@@ -80,9 +80,9 @@ public class Map
             // if current == target, then we're done
             if (current == pos[tX, tY])
             {
-                Debug.Log("AT END!");
+                Debug.Log($"AT END!");
 
-                    thee._path.Add(current);
+                thee._path.Add(current);
 
                 while (current != pos[fX, fY])
                 {
