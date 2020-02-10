@@ -6,40 +6,57 @@ using UnityEngine.SceneManagement;
 public class ctrl : MonoBehaviour
 {
     public bool randomize;
+    public int mapSize;
     public Vector2Int from, to;
-    public Vector2Int[] block;
+    public List<Vector2Int> block;
     Map map;
 
     // Start is called before the first frame update
     void Start()
     {
-        map = new Map(20);
+        GameObject g = GameObject.Find("ground");
+        g.transform.localScale = new Vector3(mapSize, 1, mapSize);
+        g.transform.position = new Vector3(mapSize / 2, 0, mapSize / 2);
+
+        Camera.main.transform.position = new Vector3(mapSize / 2, mapSize, mapSize / 2);
+
+        map = new Map(mapSize+1);
         map.Assign();
 
         if (randomize)
         {
-            from = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
-            to = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
+            from = new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize));
+            to = new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize));
 
-            block = new Vector2Int[100];
+            block = new List<Vector2Int>();
 
-            for (int i = 0; i < block.Length; i++)
+            for (int i = 0; i < mapSize * 5; i++)
             {
-                block[i] = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
+                block.Add(new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize)));
 
-                if (block[i].x == to.x && block[i].y == to.y)
+                // 
+                if (block[i].x == to.x && block[i].y == to.y || block[i].x == from.x && block[i].y == from.y)
                 {
                     block[i] = new Vector2Int(0, 0);
                 }
             }
         }
+
+        TilePath p = map.FindPath(from.x, from.y, to.x, to.y);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            map.FindPath(from.x, from.y, to.x, to.y);
+            to = new Vector2Int(Random.Range(0+1, mapSize), Random.Range(0+1, mapSize));
+
+            while (block.Contains(to))
+            {
+                to = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
+            }
+
+            TilePath p = map.FindPath(from.x, from.y, to.x, to.y);
         }
     }
 

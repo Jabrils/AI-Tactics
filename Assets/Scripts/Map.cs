@@ -13,7 +13,7 @@ public class Map
     Tile tileFrom => current.parent == null ? current.parent : current;
     Tile tileTo => pos[tX, tY];
     int fX, fY, tX, tY;
-    public TilePath thee = new TilePath(new List<Tile>());
+    public TilePath thee;
 
     Tile current;
     Tile[,] pos;
@@ -25,9 +25,9 @@ public class Map
         _mapSize = size;
     }
 
-    public void BlockTiles(Vector2Int[] b)
+    public void BlockTiles(List<Vector2Int> b)
     {
-        for (int i = 0; i < b.Length; i++)
+        for (int i = 0; i < b.Count; i++)
         {
             pos[b[i].x, b[i].y].free = false;
         }
@@ -45,9 +45,10 @@ public class Map
         }
     }
 
-    public void FindPath(int _fX, int _fY, int _tX, int _tY)
+    public TilePath FindPath(int _fX, int _fY, int _tX, int _tY)
     {
         float start = Time.time;
+        thee = new TilePath(new List<Tile>());
 
         fX = _fX;
         fY = _fY;
@@ -56,19 +57,12 @@ public class Map
 
         BlockTiles(GameObject.Find("CTRL").GetComponent<ctrl>().block);
 
-        // first we set the neighbors
-        for (int i = 0; i < mapSize; i++)
-        {
-            for (int j = 0; j < mapSize; j++)
-            {
-                //pos[i, j].SetNeighbors(GetNeighbors(pos[i, j], pos[fX, fY], pos[tX, tY]));
-            }
-        }
-
         // set list of tiles to be evaluated
         openTiles = new List<Tile>();
+        //openTiles.Clear();
         // set list of tiles already evaluated
         closedTiles = new List<Tile>();
+        //closedTiles.Clear();
 
         // add current node to the open list
         AddTileToOpen(pos[fX, fY]);
@@ -84,20 +78,27 @@ public class Map
             {
                 Debug.Log($"AT END! Elapsed Time: {Time.time - start}");
 
+                // 
                 thee._path.Add(current);
 
+                // 
                 while (current != pos[fX, fY])
                 {
                     thee._path.Add(current.parent);
                     current = current.parent;
                 }
 
-                break;
+                // 
+                thee._path.Reverse();
+
+                return thee;
             }
 
             // if not then well Process this tile for exploration
             ProcessTile(current);
         }
+
+        return null;
     }
 
     void AddTileToOpen(Tile t)
@@ -139,7 +140,7 @@ public class Map
 
         Tile n = pos[current.x - 1, current.y];
         // set our neighbor's fcost
-        if (current.x - 1 >= 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x - 1, current.y].free)
+        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x - 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -152,7 +153,7 @@ public class Map
 
         n = pos[current.x, current.y - 1];
         // 
-        if (current.y - 1 >= 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y - 1].free)
+        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y - 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -165,7 +166,7 @@ public class Map
 
         n = pos[current.x + 1, current.y];
         // 
-        if (current.x + 1 < mapSize && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x + 1, current.y].free)
+        if (current.x + 1 < mapSize-1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x + 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -178,7 +179,7 @@ public class Map
 
         n = pos[current.x, current.y + 1];
         // 
-        if (current.y + 1 < mapSize && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y + 1].free)
+        if (current.y + 1 < mapSize-1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y + 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -256,7 +257,7 @@ public class Tile
     }
 }
 
-public struct TilePath
+public class TilePath
 {
     public List<Tile> _path;
 
