@@ -451,12 +451,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dba00bbff548bae4190c12daf8398b22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  time: 0
+  randomize: 0
+  time: 1
   from: {x: 2, y: 10}
   to: {x: 10, y: 10}
   block:
   - {x: 9, y: 9}
-  - {x: 9, y: 10}
+  - {x: 8, y: 10}
   - {x: 9, y: 11}
   - {x: 9, y: 8}
   - {x: 10, y: 8}
@@ -465,7 +466,21 @@ MonoBehaviour:
   - {x: 9, y: 12}
   - {x: 10, y: 12}
   - {x: 11, y: 13}
-  - {x: 12, y: 13}
+  - {x: 12, y: 14}
+  - {x: 12, y: 15}
+  - {x: 12, y: 16}
+  - {x: 13, y: 17}
+  - {x: 12, y: 6}
+  - {x: 12, y: 5}
+  - {x: 13, y: 4}
+  - {x: 12, y: 6}
+  - {x: 11, y: 11}
+  - {x: 12, y: 11}
+  - {x: 13, y: 9}
+  - {x: 11, y: 9}
+  - {x: 12, y: 9}
+  - {x: 13, y: 11}
+  - {x: 12, y: 11}
 --- !u!4 &1832687495
 Transform:
   m_ObjectHideFlags: 0

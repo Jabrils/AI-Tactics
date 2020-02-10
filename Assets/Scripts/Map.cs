@@ -45,8 +45,10 @@ public class Map
         }
     }
 
-    public IEnumerator FindPath(float t, int _fX, int _fY, int _tX, int _tY)
+    public void FindPath(int _fX, int _fY, int _tX, int _tY)
     {
+        float start = Time.time;
+
         fX = _fX;
         fY = _fY;
         tX = _tX;
@@ -80,7 +82,7 @@ public class Map
             // if current == target, then we're done
             if (current == pos[tX, tY])
             {
-                Debug.Log($"AT END!");
+                Debug.Log($"AT END! Elapsed Time: {Time.time - start}");
 
                 thee._path.Add(current);
 
@@ -95,14 +97,15 @@ public class Map
 
             // if not then well Process this tile for exploration
             ProcessTile(current);
-
-            yield return new WaitForSeconds(t);
         }
     }
 
     void AddTileToOpen(Tile t)
     {
-        openTiles.Add(t);
+        if (!openTiles.Contains(t))
+        {
+            openTiles.Add(t);
+        }
     }
 
     void ProcessTile(Tile c)
@@ -136,7 +139,7 @@ public class Map
 
         Tile n = pos[current.x - 1, current.y];
         // set our neighbor's fcost
-        if (current.x - 1 >= 0 && !closedTiles.Contains(n) && pos[current.x - 1, current.y].free)
+        if (current.x - 1 >= 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x - 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -145,12 +148,11 @@ public class Map
             n.SetParent(current);
             AddTileToOpen(n);
             ret.Add(n);
-            //Debug.Log($"NEI: {n.dist} - {n.fCost}");
         }
 
         n = pos[current.x, current.y - 1];
         // 
-        if (current.y - 1 >= 0 && !closedTiles.Contains(n) && pos[current.x, current.y - 1].free)
+        if (current.y - 1 >= 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y - 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -159,12 +161,11 @@ public class Map
             n.SetParent(current);
             AddTileToOpen(n);
             ret.Add(n);
-            //Debug.Log($"NEI: {n.dist} - {n.fCost}");
         }
 
         n = pos[current.x + 1, current.y];
         // 
-        if (current.x + 1 < mapSize && !closedTiles.Contains(n) && pos[current.x + 1, current.y].free)
+        if (current.x + 1 < mapSize && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x + 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -173,12 +174,11 @@ public class Map
             n.SetParent(current);
             AddTileToOpen(n);
             ret.Add(n);
-            //Debug.Log($"NEI: {n.dist} - {n.fCost}");
         }
 
         n = pos[current.x, current.y + 1];
         // 
-        if (current.y + 1 < mapSize && !closedTiles.Contains(n) && pos[current.x, current.y + 1].free)
+        if (current.y + 1 < mapSize && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y + 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -187,7 +187,6 @@ public class Map
             n.SetParent(current);
             AddTileToOpen(n);
             ret.Add(n);
-            //Debug.Log($"NEI: {n.dist} - {n.fCost}");
         }
 
         return ret;

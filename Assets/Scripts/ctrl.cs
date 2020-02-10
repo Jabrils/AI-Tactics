@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class ctrl : MonoBehaviour
 {
-    public float time;
+    public bool randomize;
     public Vector2Int from, to;
     public Vector2Int[] block;
     Map map;
@@ -16,35 +16,36 @@ public class ctrl : MonoBehaviour
         map = new Map(20);
         map.Assign();
 
-        from = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
-        to = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
-
-        block = new Vector2Int[100];
-
-        for (int i = 0; i < block.Length; i++)
+        if (randomize)
         {
-            block[i] = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
+            from = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
+            to = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
 
-            if (block[i].x == to.x && block[i].y == to.y)
+            block = new Vector2Int[100];
+
+            for (int i = 0; i < block.Length; i++)
             {
-                block[i] = new Vector2Int(0, 0);
+                block[i] = new Vector2Int(Random.Range(0, 20), Random.Range(0, 20));
+
+                if (block[i].x == to.x && block[i].y == to.y)
+                {
+                    block[i] = new Vector2Int(0, 0);
+                }
             }
         }
-
-        StartCoroutine(map.FindPath(time, from.x, from.y, to.x, to.y));
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            map.FindPath(from.x, from.y, to.x, to.y);
         }
     }
 
     void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (Application.isPlaying && map.openTiles != null)
         {
 
             // 
