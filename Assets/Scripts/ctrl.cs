@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class ctrl : MonoBehaviour
 {
-    public bool randomize;
     public int mapSize;
     public Vector2Int from, to;
     public List<Vector2Int> block;
@@ -20,25 +19,21 @@ public class ctrl : MonoBehaviour
 
         Camera.main.transform.position = new Vector3(mapSize / 2, mapSize, mapSize / 2);
 
-        map = new Map(mapSize+1);
-        map.Assign();
+        map = new Map(mapSize + 1);
 
-        if (randomize)
+        from = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
+        to = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
+
+        block = new List<Vector2Int>();
+
+        for (int i = 0; i < mapSize * ((mapSize / 10) * 3); i++)
         {
-            from = new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize));
-            to = new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize));
+            block.Add(new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize)));
 
-            block = new List<Vector2Int>();
-
-            for (int i = 0; i < mapSize * 5; i++)
+            // 
+            if (block[i].x == to.x && block[i].y == to.y || block[i].x == from.x && block[i].y == from.y)
             {
-                block.Add(new Vector2Int(Random.Range(0, mapSize), Random.Range(0, mapSize)));
-
-                // 
-                if (block[i].x == to.x && block[i].y == to.y || block[i].x == from.x && block[i].y == from.y)
-                {
-                    block[i] = new Vector2Int(0, 0);
-                }
+                block[i] = new Vector2Int(0, 0);
             }
         }
 
@@ -49,7 +44,12 @@ public class ctrl : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            to = new Vector2Int(Random.Range(0+1, mapSize), Random.Range(0+1, mapSize));
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            to = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
 
             while (block.Contains(to))
             {
@@ -89,10 +89,10 @@ public class ctrl : MonoBehaviour
             }
 
             // 
-            for (int i = 0; i < map.thee._path.Count; i++)
+            for (int i = 0; i < map.thee.path.Count; i++)
             {
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawCube(new Vector3(map.thee._path[i].x, 1, map.thee._path[i].y), Vector3.one);
+                Gizmos.DrawCube(new Vector3(map.thee.path[i].x, 1, map.thee.path[i].y), Vector3.one);
             }
 
         }

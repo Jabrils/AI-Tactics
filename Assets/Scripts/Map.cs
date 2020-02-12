@@ -10,42 +10,97 @@ public class Map
     public int mapSize => _mapSize;
     public int halfMapSize => _mapSize / 2;
     public Tile a => current;
-    Tile tileFrom => current.parent == null ? current.parent : current;
-    Tile tileTo => pos[tX, tY];
+    public Tile[,] pos => _pos;
+    Tile tileFrom => _pos[fX, fY];
+    Tile tileTo => _pos[tX, tY];
     int fX, fY, tX, tY;
     public TilePath thee;
 
     Tile current;
-    Tile[,] pos;
+    Tile[,] _pos;
     public List<Tile> openTiles, closedTiles;
 
     public Map(int size)
     {
-        pos = new Tile[size, size];
+        _pos = new Tile[size, size];
         _mapSize = size;
+
+        Assign();
     }
 
     public void BlockTiles(List<Vector2Int> b)
     {
         for (int i = 0; i < b.Count; i++)
         {
-            pos[b[i].x, b[i].y].free = false;
+            _pos[b[i].x, b[i].y].free = false;
         }
     }
 
-    public void Assign()
+    void Assign()
     {
         // first we init
         for (int i = 0; i < mapSize; i++)
         {
             for (int j = 0; j < mapSize; j++)
             {
-                pos[i, j] = new Tile(i, j);
+                _pos[i, j] = new Tile(i, j);
             }
         }
     }
 
+    public List<Vector2Int> CalcAvailbleMoves(Vector2Int source)
+    {
+        // get a reference to what we're going to return
+        List<Vector2Int> ret = new List<Vector2Int>();
+
+        // loop through the entire map size
+        for (int i = 0; i < mapSize; i++)
+        {
+            for (int j = 0; j < mapSize; j++)
+            {
+                // if the tile is in the right distance from the source & that tile is not the tile the source is on,
+                if ((ManhattanDistance(source, pos[i, j].v2Int) <= GM.maxMoves) && source != pos[i, j].v2Int)
+                {
+                    // also IF that space is reachable in 5 or less moves
+                    if (FindPath(source.x, source.y, pos[i, j].x, pos[i, j].y)?.dist <= 5)
+                    {
+                        // add it to the return reference
+                        ret.Add(pos[i, j].v2Int);
+                    }
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public static int ManhattanDistance(Vector2Int a, Vector2Int b)
+    {
+        // calculate the X + Y distance between a & b
+        return (Mathf.Abs(a.x - b.x) + (Mathf.Abs(a.y - b.y)));
+    }
+
     public TilePath FindPath(int _fX, int _fY, int _tX, int _tY)
+    {
+        return PathFinder(_fX, _fY, _tX, _tY);
+    }
+
+    public TilePath FindLimitedPath(int _fX, int _fY, int _tX, int _tY)
+    {
+
+        // if the tile we are trying to reach is out of range,
+        if (ManhattanDistance(new Vector2Int(_fX, _fY), new Vector2Int(_tX, _tY)) > GM.maxMoves)
+        {
+            // appologize. right now.
+            Debug.Log($"Sorry out of range!");
+
+            return null;
+        }
+
+        return PathFinder(_fX, _fY, _tX, _tY);
+    }
+
+    TilePath PathFinder(int _fX, int _fY, int _tX, int _tY)
     {
         float start = Time.time;
         thee = new TilePath(new List<Tile>());
@@ -55,41 +110,39 @@ public class Map
         tX = _tX;
         tY = _tY;
 
-        BlockTiles(GameObject.Find("CTRL").GetComponent<ctrl>().block);
-
         // set list of tiles to be evaluated
         openTiles = new List<Tile>();
-        //openTiles.Clear();
         // set list of tiles already evaluated
         closedTiles = new List<Tile>();
-        //closedTiles.Clear();
 
         // add current node to the open list
-        AddTileToOpen(pos[fX, fY]);
+        AddTileToOpen(tileFrom);
 
-        // 
+        // While we still have tiles in the open tiles list
         while (openTiles.Count > 0)
         {
             // current tile = tile with the lowest f cost in the open set (start off with only 1 tile in the open tiles list so that is the lowest)
             current = GetLowestFCost();
 
             // if current == target, then we're done
-            if (current == pos[tX, tY])
+            if (current == tileTo)
             {
-                Debug.Log($"AT END! Elapsed Time: {Time.time - start}");
+                //Debug.Log($"AT END! Elapsed Time: {Time.time - start}");
 
                 // 
-                thee._path.Add(current);
+                thee.path.Add(current);
 
-                // 
-                while (current != pos[fX, fY])
+                // While the current tile's parent does not = our starting tile,
+                while (current.parent != tileFrom)
                 {
-                    thee._path.Add(current.parent);
+                    // add it to the path
+                    thee.path.Add(current.parent);
+                    // update what the current node is
                     current = current.parent;
                 }
 
-                // 
-                thee._path.Reverse();
+                // Because we trace from the end to the start, we need to reverse the path
+                thee.path.Reverse();
 
                 return thee;
             }
@@ -97,6 +150,8 @@ public class Map
             // if not then well Process this tile for exploration
             ProcessTile(current);
         }
+
+        Debug.Log($"CAN'T FIND! Elapsed Time: {Time.time - start}");
 
         return null;
     }
@@ -138,9 +193,9 @@ public class Map
 
         current.SetGnH(gc, hc);
 
-        Tile n = pos[current.x - 1, current.y];
+        Tile n = _pos[current.x - 1, current.y];
         // set our neighbor's fcost
-        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x - 1, current.y].free)
+        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x - 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -151,9 +206,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = pos[current.x, current.y - 1];
+        n = _pos[current.x, current.y - 1];
         // 
-        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y - 1].free)
+        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x, current.y - 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -164,9 +219,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = pos[current.x + 1, current.y];
+        n = _pos[current.x + 1, current.y];
         // 
-        if (current.x + 1 < mapSize-1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x + 1, current.y].free)
+        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x + 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -177,9 +232,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = pos[current.x, current.y + 1];
+        n = _pos[current.x, current.y + 1];
         // 
-        if (current.y + 1 < mapSize-1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && pos[current.x, current.y + 1].free)
+        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x, current.y + 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -210,59 +265,5 @@ public class Map
 
         // 
         return lowest;
-    }
-}
-
-public class Tile
-{
-    //public Tile[] neighbor = new Tile[4];
-    public bool free = true;
-
-    public int x => _x;
-    public int y => _y;
-    public float fCost => gCost + hCost;
-    public string loc => $"{x}, {y}";
-    public string dist => $"{gCost}, {hCost}";
-    public List<Tile> neighbors => _neighbors;
-    public float gCost => _gCost;
-    public float hCost => _hCost; // g = dist from start pos; h = dis from end;
-    public Tile parent => _parent;
-
-    Tile _parent;
-    List<Tile> _neighbors;
-    bool open, closed;
-    int _x, _y;
-    float _gCost, _hCost;
-
-    public Tile(int X, int Y)
-    {
-        _x = X;
-        _y = Y;
-    }
-
-    public void SetNeighbors(List<Tile> N)
-    {
-        _neighbors = N;
-    }
-
-    public void SetGnH(float g, float h)
-    {
-        _gCost = g;
-        _hCost = h;
-    }
-
-    public void SetParent(Tile p)
-    {
-        _parent = p;
-    }
-}
-
-public class TilePath
-{
-    public List<Tile> _path;
-
-    public TilePath(List<Tile> p)
-    {
-        _path = p;
     }
 }
