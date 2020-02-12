@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class lMove_Concept : MonoBehaviour
 {
-    public bool doTick;
     [Range(0,1)]
-    public float dist = 1;
+    public float dist = 1, angle = 0;
+    public int sel;
     public Vector2Int good, bad;
     public List<Vector2Int> block = new List<Vector2Int>();
     List<Vector2Int> pos = new List<Vector2Int>();
     List<Vector2Int> selPos = new List<Vector2Int>();
     Map map;
     TilePath p;
-    int tick = 0;
+    int angleCount => Mathf.Clamp(Mathf.RoundToInt(angle * selPos.Count), 0, selPos.Count-1);
 
     // Start is called before the first frame update
     void Start()
@@ -26,36 +26,49 @@ public class lMove_Concept : MonoBehaviour
         map.BlockTiles(block);
 
         pos = map.CalcAvailbleMoves(good);
-
-        if (doTick)
-        {
-            StartCoroutine(Tick());
-        }
     }
 
     void Update()
     {
+        // reset our selPos list every frame, this allows us to make changes to it
         selPos = new List<Vector2Int>();
 
+        // now we calculate the selected range of tiles based on distance from the opponent
         int calc = Mathf.RoundToInt(dist * 10 + (Map.ManhattanDistance(good, bad) - GM.maxMoves));
 
+        // we need a reference to a temp all selected positions list
+        List<Vector2Int> tempAllSelPos = new List<Vector2Int>();
+
+        // next we loop through all of the positions & see who is viable
         for (int i = 0; i < pos.Count; i++)
         {
-
             if (Map.ManhattanDistance(pos[i], bad) == Mathf.Clamp(calc, 1, calc))
             {
-                selPos.Add(pos[i]);
+                tempAllSelPos.Add(pos[i]);
             }
         }
 
-        //p = map.FindLimitedPath(good.x, good.y, selPos[tick].x, selPos[tick].y);
-    }
+        // then we loop through the viable ones to grab only the top ones
+        for (int i = 0; i < tempAllSelPos.Count; i++)
+        {
+        if (tempAllSelPos[i].y >= bad.y)
+            {
+                selPos.Add(tempAllSelPos[i]);
+            }
+        }
+        // we have to reverse the list so that it is counter clockwise, this makes it according to radians
+        selPos.Reverse();
 
-    IEnumerator Tick()
-    {
-        yield return new WaitForSeconds(1);
-        tick++;
-        StartCoroutine(Tick());
+        // then we loop through the viable ones to grab only the bottom ones
+        for (int i = 0; i < tempAllSelPos.Count; i++)
+        {
+            if (tempAllSelPos[i].y < bad.y)
+            {
+                selPos.Add(tempAllSelPos[i]);
+            }
+        }
+
+        p = map.FindLimitedPath(good.x, good.y, selPos[angleCount].x, selPos[angleCount].y);
     }
 
     void OnDrawGizmos()
@@ -69,7 +82,7 @@ public class lMove_Concept : MonoBehaviour
 
         for (int i = 0; i < selPos.Count; i++)
         {
-            Gizmos.color = Color.cyan;
+            Gizmos.color = i == angleCount ? Color.yellow : Color.cyan;
             Gizmos.DrawCube(new Vector3(selPos[i].x, 1, selPos[i].y), Vector3.one);
         }
 
@@ -78,7 +91,7 @@ public class lMove_Concept : MonoBehaviour
             for (int i = 0; i < p.path.Count; i++)
             {
                 Gizmos.color = i == p.path.Count - 1? Color.yellow : Color.white;
-                Gizmos.DrawCube(new Vector3(p.path[i].x, 1, p.path[i].y), Vector3.one);
+                Gizmos.DrawWireCube(new Vector3(p.path[i].x, 1, p.path[i].y), Vector3.one);
             }
         }
 
