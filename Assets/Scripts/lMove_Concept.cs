@@ -4,21 +4,23 @@ using UnityEngine;
 
 public class lMove_Concept : MonoBehaviour
 {
-    [Range(0,1)]
-    public float dist = 1, angle = 0;
-    public int sel;
+    [Range(0, 1)]
+    public float dist = 1;
+    [Range(-1, 1)]
+    public float angleX = 0, angleY = 0;
     public Vector2Int good, bad;
+    public Vector2 radTest;
     public List<Vector2Int> block = new List<Vector2Int>();
     List<Vector2Int> pos = new List<Vector2Int>();
     List<Vector2Int> selPos = new List<Vector2Int>();
     Map map;
     TilePath p;
-    int angleCount => Mathf.Clamp(Mathf.RoundToInt(angle * selPos.Count), 0, selPos.Count-1);
+    int angleSelect => Map.SelectAnAngle(selPos, angleX, angleY, bad);
 
     // Start is called before the first frame update
     void Start()
     {
-        map = new Map(20+1);
+        map = new Map(20 + 1);
 
         block = new List<Vector2Int>();
         block.Add(bad);
@@ -44,35 +46,16 @@ public class lMove_Concept : MonoBehaviour
         {
             if (Map.ManhattanDistance(pos[i], bad) == Mathf.Clamp(calc, 1, calc))
             {
-                tempAllSelPos.Add(pos[i]);
+                selPos.Add(pos[i]);
             }
         }
 
-        // then we loop through the viable ones to grab only the top ones
-        for (int i = 0; i < tempAllSelPos.Count; i++)
-        {
-        if (tempAllSelPos[i].y >= bad.y)
-            {
-                selPos.Add(tempAllSelPos[i]);
-            }
-        }
-        // we have to reverse the list so that it is counter clockwise, this makes it according to radians
-        selPos.Reverse();
-
-        // then we loop through the viable ones to grab only the bottom ones
-        for (int i = 0; i < tempAllSelPos.Count; i++)
-        {
-            if (tempAllSelPos[i].y < bad.y)
-            {
-                selPos.Add(tempAllSelPos[i]);
-            }
-        }
-
-        p = map.FindLimitedPath(good.x, good.y, selPos[angleCount].x, selPos[angleCount].y);
+        p = map.FindLimitedPath(good.x, good.y, selPos[angleSelect].x, selPos[angleSelect].y);
     }
 
     void OnDrawGizmos()
     {
+
         // 
         for (int i = 0; i < pos.Count; i++)
         {
@@ -82,7 +65,7 @@ public class lMove_Concept : MonoBehaviour
 
         for (int i = 0; i < selPos.Count; i++)
         {
-            Gizmos.color = i == angleCount ? Color.yellow : Color.cyan;
+            Gizmos.color = i == angleSelect ? Color.yellow : Color.cyan;
             Gizmos.DrawCube(new Vector3(selPos[i].x, 1, selPos[i].y), Vector3.one);
         }
 
@@ -90,7 +73,7 @@ public class lMove_Concept : MonoBehaviour
         {
             for (int i = 0; i < p.path.Count; i++)
             {
-                Gizmos.color = i == p.path.Count - 1? Color.yellow : Color.white;
+                Gizmos.color = i == p.path.Count - 1 ? Color.yellow : Color.white;
                 Gizmos.DrawWireCube(new Vector3(p.path[i].x, 1, p.path[i].y), Vector3.one);
             }
         }

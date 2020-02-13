@@ -451,11 +451,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1254bdb57388a41b9ae0d603303647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dist: 1
-  angle: 0
-  sel: 0
+  dist: 0.5
+  angleX: 0
+  angleY: 0
   good: {x: 12, y: 7}
-  bad: {x: 12, y: 9}
+  bad: {x: 12, y: 4}
+  radTest: {x: 0, y: 1}
   block: []
 --- !u!4 &1046437745
 Transform:

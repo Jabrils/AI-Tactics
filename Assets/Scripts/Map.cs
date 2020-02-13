@@ -80,6 +80,40 @@ public class Map
         return (Mathf.Abs(a.x - b.x) + (Mathf.Abs(a.y - b.y)));
     }
 
+    public static int SelectAnAngle(List<Vector2Int> toCheck, float iX, float iY, Vector2Int whoLoc)
+    {
+        int ret = -1;
+
+        // 
+        float[] temp = new float[toCheck.Count];
+
+        // Get all availible select positions & give them an ID
+        for (int i = 0; i < toCheck.Count; i++)
+        {
+            temp[i] = GM.XYtoDeg(toCheck[i].x - whoLoc.x, toCheck[i].y - whoLoc.y);
+        }
+
+        float lowestDist = Mathf.Infinity;
+
+        // Get the distance from desired point to all availible selected positions
+        for (int i = 0; i < temp.Length; i++)
+        {
+            float desiredPoint = GM.XYtoDeg(iX, iY);
+
+            float dist = Mathf.Abs(desiredPoint - temp[i]);
+
+            // 
+            if (dist < lowestDist)
+            {
+                lowestDist = dist;
+                ret = i;
+            }
+        }
+
+        // Return the availible selected position with the lowest distance
+        return ret;
+    }
+
     public TilePath FindPath(int _fX, int _fY, int _tX, int _tY)
     {
         return PathFinder(_fX, _fY, _tX, _tY);
@@ -151,7 +185,7 @@ public class Map
             ProcessTile(current);
         }
 
-        Debug.Log($"CAN'T FIND! Elapsed Time: {Time.time - start}");
+        //Debug.Log($"CAN'T FIND! Elapsed Time: {Time.time - start}");
 
         return null;
     }
