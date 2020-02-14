@@ -8,6 +8,8 @@ public class Tile
 
     public int x => _x;
     public int y => _y;
+    public int eX => _eX;
+    public int eY => _eY;
     public float fCost => gCost + hCost;
     public string loc => $"{x}, {y}";
     public string dist => $"{gCost}, {hCost}";
@@ -20,13 +22,25 @@ public class Tile
     Tile _parent;
     List<Tile> _neighbors;
     bool open, closed;
-    int _x, _y;
+    int _x, _y; // raw x & y
+    int _eX, _eY; // expression x & y, modified by the map
     float _gCost, _hCost;
+    char _type;
+    public char type => _type;
 
-    public Tile(int X, int Y)
+    public Tile(int X, int Y, char type = 'o', int halfMapSize = 0)
     {
         _x = X;
         _y = Y;
+        _type = type;
+
+        _eX = X - halfMapSize;
+        _eY = Y - halfMapSize;
+    }
+
+    public void AssignType(char t)
+    {
+        _type = t;
     }
 
     public void SetNeighbors(List<Tile> N)

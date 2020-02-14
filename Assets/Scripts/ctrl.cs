@@ -15,11 +15,11 @@ public class ctrl : MonoBehaviour
     {
         GameObject g = GameObject.Find("ground");
         g.transform.localScale = new Vector3(mapSize, 1, mapSize);
-        g.transform.position = new Vector3(mapSize / 2, 0, mapSize / 2);
+        g.transform.position = new Vector3(.5f, 0, .5f);
 
-        Camera.main.transform.position = new Vector3(mapSize / 2, mapSize, mapSize / 2);
+        Camera.main.transform.position = new Vector3(.5f, mapSize, .5f);
 
-        map = new Map(mapSize + 1);
+        map = new Map(mapSize);
 
         from = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
         to = new Vector2Int(Random.Range(0 + 1, mapSize), Random.Range(0 + 1, mapSize));
@@ -69,9 +69,9 @@ public class ctrl : MonoBehaviour
             for (int i = 0; i < map.openTiles.Count; i++)
             {
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawCube(new Vector3(map.openTiles[i].x, 1, map.openTiles[i].y), Vector3.one);
+                Gizmos.DrawCube(new Vector3(map.openTiles[i].eX, 1, map.openTiles[i].eY), Vector3.one);
                 Gizmos.color = Color.white;
-                Gizmos.DrawLine(new Vector3(map.openTiles[i].x, 2, map.openTiles[i].y), new Vector3(map.openTiles[i].parent.x, 2, map.openTiles[i].parent.y));
+                Gizmos.DrawLine(new Vector3(map.openTiles[i].eX, 2, map.openTiles[i].eY), new Vector3(map.openTiles[i].parent.eX, 2, map.openTiles[i].parent.eY));
             }
 
 
@@ -79,12 +79,12 @@ public class ctrl : MonoBehaviour
             for (int i = 0; i < map.closedTiles.Count; i++)
             {
                 Gizmos.color = Color.blue;
-                Gizmos.DrawCube(new Vector3(map.closedTiles[i].x, 1, map.closedTiles[i].y), Vector3.one);
+                Gizmos.DrawCube(new Vector3(map.closedTiles[i].eX, 1, map.closedTiles[i].eY), Vector3.one);
                 Gizmos.color = Color.white;
 
                 if (map.closedTiles[i].parent != null)
                 {
-                    Gizmos.DrawLine(new Vector3(map.closedTiles[i].x, 2, map.closedTiles[i].y), new Vector3(map.closedTiles[i].parent.x, 2, map.closedTiles[i].parent.y));
+                    Gizmos.DrawLine(new Vector3(map.closedTiles[i].eX, 2, map.closedTiles[i].eY), new Vector3(map.closedTiles[i].parent.eX, 2, map.closedTiles[i].parent.eY));
                 }
             }
 
@@ -92,21 +92,21 @@ public class ctrl : MonoBehaviour
             for (int i = 0; i < map.thee.path.Count; i++)
             {
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawCube(new Vector3(map.thee.path[i].x, 1, map.thee.path[i].y), Vector3.one);
+                Gizmos.DrawCube(new Vector3(map.thee.path[i].eX, 1, map.thee.path[i].eY), Vector3.one);
             }
 
         }
 
         Gizmos.color = Color.green;
-        Gizmos.DrawCube(new Vector3(from.x, 1, from.y), Vector3.one);
+        Gizmos.DrawCube(new Vector3(from.x - map.halfMapSize, 1, from.y - map.halfMapSize), Vector3.one);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawCube(new Vector3(to.x, 1, to.y), Vector3.one);
+        Gizmos.DrawCube(new Vector3(to.x - map.halfMapSize, 1, to.y - map.halfMapSize), Vector3.one);
 
         foreach (Vector2Int ve in block)
         {
             Gizmos.color = Color.black;
-            Gizmos.DrawCube(new Vector3(ve.x, 1, ve.y), Vector3.one);
+            Gizmos.DrawCube(new Vector3(ve.x - map.halfMapSize, 1, ve.y - map.halfMapSize), Vector3.one);
         }
     }
 }

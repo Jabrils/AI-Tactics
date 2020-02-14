@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/limited_Move_concept.unity
+- path: Assets/Scenes/battle.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

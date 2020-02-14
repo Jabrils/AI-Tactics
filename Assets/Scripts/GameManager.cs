@@ -8,6 +8,7 @@ using UnityEngine;
 static class GM
 {
     public static int maxMoves = 5;
+    public static string lvlExt = ".map";
 
     public static float XYtoDeg(float x, float y)
     {

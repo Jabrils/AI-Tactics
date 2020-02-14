@@ -1,57 +1,60 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class Map
 {
-    int _mapSize = 20;
-
-    public int mapSize => _mapSize;
-    public int halfMapSize => _mapSize / 2;
+    public int mapSize => loc.GetLength(0);
+    public int halfMapSize => mapSize/2;
     public Tile a => current;
-    public Tile[,] pos => _pos;
-    Tile tileFrom => _pos[fX, fY];
-    Tile tileTo => _pos[tX, tY];
+    Tile tileFrom => _loc[fX, fY];
+    Tile tileTo => _loc[tX, tY];
+    public Tile[,] loc => _loc;
     int fX, fY, tX, tY;
     public TilePath thee;
 
     Tile current;
-    Tile[,] _pos;
+    Tile[,] _loc;
     public List<Tile> openTiles, closedTiles;
 
     public Map(int size)
     {
-        _pos = new Tile[size, size];
-        _mapSize = size;
+        _loc = new Tile[size, size];
 
-        Assign();
+        InitLocations();
+    }
+
+    public Map(string path)
+    {
+        LoadLeveData(path);
     }
 
     public void BlockTiles(List<Vector2Int> b)
     {
         for (int i = 0; i < b.Count; i++)
         {
-            _pos[b[i].x, b[i].y].free = false;
+            _loc[b[i].x, b[i].y].free = false;
         }
     }
 
-    void Assign()
+    void InitLocations()
     {
         // first we init
         for (int i = 0; i < mapSize; i++)
         {
             for (int j = 0; j < mapSize; j++)
             {
-                _pos[i, j] = new Tile(i, j);
+                _loc[j, i] = new Tile(j, i, halfMapSize: halfMapSize);
             }
         }
     }
 
-    public List<Vector2Int> CalcAvailbleMoves(Vector2Int source)
+    public List<Tile> CalcAvailbleMoves(Vector2Int source)
     {
         // get a reference to what we're going to return
-        List<Vector2Int> ret = new List<Vector2Int>();
+        List<Tile> ret = new List<Tile>();
 
         // loop through the entire map size
         for (int i = 0; i < mapSize; i++)
@@ -59,13 +62,13 @@ public class Map
             for (int j = 0; j < mapSize; j++)
             {
                 // if the tile is in the right distance from the source & that tile is not the tile the source is on,
-                if ((ManhattanDistance(source, pos[i, j].v2Int) <= GM.maxMoves) && source != pos[i, j].v2Int)
+                if ((ManhattanDistance(source, loc[j, i].v2Int) <= GM.maxMoves) && source != loc[j, i].v2Int)
                 {
                     // also IF that space is reachable in 5 or less moves
-                    if (FindPath(source.x, source.y, pos[i, j].x, pos[i, j].y)?.dist <= 5)
+                    if (FindPath(source.x, source.y, loc[j, i].x, loc[j, i].y)?.dist <= 5)
                     {
                         // add it to the return reference
-                        ret.Add(pos[i, j].v2Int);
+                        ret.Add(loc[j, i]);
                     }
                 }
             }
@@ -80,7 +83,7 @@ public class Map
         return (Mathf.Abs(a.x - b.x) + (Mathf.Abs(a.y - b.y)));
     }
 
-    public static int SelectAnAngle(List<Vector2Int> toCheck, float iX, float iY, Vector2Int whoLoc)
+    public static int SelectAnAngle(List<Tile> toCheck, float iX, float iY, Vector2Int whoLoc)
     {
         int ret = -1;
 
@@ -121,7 +124,6 @@ public class Map
 
     public TilePath FindLimitedPath(int _fX, int _fY, int _tX, int _tY)
     {
-
         // if the tile we are trying to reach is out of range,
         if (ManhattanDistance(new Vector2Int(_fX, _fY), new Vector2Int(_tX, _tY)) > GM.maxMoves)
         {
@@ -132,6 +134,94 @@ public class Map
         }
 
         return PathFinder(_fX, _fY, _tX, _tY);
+    }
+
+    public void LoadLeveData(string levelName)
+    {
+        using (StreamReader sR = new StreamReader($"{Path.Combine(Application.dataPath, $"lvl_{levelName}{GM.lvlExt}")}"))
+        {
+            // make an algo that will convert text data of x = block o = free into a list of Vector2Ints
+            string[] raw = sR.ReadToEnd().Split('\n');
+
+            int mapSize = raw.Length;
+
+            // 
+            _loc = new Tile[mapSize, mapSize];
+            
+            // 
+            InitLocations();
+
+            // make a reference to the data mapped as chars
+            char[,] mapped = new char[mapSize, mapSize];
+
+            // 
+            List<Vector2Int> block = new List<Vector2Int>();
+
+            // loop through the mapped chars
+            for (int i = 0; i < raw.Length; i++)
+            {
+                for (int j = 0; j < raw.Length; j++)
+                {
+                    // fill in the mapped chars
+                    mapped[j, i] = raw[i][j];
+
+                    // assign type
+                    loc[j, i].AssignType(raw[i][j]);
+
+                    // ADD ALL THINGS, w, p etc
+                    if (raw[i][j] == 'x' || raw[i][j] == 'p' || raw[i][j] == 'w')
+                    {
+                        block.Add(new Vector2Int(j, i));
+                    }
+                }
+            }
+
+            // pass that to map.Block()
+            BlockTiles(block);
+
+            // profit 
+        }
+    }
+
+    public static (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) OutputLocation(Map map, Vector2Int self, Vector2Int opponent, float dist, float angleX, float angleY)
+    {
+        // reset our selPos list every frame, this allows us to make changes to it
+        List<Tile> selLoc = new List<Tile>();
+
+        // 
+        int intervals = 4;
+
+        // now we calculate the selected range of tiles based on distance from the opponent
+        int calc = Mathf.RoundToInt((dist * intervals) + (Map.ManhattanDistance(self, opponent) - GM.maxMoves));
+
+        // we need a reference to a temp all selected positions list
+        List<Vector2Int> tempAllSelPos = new List<Vector2Int>();
+
+        List<Tile> loc = map.CalcAvailbleMoves(self);
+
+        // next we loop through all of the positions & see who is viable
+        for (int i = 0; i < loc.Count; i++)
+        {
+            //Debug.Log($"ManDist: {Map.ManhattanDistance(loc[i].v2Int, opponent)} == {Mathf.Clamp(calc, 1, calc)}");
+
+            if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, 1, calc))
+            {
+                // IF THIS IS EMPTY IT THROWS EXCEPTIONS
+                // NEED TO MAKE SURE IT EITHER STAYS ON LAST IN RANGE, OR FORCE THE CALC TO STAY IN RANGE OF WHATS POSSIBLE.
+                // I THINK THE ABOVE CAN BE ACHIEVED USING THE CLAMP, FIGURING OUT A SMART WAY OF GETTING THE MAX POSSIBLE HSCORE
+                // ^^^ CAN SIMPLY CHECK IN A LOOP & STORE THE MAX, BUT I THINK IF I CAN INTELLIGENTLY REMAP IT TO 0-1, THAT'D BE BEST
+                // IT APPEARS THE INTERVALS VARIABLE IS WHERE ITS AT, IT APPEARS TO = HOW MANY MANHAT SPACES THE FURTHEST SPACE IS,
+                // WHICH IS QUITE COMPLICATED, BUT THANKFULLY AFTER THINKING ABOUT IT I THINK THAT KEEPING IT A CONSTANT INTERVAL OF 10,
+                // & CLAMPING THE CALC IS BETTER BECAUSE THEN PREDICTING A 1 DIST WILL ALWAYS MEAN THE SAME THING, REGARDLESS IF GRANTED OR NOT
+                selLoc.Add(loc[i]);
+            }
+        }
+
+        int angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
+
+        TilePath p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
+
+        return (loc, selLoc, p, angleSelect);
     }
 
     TilePath PathFinder(int _fX, int _fY, int _tX, int _tY)
@@ -201,7 +291,7 @@ public class Map
     void ProcessTile(Tile c)
     {
         // Get & set all of the neighbors for that tile, which will also add it to the open tiles list
-        current.SetNeighbors(GetNeighbors(current, current.parent, tileTo));
+        current.SetNeighbors(GetNeighbors(c, c.parent, tileTo));
 
         // remove current from open since it's ben processed
         openTiles.Remove(c);
@@ -227,9 +317,9 @@ public class Map
 
         current.SetGnH(gc, hc);
 
-        Tile n = _pos[current.x - 1, current.y];
+        Tile n = _loc[current.x - 1, current.y];
         // set our neighbor's fcost
-        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x - 1, current.y].free)
+        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x - 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -240,9 +330,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = _pos[current.x, current.y - 1];
+        n = _loc[current.x, current.y - 1];
         // 
-        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x, current.y - 1].free)
+        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x, current.y - 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -253,9 +343,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = _pos[current.x + 1, current.y];
+        n = _loc[current.x + 1, current.y];
         // 
-        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x + 1, current.y].free)
+        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x + 1, current.y].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -266,9 +356,9 @@ public class Map
             ret.Add(n);
         }
 
-        n = _pos[current.x, current.y + 1];
+        n = _loc[current.x, current.y + 1];
         // 
-        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _pos[current.x, current.y + 1].free)
+        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x, current.y + 1].free)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));

@@ -451,7 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dba00bbff548bae4190c12daf8398b22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: 100
+  mapSize: 10
   from: {x: 2, y: 10}
   to: {x: 10, y: 11}
   block:
