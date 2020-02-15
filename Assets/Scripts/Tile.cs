@@ -18,6 +18,7 @@ public class Tile
     public float hCost => _hCost; // h = dis from end
     public Tile parent => _parent;
     public Vector2Int v2Int => new Vector2Int(x, y);
+    public Vector2Int expression => new Vector2Int(eX, eY);
 
     GameObject _obj;
     Renderer _rend;
@@ -46,6 +47,7 @@ public class Tile
         _rend = _obj.GetComponent<Renderer>();
 
         _obj.SetActive(false);
+        _obj.transform.SetParent(GM.tilesParent);
     }
 
     public void ToggleRender(bool t, Color c)

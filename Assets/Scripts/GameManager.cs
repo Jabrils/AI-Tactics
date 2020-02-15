@@ -9,6 +9,8 @@ static class GM
 {
     public static int maxMoves = 5;
     public static string lvlExt = ".map";
+    public static float battleSpd = 4;
+    public static Transform tilesParent;
 
     public static float XYtoDeg(float x, float y)
     {

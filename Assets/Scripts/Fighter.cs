@@ -26,4 +26,9 @@ public class Fighter
         _obj = gO;
         this.mapSize = mapSize;
     }
+
+    public void MoveTo(Vector2 where)
+    {
+        _obj.transform.position = new Vector3(where.x, 1.5f, where.y);
+    }
 }

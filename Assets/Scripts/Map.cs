@@ -8,7 +8,6 @@ public class Map
 {
     public int mapSize => loc.GetLength(0);
     public int halfMapSize => mapSize / 2;
-    public Tile a => current;
     Tile tileFrom => _loc[fX, fY];
     Tile tileTo => _loc[tX, tY];
     public Tile[,] loc => _loc;
@@ -24,12 +23,21 @@ public class Map
     {
         _loc = new Tile[size, size];
 
+        MapInit();
+
         InitLocations();
     }
 
     public Map(string path)
     {
+        MapInit();
+
         LoadLeveData(path);
+    }
+
+    void MapInit()
+    {
+        GM.tilesParent = new GameObject("Tiles").transform;
     }
 
     public void BlockTiles(List<Vector2Int> b)
@@ -70,9 +78,17 @@ public class Map
                 // if the tile is in the right distance from the source & that tile is not the tile the source is on,
                 if ((ManhattanDistance(source, loc[j, i].v2Int) <= GM.maxMoves) && source != loc[j, i].v2Int)
                 {
+                    //// MAKES IT THIS FAR
+                    //if (loc[j, i].y == 0)
+                    //{
+                    //    Debug.Log($"1: {loc[j, i].v2Int}");
+                    //}
+
                     // also IF that space is reachable in 5 or less moves
-                    if (FindPath(source.x, source.y, loc[j, i].x, loc[j, i].y)?.dist <= 5)
+                    if (FindPath(source.x, source.y, loc[j, i].x, loc[j, i].y)?.dist <= GM.maxMoves)
                     {
+                        //Debug.Log($"2: {loc[j, i].v2Int}");
+
                         // add it to the return reference
                         ret.Add(loc[j, i]);
                     }
@@ -195,7 +211,7 @@ public class Map
         List<Tile> selLoc = new List<Tile>();
 
         // 
-        int intervals = 10;
+        int intervals = GM.maxMoves * 2;
 
         // now we calculate the selected range of tiles based on distance from the opponent
         int calc = Mathf.RoundToInt((dist * intervals) + (Map.ManhattanDistance(self, opponent) - GM.maxMoves));
@@ -229,11 +245,29 @@ public class Map
             }
         }
 
+        // 
         int angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
 
+        // 
         TilePath p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
 
         return (loc, selLoc, p, angleSelect);
+    }
+
+    public IEnumerator MoveFighter(int who, float speed, TilePath tp)
+    {
+        // 
+        int pathSpots = tp.path.Count;
+        // 
+        yield return new WaitForSeconds(1 / speed * 2);
+
+        // 
+        for (int i = 0; i < pathSpots; i++)
+        {
+            fighter[who].MoveTo(tp.path[i].expression);
+            yield return new WaitForSeconds(1 / speed);
+        }
+
     }
 
     TilePath PathFinder(int _fX, int _fY, int _tX, int _tY)
@@ -263,8 +297,6 @@ public class Map
             // if current == target, then we're done
             if (current == tileTo)
             {
-                //Debug.Log($"AT END! Elapsed Time: {Time.time - start}");
-
                 // 
                 thee.path.Add(current);
 
@@ -320,6 +352,7 @@ public class Map
     List<Tile> GetNeighbors(Tile current, Tile _from, Tile to)
     {
         _from = current;
+        //Debug.Log($"{current.x}, {current.y}: {current.free}");
 
         List<Tile> ret = new List<Tile>();
 
@@ -330,56 +363,103 @@ public class Map
         // set the g & h scores
         current.SetGnH(gc, hc);
 
-        Tile n = _loc[current.x - 1, current.y];
-        // set our neighbor's fcost
-        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
-        {
-            gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
-            hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+        // need a reference to our temp tile
+        Tile n = null;
 
-            n.SetGnH(gc, hc);
-            n.SetParent(current);
-            AddTileToOpen(n);
-            ret.Add(n);
+        // if the spot to the left is within the map
+        if (current.x - 1 >= 0)
+        {
+            // set the temp tile
+            n = _loc[current.x - 1, current.y];
+
+            // if the tile is not already in open tile set, or closed tile se, & it is free, & either player is not on the tile,
+            if (!openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+            {
+                // Get the g & h score
+                gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
+                hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+
+                // Set the g & h score
+                n.SetGnH(gc, hc);
+                // Set the parent
+                n.SetParent(current);
+                // Add the tile to the open set
+                AddTileToOpen(n);
+                // return the tile
+                ret.Add(n);
+            }
         }
 
-        n = _loc[current.x, current.y - 1];
-        // 
-        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+        // if the spot to the bottom is within the map
+        if (current.y - 1 >= 0)
         {
-            gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
-            hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+            // set the temp tile
+            n = _loc[current.x, current.y - 1];
 
-            n.SetGnH(gc, hc);
-            n.SetParent(current);
-            AddTileToOpen(n);
-            ret.Add(n);
+            // if the tile is not already in open tile set, or closed tile se, & it is free, & either player is not on the tile,
+            if (!openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+            {
+                // Get the g & h score
+                gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
+                hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+
+                // Set the g & h score
+                n.SetGnH(gc, hc);
+                // Set the parent
+                n.SetParent(current);
+                // Add the tile to the open set
+                AddTileToOpen(n);
+                // return the tile
+                ret.Add(n);
+            }
         }
 
-        n = _loc[current.x + 1, current.y];
-        // 
-        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+        // if the spot to the right is within the map
+        if (current.x + 1 <= mapSize - 1)
         {
-            gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
-            hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+            // set the temp tile
+            n = _loc[current.x + 1, current.y];
 
-            n.SetGnH(gc, hc);
-            n.SetParent(current);
-            AddTileToOpen(n);
-            ret.Add(n);
+            // if the tile is not already in open tile set, or closed tile se, & it is free, & either player is not on the tile,
+            if (!openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+            {
+                // Get the g & h score
+                gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
+                hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+
+                // Set the g & h score
+                n.SetGnH(gc, hc);
+                // Set the parent
+                n.SetParent(current);
+                // Add the tile to the open set
+                AddTileToOpen(n);
+                // return the tile
+                ret.Add(n);
+            }
         }
 
-        n = _loc[current.x, current.y + 1];
-        // 
-        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+        // if the spot to the top is within the map
+        if (current.y + 1 <= mapSize - 1)
         {
-            gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
-            hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+            // set the temp tile
+            n = _loc[current.x, current.y + 1];
 
-            n.SetGnH(gc, hc);
-            n.SetParent(current);
-            AddTileToOpen(n);
-            ret.Add(n);
+            // if the tile is not already in open tile set, or closed tile se, & it is free, & either player is not on the tile,
+            if (!openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
+            {
+                // Get the g & h score
+                gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
+                hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
+
+                // Set the g & h score
+                n.SetGnH(gc, hc);
+                // Set the parent
+                n.SetParent(current);
+                // Add the tile to the open set
+                AddTileToOpen(n);
+                // return the tile
+                ret.Add(n);
+            }
         }
 
         return ret;
