@@ -19,6 +19,9 @@ public class Tile
     public Tile parent => _parent;
     public Vector2Int v2Int => new Vector2Int(x, y);
 
+    GameObject _obj;
+    Renderer _rend;
+
     Tile _parent;
     List<Tile> _neighbors;
     bool open, closed;
@@ -36,6 +39,24 @@ public class Tile
 
         _eX = X - halfMapSize;
         _eY = Y - halfMapSize;
+
+        _obj = GameObject.Instantiate(Resources.Load<GameObject>("Objs/Tile"));
+        _obj.transform.position = new Vector3(eX, .5f, eY);
+
+        _rend = _obj.GetComponent<Renderer>();
+
+        _obj.SetActive(false);
+    }
+
+    public void ToggleRender(bool t, Color c)
+    {
+        _obj.SetActive(t);
+        ChangeTileColor(c);
+    }
+
+    void ChangeTileColor(Color c)
+    {
+        _rend.material.SetColor("Tile_Color", c);
     }
 
     public void AssignType(char t)

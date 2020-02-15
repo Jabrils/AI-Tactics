@@ -7,13 +7,14 @@ using UnityEngine;
 public class Map
 {
     public int mapSize => loc.GetLength(0);
-    public int halfMapSize => mapSize/2;
+    public int halfMapSize => mapSize / 2;
     public Tile a => current;
     Tile tileFrom => _loc[fX, fY];
     Tile tileTo => _loc[tX, tY];
     public Tile[,] loc => _loc;
     int fX, fY, tX, tY;
     public TilePath thee;
+    Fighter[] fighter;
 
     Tile current;
     Tile[,] _loc;
@@ -37,6 +38,11 @@ public class Map
         {
             _loc[b[i].x, b[i].y].free = false;
         }
+    }
+
+    public void SetFighters(Fighter[] f)
+    {
+        fighter = f;
     }
 
     void InitLocations()
@@ -147,7 +153,7 @@ public class Map
 
             // 
             _loc = new Tile[mapSize, mapSize];
-            
+
             // 
             InitLocations();
 
@@ -189,7 +195,7 @@ public class Map
         List<Tile> selLoc = new List<Tile>();
 
         // 
-        int intervals = 4;
+        int intervals = 10;
 
         // now we calculate the selected range of tiles based on distance from the opponent
         int calc = Mathf.RoundToInt((dist * intervals) + (Map.ManhattanDistance(self, opponent) - GM.maxMoves));
@@ -199,20 +205,26 @@ public class Map
 
         List<Tile> loc = map.CalcAvailbleMoves(self);
 
+        // we need a reference to the furthest distance in the availible spaces
+        int closest = 10000;
+        int furthest = 0;
+
+        // 
+        for (int i = 0; i < loc.Count; i++)
+        {
+            int temp = Map.ManhattanDistance(loc[i].v2Int, opponent);
+
+            closest = temp < closest ? temp : closest;
+            furthest = temp > furthest ? temp : furthest;
+        }
+
         // next we loop through all of the positions & see who is viable
         for (int i = 0; i < loc.Count; i++)
         {
             //Debug.Log($"ManDist: {Map.ManhattanDistance(loc[i].v2Int, opponent)} == {Mathf.Clamp(calc, 1, calc)}");
 
-            if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, 1, calc))
+            if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, closest, furthest))
             {
-                // IF THIS IS EMPTY IT THROWS EXCEPTIONS
-                // NEED TO MAKE SURE IT EITHER STAYS ON LAST IN RANGE, OR FORCE THE CALC TO STAY IN RANGE OF WHATS POSSIBLE.
-                // I THINK THE ABOVE CAN BE ACHIEVED USING THE CLAMP, FIGURING OUT A SMART WAY OF GETTING THE MAX POSSIBLE HSCORE
-                // ^^^ CAN SIMPLY CHECK IN A LOOP & STORE THE MAX, BUT I THINK IF I CAN INTELLIGENTLY REMAP IT TO 0-1, THAT'D BE BEST
-                // IT APPEARS THE INTERVALS VARIABLE IS WHERE ITS AT, IT APPEARS TO = HOW MANY MANHAT SPACES THE FURTHEST SPACE IS,
-                // WHICH IS QUITE COMPLICATED, BUT THANKFULLY AFTER THINKING ABOUT IT I THINK THAT KEEPING IT A CONSTANT INTERVAL OF 10,
-                // & CLAMPING THE CALC IS BETTER BECAUSE THEN PREDICTING A 1 DIST WILL ALWAYS MEAN THE SAME THING, REGARDLESS IF GRANTED OR NOT
                 selLoc.Add(loc[i]);
             }
         }
@@ -315,11 +327,12 @@ public class Map
         float gc = GetDistance(new Vector2(current.x, current.y), new Vector2(_from.x, _from.y));
         float hc = GetDistance(new Vector2(current.x, current.y), new Vector2(to.x, to.y));
 
+        // set the g & h scores
         current.SetGnH(gc, hc);
 
         Tile n = _loc[current.x - 1, current.y];
         // set our neighbor's fcost
-        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x - 1, current.y].free)
+        if (current.x - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -332,7 +345,7 @@ public class Map
 
         n = _loc[current.x, current.y - 1];
         // 
-        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x, current.y - 1].free)
+        if (current.y - 1 > 0 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -345,7 +358,7 @@ public class Map
 
         n = _loc[current.x + 1, current.y];
         // 
-        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x + 1, current.y].free)
+        if (current.x + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
@@ -358,7 +371,7 @@ public class Map
 
         n = _loc[current.x, current.y + 1];
         // 
-        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && _loc[current.x, current.y + 1].free)
+        if (current.y + 1 < mapSize - 1 && !openTiles.Contains(n) && !closedTiles.Contains(n) && n.free && n.v2Int != fighter[0].expression && n.v2Int != fighter[1].expression)
         {
             gc = GetDistance(new Vector2(n.x, n.y), new Vector2(_from.x, _from.y));
             hc = GetDistance(new Vector2(n.x, n.y), new Vector2(to.x, to.y));
