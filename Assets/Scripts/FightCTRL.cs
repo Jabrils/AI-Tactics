@@ -25,27 +25,47 @@ class FightCTRL : MonoBehaviour
     List<Tile> loc = new List<Tile>();
     TilePath p;
     Fighter[] fighter = new Fighter[2];
-
+    StateData stateData = new StateData();
 
     void Start()
     {
+        // 
         map = new Map(levelName);
 
+        // 
         fighter[0] = new Fighter(one, map.mapSize);
         fighter[1] = new Fighter(two, map.mapSize);
+
+        // 
+        fighter[0].SetOpponent(fighter[1]);
+        fighter[1].SetOpponent(fighter[0]);
 
         map.SetFighters(fighter);
 
         GameObject blocksParent = new GameObject("Blocks");
 
+        // 
         foreach (Tile ve in map.loc)
         {
             if (!ve.free)
             {
-                Color c = ve.type == 'w' ? new Color(.75f, .25f, 0) : ve.type == 'p' ? (Color.yellow + Color.white) / 2 : Color.black;
-                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                g.transform.position = new Vector3(ve.x - map.halfMapSize, 1.5f, ve.y - map.halfMapSize);
-                g.GetComponent<Renderer>().material.SetColor("_BaseColor", c);
+                Color c = ve.type == 'w' ? new Color(.75f, .25f, 0) : Color.black;
+                GameObject g = null;
+
+                // 
+                if (ve.type == 'p')
+                {
+                    g = Instantiate(Resources.Load<GameObject>("Objs/Pillar"));
+                    g.transform.position = new Vector3(ve.x - map.halfMapSize, .5f, ve.y - map.halfMapSize);
+                }
+                else if (ve.type == 'w')
+                {
+                    g = Instantiate(Resources.Load<GameObject>("Objs/Wall"));
+                    g.transform.localScale = new Vector3(1, 2, 1);
+                    g.transform.position = new Vector3(ve.x - map.halfMapSize, 1.5f, ve.y - map.halfMapSize);
+                }
+
+                // 
                 g.transform.SetParent(blocksParent.transform);
             }
         }
@@ -56,30 +76,11 @@ class FightCTRL : MonoBehaviour
         GM.maxMoves = mMoves;
 
         // 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (_turn == GM.turnSyncer)
         {
-            for (int i = 0; i < map.loc.GetLength(0); i++)
-            {
-                for (int j = 0; j < map.loc.GetLength(0); j++)
-                {
-                    map.loc[i, j].ToggleRender(false, Color.clear);
-                }
-            }
-
-            // 
-            Output o = CalculateOutut();
-
-            // 
-            (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? o.distance : dist, randomOutputs ? o.angleX : angleX, randomOutputs ? o.angleY : angleY);
-
-            p = outp.path;
-            loc = outp.loc;
-            selLoc = outp.selLoc;
-            angleSelect = outp.angleSelect;
-
-            StartCoroutine(map.MoveFighter(turn, GM.battleSpd, p));
-            _turn++;
+            TakeTurn();
         }
+        
         // 
         for (int i = 0; i < loc.Count; i++)
         {
@@ -117,13 +118,30 @@ class FightCTRL : MonoBehaviour
         }
     }
 
-    Output CalculateOutut()
+    void TakeTurn()
     {
-        float d = Random.value;
-        float aX = Random.Range(-1f, 1f);
-        float aY = Random.Range(-1f, 1f);
+        for (int i = 0; i < map.loc.GetLength(0); i++)
+        {
+            for (int j = 0; j < map.loc.GetLength(0); j++)
+            {
+                map.loc[i, j].ToggleRender(false, Color.clear);
+            }
+        }
 
-        return new Output(d, aX, aY);
+        // 
+        OutputMove o = OutputMove.CalculateOutput(stateData);
+
+        // 
+        (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? o.distance : dist, o.angleX, o.angleY);
+
+        p = outp.path;
+        loc = outp.loc;
+        selLoc = outp.selLoc;
+        angleSelect = outp.angleSelect;
+
+        StartCoroutine(map.MoveFighter(turn, GM.battleSpd, p));
+
+        _turn++;
     }
 
     void OnDrawGizmos()
@@ -139,17 +157,5 @@ class FightCTRL : MonoBehaviour
                 }
             }
         }
-    }
-}
-
-public struct Output
-{
-    public float distance, angleX, angleY;
-
-    public Output(float d, float aX, float aY)
-    {
-        distance = d;
-        angleX = aX;
-        angleY = aY;
     }
 }

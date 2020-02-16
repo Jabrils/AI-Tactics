@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -165,6 +164,7 @@ public class Map
             // make an algo that will convert text data of x = block o = free into a list of Vector2Ints
             string[] raw = sR.ReadToEnd().Split('\n');
 
+            // 
             int mapSize = raw.Length;
 
             // 
@@ -184,17 +184,34 @@ public class Map
             {
                 for (int j = 0; j < raw.Length; j++)
                 {
+                    char tileData = raw[i][j];
+
                     // fill in the mapped chars
-                    mapped[j, i] = raw[i][j];
+                    mapped[j, i] = tileData;
+
+                    // 
+                    if (tileData == 'o')
+                    {
+                        float dice = Random.value;
+
+                        // 
+                        if (dice < GM.randomProbability)
+                        {
+                            mapped[j,i] = 'p';
+                        }
+
+                        tileData = mapped[j,i];
+                    }
 
                     // assign type
-                    loc[j, i].AssignType(raw[i][j]);
+                    loc[j, i].AssignType(tileData);
 
                     // ADD ALL THINGS, w, p etc
-                    if (raw[i][j] == 'x' || raw[i][j] == 'p' || raw[i][j] == 'w')
+                    if (tileData == 'x' || tileData == 'p' || tileData == 'w')
                     {
                         block.Add(new Vector2Int(j, i));
                     }
+
                 }
             }
 
@@ -258,6 +275,7 @@ public class Map
     {
         // 
         int pathSpots = tp.path.Count;
+
         // 
         yield return new WaitForSeconds(1 / speed * 2);
 
@@ -267,6 +285,21 @@ public class Map
             fighter[who].MoveTo(tp.path[i].expression);
             yield return new WaitForSeconds(1 / speed);
         }
+
+        // 
+        if (fighter[who].inAttackRange)
+        {
+            // 
+            OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
+
+            // 
+            if (oB.decision > .5f)
+            {
+                fighter[who].Battle();
+            }
+        }
+
+        GM.turnSyncer++;
 
     }
 
