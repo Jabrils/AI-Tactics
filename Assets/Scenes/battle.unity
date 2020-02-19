@@ -538,7 +538,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelName: colle
   mMoves: 5
-  randomOutputs: 1
+  randomOutputs: 0
+  btSpd: 5
   dist: 0
   angleX: 0
   angleY: 0

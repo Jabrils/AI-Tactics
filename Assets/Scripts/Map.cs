@@ -20,10 +20,13 @@ public class Map
 
     public Map(int size)
     {
+        // 
         _loc = new Tile[size, size];
 
+        // 
         MapInit();
 
+        // 
         InitLocations();
     }
 
@@ -62,6 +65,9 @@ public class Map
                 _loc[j, i] = new Tile(j, i, halfMapSize: halfMapSize);
             }
         }
+
+        // 
+        GM.mapSize = mapSize;
     }
 
     public List<Tile> CalcAvailbleMoves(Vector2Int source)
@@ -76,18 +82,11 @@ public class Map
             {
                 // if the tile is in the right distance from the source & that tile is not the tile the source is on,
                 if ((ManhattanDistance(source, loc[j, i].v2Int) <= GM.maxMoves) && source != loc[j, i].v2Int)
+                //if ((Mathf.Abs(source.x - loc[j,i].x) <= GM.maxMoves) && source != loc[j, i].v2Int)
                 {
-                    //// MAKES IT THIS FAR
-                    //if (loc[j, i].y == 0)
-                    //{
-                    //    Debug.Log($"1: {loc[j, i].v2Int}");
-                    //}
-
                     // also IF that space is reachable in 5 or less moves
                     if (FindPath(source.x, source.y, loc[j, i].x, loc[j, i].y)?.dist <= GM.maxMoves)
                     {
-                        //Debug.Log($"2: {loc[j, i].v2Int}");
-
                         // add it to the return reference
                         ret.Add(loc[j, i]);
                     }
@@ -197,10 +196,10 @@ public class Map
                         // 
                         if (dice < GM.randomProbability)
                         {
-                            mapped[j,i] = 'p';
+                            mapped[j, i] = 'p';
                         }
 
-                        tileData = mapped[j,i];
+                        tileData = mapped[j, i];
                     }
 
                     // assign type
@@ -265,13 +264,14 @@ public class Map
         // 
         int angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
 
+        // THROWING ERRORS IF AGENT CAN'T MOVE
         // 
         TilePath p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
 
         return (loc, selLoc, p, angleSelect);
     }
 
-    public IEnumerator MoveFighter(int who, float speed, TilePath tp)
+    public IEnumerator MoveFighter(int time, int who, float speed, TilePath tp)
     {
         // 
         int pathSpots = tp.path.Count;
@@ -282,7 +282,7 @@ public class Map
         // 
         for (int i = 0; i < pathSpots; i++)
         {
-            fighter[who].MoveTo(tp.path[i].expression);
+            fighter[who].MoveTo(time, tp.path[i].expression);
             yield return new WaitForSeconds(1 / speed);
         }
 
@@ -295,7 +295,37 @@ public class Map
             // 
             if (oB.decision > .5f)
             {
-                fighter[who].Battle();
+                fighter[who].Battle(time, this);
+            }
+        }
+
+        // 
+        bool[] lost = new bool[2];
+
+        // 
+        for (int i = 0; i < fighter.Length; i++)
+        {
+            if (fighter[i].hp <= 0)
+            {
+                lost[i] = true;
+            }
+        }
+
+        if (lost[0] || lost[1])
+        {
+            FightCTRL.phase = FightCTRL.Phase.End;
+
+            if (lost[0] && !lost[1])
+            {
+                Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
+            }
+            else if (!lost[0] && lost[1])
+            {
+                Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
+            }
+            else if (lost[0] && lost[1])
+            {
+                Debug.Log($"GAME OVER! TIE GMAE!");
             }
         }
 
@@ -308,6 +338,7 @@ public class Map
         float start = Time.time;
         thee = new TilePath(new List<Tile>());
 
+        // 
         fX = _fX;
         fY = _fY;
         tX = _tX;
@@ -351,8 +382,6 @@ public class Map
             // if not then well Process this tile for exploration
             ProcessTile(current);
         }
-
-        //Debug.Log($"CAN'T FIND! Elapsed Time: {Time.time - start}");
 
         return null;
     }
