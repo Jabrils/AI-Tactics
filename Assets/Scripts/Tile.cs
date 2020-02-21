@@ -43,6 +43,7 @@ public class Tile
 
         _obj = GameObject.Instantiate(Resources.Load<GameObject>("Objs/Tile"));
         _obj.transform.position = new Vector3(eX, .5f, eY);
+        _obj.transform.localScale = Vector3.one * .95f;
 
         _rend = _obj.GetComponent<Renderer>();
 
@@ -52,8 +53,16 @@ public class Tile
 
     public void ToggleRender(bool t, Color c)
     {
-        _obj.SetActive(t);
-        ChangeTileColor(c);
+        if (type == 'p' || type == 'w')
+        {
+            _obj.SetActive(true);
+            ChangeTileColor(Color.red);
+        }
+        else
+        {
+            _obj.SetActive(t);
+            ChangeTileColor(c);
+        }
     }
 
     void ChangeTileColor(Color c)

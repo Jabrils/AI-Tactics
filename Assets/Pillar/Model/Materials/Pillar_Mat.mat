@@ -21,18 +21,26 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Pillar_Mat
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: be0e4060915d9434cb840a1229205fcc,
+    type: 3}
   m_ShaderKeywords: _NORMALMAP
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2050
-  stringTagMap:
-    RenderType: Opaque
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - Normal:
+        m_Texture: {fileID: 2800000, guid: fdacd27d1a120cb458df5b9e17cc924d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture:
+        m_Texture: {fileID: 2800000, guid: ee79809b907d38249902647e7ad8fe11, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: ee79809b907d38249902647e7ad8fe11, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -65,6 +73,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 21f63a9c0a2bcdc4288a0ce19aba90b1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NormalFromTexture_2E2493D7_Texture_0:
+        m_Texture: {fileID: 2800000, guid: fdacd27d1a120cb458df5b9e17cc924d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -73,11 +85,20 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_C5C6E9E4_Texture_1:
+        m_Texture: {fileID: 2800000, guid: fdacd27d1a120cb458df5b9e17cc924d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 2800000, guid: a0b7ffb67147dd44ea2074b3210ec297, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_39991AE3_Out_0:
+        m_Texture: {fileID: 2800000, guid: ee79809b907d38249902647e7ad8fe11, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Alpha: 1
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1

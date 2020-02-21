@@ -57,9 +57,20 @@ public class Fighter
         }
     }
 
-    public void MoveTo(int time, Vector2 where)
+    public void MoveTo(int time, Map map, Vector2 where)
     {
-        _obj.transform.position = new Vector3(where.x, 1.5f, where.y);
+        Vector3 next = new Vector3(where.x, .5f, where.y);
+
+        LookAt(next);
+
+        _obj.transform.position = next;
+        _opp.LookAtOpponent();
+
+        // 
+        if (map.camMode == Map.CamMode.Isometric)
+        {
+            map.SetCamTo(Map.CamMode.Isometric, myTurn);
+        }
     }
 
     public void Battle(int time, Map map)
@@ -72,8 +83,8 @@ public class Fighter
 
         // SAVE ALL OF THESE FOR A COOL REPLAY FEATURE
 
-        //oA1.DEBUGSetVals(0, 0, 1);
-        //oA2.DEBUGSetVals(0, 0, 1);
+        oA1.DEBUGSetVals(0, 1, 0);
+        oA2.DEBUGSetVals(0, 1, 0);
 
         // compare & calculate
         if (oA1.decision == 0)
@@ -85,20 +96,20 @@ public class Fighter
                 // Both take damage
                 _opp.TakeDmg(str);
                 TakeDmg(_opp.str);
-                Debug.Log($"({time}) {obj.name} -> <- {_opp.obj.name} ATT: {obj.name} HP: {hp} - {_opp.obj.name} HP: {_opp.hp}");
+                //Debug.Log($"({time}) {obj.name} -> <- {_opp.obj.name} ATT: {obj.name} HP: {hp} - {_opp.obj.name} HP: {_opp.hp}");
             }
             else if (oA2.decision == 1)
             {
                 // take damage & is stunned
                 TakeDmg(_opp.str);
-                Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
+                //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
                 Stun(time);
             }
             else if (oA2.decision == 2)
             {
                 // opponent takes damage x2
                 _opp.TakeDmg(str*2);
-                Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
+                //Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
             }
         }
         else if (oA1.decision == 1)
@@ -109,13 +120,13 @@ public class Fighter
             {
                 // opponent takes damage
                 _opp.TakeDmg(str);
-                Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
+                //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
                 _opp.Stun(time);
             }
             else if (oA2.decision == 1)
             {
                 // take one step away from each other
-                Debug.Log($"({time}) Both took 1 step away from each other");
+                //Debug.Log($"({time}) Both took 1 step away from each other");
 
                 // 
                 Vector2Int s1 = v2Int;
@@ -129,7 +140,7 @@ public class Fighter
             {
                 // opponent powers up
                 _opp.PowerUp();
-                Debug.Log($"({time}) {_opp.obj.name} powered up +1 = {_opp.str} str");
+                //Debug.Log($"({time}) {_opp.obj.name} powered up +1 = {_opp.str} str");
             }
         }
         else if (oA1.decision == 2)
@@ -140,33 +151,52 @@ public class Fighter
             {
                 // you take damage x2
                 TakeDmg(_opp.str*2);
-                Debug.Log($"({time}) {_opp.obj.name} crit {obj.name} for {_opp.str}*2 = HP: {hp}");
+                //Debug.Log($"({time}) {_opp.obj.name} crit {obj.name} for {_opp.str}*2 = HP: {hp}");
             }
             else if (oA2.decision == 1)
             {
                 // you power up
                 PowerUp();
-                Debug.Log($"({time}) {obj.name} powered up +1 = {str} str");
+                //Debug.Log($"({time}) {obj.name} powered up +1 = {str} str");
             }
             else if (oA2.decision == 2)
             {
                 // both powers down
                 PowerDown();
                 _opp.PowerDown();
-                Debug.Log($"({time}) Both powered down -1. {_opp.obj.name} = {_opp.str} str : {obj.name} = {str} str");
+                //Debug.Log($"({time}) Both powered down -1. {_opp.obj.name} = {_opp.str} str : {obj.name} = {str} str");
             }
         }
     }
 
+    // 
     void StepBackwardsFrom(int time, Map map, Vector2Int from)
     {
         Vector2Int back = v2Int - (from - v2Int);
 
+        int theX = back.x + map.halfMapSize;
+        int theY = back.y + map.halfMapSize;
+
+        bool xIsOkay = theX >= 0 && theX <= map.mapSize-1;
+        bool yIsOkay = theY >= 0 && theY <= map.mapSize-1;
+
         // 
-        if (map.loc[back.x + map.halfMapSize, back.y + map.halfMapSize].free)
+        if (xIsOkay && yIsOkay && map.loc[theX, theY].free)
         {
-            MoveTo(time, back);
+            MoveTo(time, map, back);
         }
+
+        LookAtOpponent();
+    }
+
+    public void LookAt(Vector3 t)
+    {
+        obj.transform.LookAt(t);
+    }
+
+    public void LookAtOpponent()
+    {
+        obj.transform.LookAt(_opp.obj.transform);
     }
 
     public void PowerUp()
@@ -185,13 +215,13 @@ public class Fighter
     {
         _stunned = true;
         _lastStunned = time;
-        Debug.Log($"({time}) {obj.name} is now STUNNED!");
+        //Debug.Log($"({time}) {obj.name} is now STUNNED!");
     }
 
     void UnStun(int time)
     {
         _stunned = false;
-        Debug.Log($"({time}) {obj.name} is now UNSTUNNED!");
+        //Debug.Log($"({time}) {obj.name} is now UNSTUNNED!");
     }
 
     void TakeDmg(int dmg)
@@ -210,6 +240,6 @@ public class Fighter
         _hp++;
 
         _hp = Mathf.Clamp(_hp, 0, GM.maxHP);
-        Debug.Log($"({time}) {obj.name} has rested to: {hp}!");
+        //Debug.Log($"({time}) {obj.name} has rested to: {hp}!");
     }
 }

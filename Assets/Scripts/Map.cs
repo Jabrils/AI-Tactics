@@ -13,6 +13,10 @@ public class Map
     int fX, fY, tX, tY;
     public TilePath thee;
     Fighter[] fighter;
+    Camera cam = Camera.main;
+
+    public enum CamMode { Topdown, Free, Isometric };
+    public CamMode camMode;
 
     Tile current;
     Tile[,] _loc;
@@ -47,6 +51,28 @@ public class Map
         for (int i = 0; i < b.Count; i++)
         {
             _loc[b[i].x, b[i].y].free = false;
+        }
+    }
+
+    public void SetCamTo(CamMode c, int who=0)
+    {
+        if (c == CamMode.Topdown)
+        {
+            cam.transform.position = new Vector3(-.5f, 20, -.5f);
+            cam.transform.eulerAngles = new Vector3(90, 0, 0);
+            cam.orthographic = true;
+
+            camMode = CamMode.Topdown;
+        }
+        else if (c == CamMode.Isometric)
+        {
+            Vector3 p = fighter[who].obj.transform.position;
+
+            cam.transform.position = new Vector3(p.x-4, p.y + 10, p.z-5);
+            cam.transform.LookAt(fighter[who].obj.transform);
+            cam.orthographic = false;
+
+            camMode = CamMode.Isometric;
         }
     }
 
@@ -191,6 +217,7 @@ public class Map
                     // 
                     if (tileData == 'o')
                     {
+                        // 
                         float dice = Random.value;
 
                         // 
@@ -199,6 +226,7 @@ public class Map
                             mapped[j, i] = 'p';
                         }
 
+                        // 
                         tileData = mapped[j, i];
                     }
 
@@ -206,18 +234,15 @@ public class Map
                     loc[j, i].AssignType(tileData);
 
                     // ADD ALL THINGS, w, p etc
-                    if (tileData == 'x' || tileData == 'p' || tileData == 'w')
+                    if (tileData == 'p' || tileData == 'w')
                     {
                         block.Add(new Vector2Int(j, i));
                     }
-
                 }
             }
 
             // pass that to map.Block()
             BlockTiles(block);
-
-            // profit 
         }
     }
 
@@ -235,55 +260,72 @@ public class Map
         // we need a reference to a temp all selected positions list
         List<Vector2Int> tempAllSelPos = new List<Vector2Int>();
 
+        // 
         List<Tile> loc = map.CalcAvailbleMoves(self);
 
-        // we need a reference to the furthest distance in the availible spaces
-        int closest = 10000;
-        int furthest = 0;
+        // 
+        int angleSelect = 0;
+        TilePath p = new TilePath(new List<Tile>());
 
         // 
-        for (int i = 0; i < loc.Count; i++)
+        if (loc.Count > 0)
         {
-            int temp = Map.ManhattanDistance(loc[i].v2Int, opponent);
+            // we need a reference to the furthest distance in the availible spaces
+            int closest = 10000;
+            int furthest = 0;
 
-            closest = temp < closest ? temp : closest;
-            furthest = temp > furthest ? temp : furthest;
-        }
-
-        // next we loop through all of the positions & see who is viable
-        for (int i = 0; i < loc.Count; i++)
-        {
-            //Debug.Log($"ManDist: {Map.ManhattanDistance(loc[i].v2Int, opponent)} == {Mathf.Clamp(calc, 1, calc)}");
-
-            if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, closest, furthest))
+            // 
+            for (int i = 0; i < loc.Count; i++)
             {
-                selLoc.Add(loc[i]);
+                int temp = Map.ManhattanDistance(loc[i].v2Int, opponent);
+
+                closest = temp < closest ? temp : closest;
+                furthest = temp > furthest ? temp : furthest;
             }
+
+            // next we loop through all of the positions & see who is viable
+            for (int i = 0; i < loc.Count; i++)
+            {
+                // 
+                if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, closest, furthest))
+                {
+                    selLoc.Add(loc[i]);
+                }
+            }
+
+            // 
+            angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
+
+            // 
+            // // 
+            // // // THROWING ERRORS IF AGENT CAN'T MOVE
+            // //
+            // 
+
+            // 
+            p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
         }
-
-        // 
-        int angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
-
-        // THROWING ERRORS IF AGENT CAN'T MOVE
-        // 
-        TilePath p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
 
         return (loc, selLoc, p, angleSelect);
     }
 
-    public IEnumerator MoveFighter(int time, int who, float speed, TilePath tp)
+    public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, float speed, TilePath tp)
     {
         // 
-        int pathSpots = tp.path.Count;
-
-        // 
-        yield return new WaitForSeconds(1 / speed * 2);
-
-        // 
-        for (int i = 0; i < pathSpots; i++)
+        if (canMove)
         {
-            fighter[who].MoveTo(time, tp.path[i].expression);
-            yield return new WaitForSeconds(1 / speed);
+            // 
+            int pathSpots = tp.path.Count;
+
+            // 
+            yield return new WaitForSeconds(1 / speed * 2);
+
+            // 
+            for (int i = 0; i < pathSpots; i++)
+            {
+                fighter[who].MoveTo(time, map, tp.path[i].expression);
+                yield return new WaitForSeconds(1 / speed);
+            }
         }
 
         // 
@@ -311,10 +353,12 @@ public class Map
             }
         }
 
+        // 
         if (lost[0] || lost[1])
         {
             FightCTRL.phase = FightCTRL.Phase.End;
 
+            // 
             if (lost[0] && !lost[1])
             {
                 Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
@@ -329,6 +373,10 @@ public class Map
             }
         }
 
+        // 
+        fighter[who].LookAtOpponent();
+
+        // 
         GM.turnSyncer++;
 
     }

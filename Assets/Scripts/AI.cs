@@ -155,8 +155,6 @@ public struct StateData
     public void Update(int turn)
     {
         theTurn = turn;
-
-        PrintState();
     }
 
     public void PrintState()

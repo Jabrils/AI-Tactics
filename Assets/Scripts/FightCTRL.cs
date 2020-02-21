@@ -43,10 +43,17 @@ class FightCTRL : MonoBehaviour
         fighter[1].SetOpponent(fighter[0]);
 
         // 
+        fighter[0].LookAtOpponent();
+        fighter[1].LookAtOpponent();
+
+        // 
         map.SetFighters(fighter);
 
         // 
         GameObject blocksParent = new GameObject("Blocks");
+
+        // 
+        map.SetCamTo(Map.CamMode.Topdown);
 
         // 
         foreach (Tile ve in map.loc)
@@ -81,6 +88,7 @@ class FightCTRL : MonoBehaviour
 
         GM.maxMoves = mMoves;
 
+        // 
         if (phase == Phase.Battle)
         {
             // 
@@ -108,15 +116,29 @@ class FightCTRL : MonoBehaviour
 
     void ListenForControls()
     {
+        // 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             GM.turnSyncer = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        // 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             phase = Phase.Battle;
+        }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            map.SetCamTo(Map.CamMode.Topdown);
+        }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            map.SetCamTo(Map.CamMode.Isometric);
         }
     }
 
@@ -129,7 +151,7 @@ class FightCTRL : MonoBehaviour
             fighter[i].CheckUp(time);
         }
 
-        // We must reset the tile rendering
+        // We must reset the tile renderings
         for (int i = 0; i < map.loc.GetLength(0); i++)
         {
             for (int j = 0; j < map.loc.GetLength(0); j++)
@@ -150,6 +172,11 @@ class FightCTRL : MonoBehaviour
         //    return;
         //}
 
+        //// 
+        //if (camMode == CamMode.Action)
+        //{
+        //    SetCamTo(CamMode.Action);
+        //}
 
         // Calculate the move output
         OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
@@ -157,6 +184,7 @@ class FightCTRL : MonoBehaviour
         // Get the movement data
         (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
 
+        // 
         // set all of the movement data
         p = outp.path;
         loc = outp.loc;
@@ -164,7 +192,7 @@ class FightCTRL : MonoBehaviour
         angleSelect = outp.angleSelect;
 
         // start our Coroutine of moving our fighter
-        StartCoroutine(map.MoveFighter(time, turn, GM.battleSpd, p));
+        StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
 
         // incriment the turn
         _turn++;
