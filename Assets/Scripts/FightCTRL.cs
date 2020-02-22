@@ -95,18 +95,32 @@ class FightCTRL : MonoBehaviour
             if (_turn == GM.turnSyncer)
             {
                 TakeTurn();
-            }
 
-            // 
-            for (int i = 0; i < loc.Count; i++)
-            {
-                loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
-            }
+                List<Tile> tempP = new List<Tile>(p.path);
 
-            // 
-            for (int i = 0; i < selLoc.Count; i++)
-            {
-                selLoc[i].ToggleRender(true, i == angleSelect ? Color.yellow : Color.cyan);
+                // 
+                for (int i = 0; i < loc.Count; i++)
+                {
+                    loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
+                }
+
+                // 
+                for (int i = 0; i < selLoc.Count; i++)
+                {
+                    selLoc[i].ToggleRender(true, i == angleSelect ? Color.yellow : Color.cyan);
+
+                    // 
+                    if (i==angleSelect)
+                    {
+                        tempP.Remove(selLoc[i]);
+                    }
+                }
+
+                // 
+                for (int i = 0; i < tempP.Count; i++)
+                {
+                    tempP[i].ToggleRender(true, Color.white);
+                }
             }
         }
 
@@ -152,13 +166,7 @@ class FightCTRL : MonoBehaviour
         }
 
         // We must reset the tile renderings
-        for (int i = 0; i < map.loc.GetLength(0); i++)
-        {
-            for (int j = 0; j < map.loc.GetLength(0); j++)
-            {
-                map.loc[i, j].ToggleRender(false, Color.clear);
-            }
-        }
+        map.ResetAllTiles();
 
         //// 
         //OutputRest r = OutputRest.Calculate();
@@ -196,20 +204,5 @@ class FightCTRL : MonoBehaviour
 
         // incriment the turn
         _turn++;
-    }
-
-    void OnDrawGizmos2()
-    {
-        if (Application.isPlaying)
-        {
-            if (p != null)
-            {
-                for (int i = 0; i < p.path.Count; i++)
-                {
-                    Gizmos.color = i == p.path.Count - 1 ? Color.yellow : Color.white;
-                    Gizmos.DrawWireCube(new Vector3(p.path[i].eX, 1, p.path[i].eY), Vector3.one);
-                }
-            }
-        }
     }
 }

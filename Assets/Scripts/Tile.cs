@@ -42,7 +42,7 @@ public class Tile
         _eY = Y - halfMapSize;
 
         _obj = GameObject.Instantiate(Resources.Load<GameObject>("Objs/Tile"));
-        _obj.transform.position = new Vector3(eX, .5f, eY);
+        _obj.transform.position = new Vector3(eX, .05f, eY);
         _obj.transform.localScale = Vector3.one * .95f;
 
         _rend = _obj.GetComponent<Renderer>();

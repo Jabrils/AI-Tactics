@@ -1,4 +1,4 @@
-## v0.0.14
+## v0.0.15
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,23 +7,27 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Replaced the path gizmo with something actually rendered
+|||Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
 |||units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
-|||add top down camera mode
-|||add action camera mode
-|||fix level loader to read it properly
-|||units no longer get stuck in corners
-|||model new coleseum
+|||fixed level loader to read it properly
+|||Added icons to make decisions clear
+|||Added dmg
+|||Added nametags
+|||Added UI
 |||model a few skins
+|||units no longer get stuck in corners
+|||added action camera mode
+|||model new coleseum
 |||optimize
 |||Food Health now spawns on the map
-|||Added pose animations
-|||Added icons to show decisions
-|||Made nearby tiles see-through / invisible feature
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.15|02.21.020|Replaced the path gizmo with something actually rendered
+|v0.0.15|02.21.020|Added pose animations
+|v0.0.15|02.21.020|added top down camera mode
+|v0.0.15|02.21.020|added isometric camera mode
 |v0.0.14|02.20.020|Added an algorithm that will ensure there is always a path from fighter to fighter
 |v0.0.14|02.19.020|model character
 |v0.0.14|02.19.020|State data is now organized

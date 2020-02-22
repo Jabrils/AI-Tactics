@@ -191,7 +191,7 @@ public struct StateData
     // 7- myStr
     public float myStr => (float)me.str / (float)GM.maxStr;
     // 8- iStunned
-    public int iStunned => me.stunned ? 1 : 0;
+    public int iStunned => me.isStunned ? 1 : 0;
 
     // 
     // // OPPONENT
@@ -208,5 +208,5 @@ public struct StateData
     // 13- oppStr
     public float oppStr => (float)opp.str / (float)GM.maxStr;
     // 14- oppStunned
-    public int oppStunned => opp.stunned ? 1 : 0;
+    public int oppStunned => opp.isStunned ? 1 : 0;
 }

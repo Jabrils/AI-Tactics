@@ -14,6 +14,9 @@ public class Map
     public TilePath thee;
     Fighter[] fighter;
     Camera cam = Camera.main;
+    Dictionary<int, string> battleDecLookUp = new Dictionary<int, string> { { 0, "Attack" }, { 1, "Defend" }, { 2, "Taunt" }, };
+    Vector3 zoomUnit = new Vector3(2, 5, 2.5f);
+    public float zoom = 1f;
 
     public enum CamMode { Topdown, Free, Isometric };
     public CamMode camMode;
@@ -54,7 +57,7 @@ public class Map
         }
     }
 
-    public void SetCamTo(CamMode c, int who=0)
+    public void SetCamTo(CamMode c, int who = 0)
     {
         if (c == CamMode.Topdown)
         {
@@ -68,7 +71,7 @@ public class Map
         {
             Vector3 p = fighter[who].obj.transform.position;
 
-            cam.transform.position = new Vector3(p.x-4, p.y + 10, p.z-5);
+            cam.transform.position = new Vector3(p.x - (zoomUnit.x * zoom), p.y + (zoomUnit.y * zoom), p.z - (zoomUnit.z * zoom));
             cam.transform.LookAt(fighter[who].obj.transform);
             cam.orthographic = false;
 
@@ -180,6 +183,19 @@ public class Map
         }
 
         return PathFinder(_fX, _fY, _tX, _tY);
+    }
+
+    public void ResetAllTiles()
+    {
+        int l = loc.GetLength(0);
+
+        for (int i = 0; i < l; i++)
+        {
+            for (int j = 0; j < l; j++)
+            {
+                loc[i, j].ToggleRender(false, Color.clear);
+            }
+        }
     }
 
     public void LoadLeveData(string levelName)
@@ -320,13 +336,21 @@ public class Map
             // 
             yield return new WaitForSeconds(1 / speed * 2);
 
+            fighter[who].ChangeAnimation("Walk");
+
             // 
             for (int i = 0; i < pathSpots; i++)
             {
                 fighter[who].MoveTo(time, map, tp.path[i].expression);
                 yield return new WaitForSeconds(1 / speed);
             }
+
+            fighter[who].ChangeAnimation("Idle");
+
+            fighter[who].LookAtOpponent();
         }
+
+        ResetAllTiles();
 
         // 
         if (fighter[who].inAttackRange)
@@ -337,7 +361,33 @@ public class Map
             // 
             if (oB.decision > .5f)
             {
-                fighter[who].Battle(time, this);
+                // pass in state, output 1 2 or 3
+                OutputAttack oA1 = OutputAttack.CalculateOutput(fighter[who].isStunned, fighter[who].stateData);
+
+                // ask opp for their battle output
+                OutputAttack oA2 = OutputAttack.CalculateOutput(fighter[who].opp.isStunned, fighter[who].opp.stateData);
+
+                OutputAttack[] oA = new OutputAttack[] { oA1, oA2 };
+
+                int[] did = new int[] { oA[0].decision, oA[1].decision };
+
+                // 
+                if (did[0] != -1)
+                {
+                    yield return new WaitForSeconds(1);
+
+                    fighter[who].ChangeAnimation(battleDecLookUp[did[0]]);
+                    fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]]);
+
+                    yield return new WaitForSeconds(3);
+
+                    fighter[who].ChangeAnimation("Idle");
+                    fighter[who].opp.ChangeAnimation("Idle");
+                }
+
+                fighter[who].Battle(time, oA, map);
+
+                yield return new WaitForSeconds(1);
             }
         }
 

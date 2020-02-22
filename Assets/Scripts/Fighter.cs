@@ -11,6 +11,10 @@ public class Fighter
     public GameObject obj => _obj;
 
     Fighter _opp;
+    public Fighter opp => _opp;
+
+    Animator _anim;
+
     public StateData stateData;
 
     public int x => Mathf.RoundToInt(obj.transform.position.x);
@@ -35,7 +39,7 @@ public class Fighter
 
     int distToOpp => Map.ManhattanDistance(v2Int, _opp.v2Int);
     bool _stunned;
-    public bool stunned => _stunned;
+    public bool isStunned => _stunned;
 
     public bool inAttackRange => distToOpp == 1;
 
@@ -46,6 +50,8 @@ public class Fighter
         _obj = gO;
         this.mapSize = mapSize;
         _myTurn = myTurn;
+
+        _anim = _obj.GetComponentInChildren<Animator>();
     }
 
     public void CheckUp(int time)
@@ -73,57 +79,52 @@ public class Fighter
         }
     }
 
-    public void Battle(int time, Map map)
+    public void Battle(int time, OutputAttack[] oA, Map map)
     {
-        // pass in state, output 1 2 or 3
-        OutputAttack oA1 = OutputAttack.CalculateOutput(_stunned, stateData);
-
-        // ask opp for their battle output
-        OutputAttack oA2 = OutputAttack.CalculateOutput(_opp._stunned, _opp.stateData);
 
         // SAVE ALL OF THESE FOR A COOL REPLAY FEATURE
 
-        oA1.DEBUGSetVals(0, 1, 0);
-        oA2.DEBUGSetVals(0, 1, 0);
+        //oA1.DEBUGSetVals(0, 1, 0);
+        //oA2.DEBUGSetVals(0, 1, 0);
 
         // compare & calculate
-        if (oA1.decision == 0)
+        if (oA[0].decision == 0)
         {
             // ATTACK
 
-            if (oA2.decision == 0)
+            if (oA[1].decision == 0)
             {
                 // Both take damage
                 _opp.TakeDmg(str);
                 TakeDmg(_opp.str);
                 //Debug.Log($"({time}) {obj.name} -> <- {_opp.obj.name} ATT: {obj.name} HP: {hp} - {_opp.obj.name} HP: {_opp.hp}");
             }
-            else if (oA2.decision == 1)
+            else if (oA[1].decision == 1)
             {
                 // take damage & is stunned
                 TakeDmg(_opp.str);
                 //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
                 Stun(time);
             }
-            else if (oA2.decision == 2)
+            else if (oA[1].decision == 2)
             {
                 // opponent takes damage x2
                 _opp.TakeDmg(str*2);
                 //Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
             }
         }
-        else if (oA1.decision == 1)
+        else if (oA[0].decision == 1)
         {
             // DEFEND
 
-            if (oA2.decision == 0)
+            if (oA[1].decision == 0)
             {
                 // opponent takes damage
                 _opp.TakeDmg(str);
                 //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
                 _opp.Stun(time);
             }
-            else if (oA2.decision == 1)
+            else if (oA[1].decision == 1)
             {
                 // take one step away from each other
                 //Debug.Log($"({time}) Both took 1 step away from each other");
@@ -136,30 +137,30 @@ public class Fighter
                 StepBackwardsFrom(time, map, s2);
                 _opp.StepBackwardsFrom(time, map, s1);
             }
-            else if (oA2.decision == 2)
+            else if (oA[1].decision == 2)
             {
                 // opponent powers up
                 _opp.PowerUp();
                 //Debug.Log($"({time}) {_opp.obj.name} powered up +1 = {_opp.str} str");
             }
         }
-        else if (oA1.decision == 2)
+        else if (oA[0].decision == 2)
         {
             // TAUNT
 
-            if (oA2.decision == 0)
+            if (oA[1].decision == 0)
             {
                 // you take damage x2
                 TakeDmg(_opp.str*2);
                 //Debug.Log($"({time}) {_opp.obj.name} crit {obj.name} for {_opp.str}*2 = HP: {hp}");
             }
-            else if (oA2.decision == 1)
+            else if (oA[1].decision == 1)
             {
                 // you power up
                 PowerUp();
                 //Debug.Log($"({time}) {obj.name} powered up +1 = {str} str");
             }
-            else if (oA2.decision == 2)
+            else if (oA[1].decision == 2)
             {
                 // both powers down
                 PowerDown();
@@ -167,6 +168,12 @@ public class Fighter
                 //Debug.Log($"({time}) Both powered down -1. {_opp.obj.name} = {_opp.str} str : {obj.name} = {str} str");
             }
         }
+    }
+
+
+    public void ChangeAnimation(string a)
+    {
+        _anim.SetTrigger(a);
     }
 
     // 
