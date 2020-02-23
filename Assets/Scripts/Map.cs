@@ -18,7 +18,7 @@ public class Map
     Vector3 zoomUnit = new Vector3(2, 5, 2.5f);
     public float zoom = 1f;
 
-    public enum CamMode { Topdown, Free, Isometric };
+    public enum CamMode { Field, Topdown, Free, Isometric };
     public CamMode camMode;
 
     Tile current;
@@ -59,11 +59,21 @@ public class Map
 
     public void SetCamTo(CamMode c, int who = 0)
     {
-        if (c == CamMode.Topdown)
+        if (c == CamMode.Field)
         {
             cam.transform.position = new Vector3(-.5f, 20, -.5f);
             cam.transform.eulerAngles = new Vector3(90, 0, 0);
             cam.orthographic = true;
+
+            camMode = CamMode.Field;
+        }
+        else if (c == CamMode.Topdown)
+        {
+            Vector3 p = fighter[who].obj.transform.position;
+
+            cam.transform.position = new Vector3(p.x, p.y + 7.5f, p.z);
+            cam.transform.LookAt(fighter[who].obj.transform);
+            cam.orthographic = false;
 
             camMode = CamMode.Topdown;
         }

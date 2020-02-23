@@ -53,7 +53,7 @@ class FightCTRL : MonoBehaviour
         GameObject blocksParent = new GameObject("Blocks");
 
         // 
-        map.SetCamTo(Map.CamMode.Topdown);
+        map.SetCamTo(Map.CamMode.Field);
 
         // 
         foreach (Tile ve in map.loc)
@@ -141,6 +141,12 @@ class FightCTRL : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             phase = Phase.Battle;
+        }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            map.SetCamTo(Map.CamMode.Field);
         }
 
         // 

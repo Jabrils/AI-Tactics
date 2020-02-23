@@ -17,7 +17,9 @@ public class Fighter
 
     Animator _anim;
 
-    TextMeshPro _dmgTxt, _strTxt, _stunTxt;
+    TextMeshPro _dmgTxt, _strTxt;
+
+    SpriteRenderer _stunSpr;
 
     Transform _hpHolder;
 
@@ -64,6 +66,9 @@ public class Fighter
         // 
         _hpHolder = gO.GetComponentsInChildren<SpriteRenderer>()[2].transform.parent;
 
+        // 
+        _stunSpr = gO.GetComponentsInChildren<SpriteRenderer>()[4];
+
         TextMeshPro[] grabTMP = gO.GetComponentsInChildren<TextMeshPro>();
 
         // 
@@ -74,9 +79,6 @@ public class Fighter
 
         // 
         _strTxt = grabTMP[2];
-
-        // 
-        _stunTxt = grabTMP[3];
     }
 
     public void CheckUp(int time)
@@ -98,10 +100,7 @@ public class Fighter
         _opp.LookAtOpponent();
 
         // 
-        if (map.camMode == Map.CamMode.Isometric)
-        {
-            map.SetCamTo(Map.CamMode.Isometric, myTurn);
-        }
+            map.SetCamTo(map.camMode, myTurn);
     }
 
     public void Battle(int time, OutputAttack[] oA, Map map)
@@ -257,14 +256,14 @@ public class Fighter
     {
         _stunned = true;
         _lastStunned = time;
-        _stunTxt.enabled = _stunned;
+        _stunSpr.enabled = _stunned;
         //Debug.Log($"({time}) {obj.name} is now STUNNED!");
     }
 
     void UnStun(int time)
     {
         _stunned = false;
-        _stunTxt.enabled = _stunned;
+        _stunSpr.enabled = _stunned;
         //Debug.Log($"({time}) {obj.name} is now UNSTUNNED!");
     }
 

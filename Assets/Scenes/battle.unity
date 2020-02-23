@@ -1678,15 +1678,20 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 3739852549827230341, guid: bd37e102c2192924f99be877d805c9af,
-        type: 3}
-      propertyPath: m_fontStyle
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7355369040425020026, guid: bd37e102c2192924f99be877d805c9af,
         type: 3}
       propertyPath: m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1103736686367035584, guid: bd37e102c2192924f99be877d805c9af,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3739852549827230341, guid: bd37e102c2192924f99be877d805c9af,
+        type: 3}
+      propertyPath: m_fontStyle
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1083346691347073586, guid: bd37e102c2192924f99be877d805c9af,
         type: 3}
@@ -1707,11 +1712,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_textInfo.pageCount
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1103736686367035584, guid: bd37e102c2192924f99be877d805c9af,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2920850122313128756, guid: bd37e102c2192924f99be877d805c9af,
         type: 3}
