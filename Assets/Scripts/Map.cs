@@ -376,18 +376,25 @@ public class Map
                 {
                     yield return new WaitForSeconds(1);
 
+                    // change the animation to reveal battle results
                     fighter[who].ChangeAnimation(battleDecLookUp[did[0]]);
                     fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]]);
 
-                    yield return new WaitForSeconds(3);
+                    yield return new WaitForSeconds(2);
 
+                    // idle animation the bots
                     fighter[who].ChangeAnimation("Idle");
                     fighter[who].opp.ChangeAnimation("Idle");
                 }
 
+                // result the battle
                 fighter[who].Battle(time, oA, map);
 
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(2);
+
+                // remove the damage from showing over the heads
+                fighter[who].SetText(false, Color.clear);
+                fighter[who].opp.SetText(false, Color.clear);
             }
         }
 

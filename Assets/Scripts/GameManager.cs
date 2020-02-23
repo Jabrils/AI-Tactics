@@ -12,7 +12,7 @@ static class GM
     public static string lvlExt = ".map";
     public static float battleSpd = 4;
     public static Transform tilesParent;
-    public static float randomProbability = .25f;
+    public static float randomProbability = .2f;
     public static int turnSyncer;
     public static int mapSize;
     public static int maxStr = 20;

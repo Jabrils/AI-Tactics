@@ -180,12 +180,6 @@ class FightCTRL : MonoBehaviour
         //    return;
         //}
 
-        //// 
-        //if (camMode == CamMode.Action)
-        //{
-        //    SetCamTo(CamMode.Action);
-        //}
-
         // Calculate the move output
         OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
 

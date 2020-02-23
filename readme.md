@@ -1,4 +1,4 @@
-## v0.0.16
+## v0.0.17
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,15 +7,19 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||visualized stunned
+|||visualized strength
+|||Added poweup animation
 |||Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
 |||units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
 |||fixed level loader to read it properly
 |||Added icons to make decisions clear
-|||Added dmg
 |||Added nametags
 |||Added UI
+|||Added audience
 |||model a few skins
 |||units no longer get stuck in corners
+|||added drone camera mode
 |||added action camera mode
 |||model new coleseum
 |||optimize
@@ -26,6 +30,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.17|02.22.020|Added dmg
 |v0.0.16|02.22.020|Added health points
 |v0.0.15|02.21.020|Replaced the path gizmo with something actually rendered
 |v0.0.15|02.21.020|Added pose animations

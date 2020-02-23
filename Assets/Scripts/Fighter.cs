@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using TMPro;
+using System.Collections;
 
 public class Fighter
 {
@@ -14,6 +16,8 @@ public class Fighter
     public Fighter opp => _opp;
 
     Animator _anim;
+
+    TextMeshPro _dmgTxt, _strTxt, _stunTxt;
 
     Transform _hpHolder;
 
@@ -54,9 +58,25 @@ public class Fighter
         this.mapSize = mapSize;
         _myTurn = myTurn;
 
+        // 
         _anim = _obj.GetComponentInChildren<Animator>();
 
+        // 
         _hpHolder = gO.GetComponentsInChildren<SpriteRenderer>()[2].transform.parent;
+
+        TextMeshPro[] grabTMP = gO.GetComponentsInChildren<TextMeshPro>();
+
+        // 
+        _dmgTxt = grabTMP[0];
+
+        // 
+        grabTMP[1].text = gO.name;
+
+        // 
+        _strTxt = grabTMP[2];
+
+        // 
+        _stunTxt = grabTMP[3];
     }
 
     public void CheckUp(int time)
@@ -107,7 +127,7 @@ public class Fighter
             else if (oA[1].decision == 1)
             {
                 // take damage & is stunned
-                TakeDmg(_opp.str);
+                TakeDmg(1);
                 //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
                 Stun(time);
             }
@@ -125,7 +145,7 @@ public class Fighter
             if (oA[1].decision == 0)
             {
                 // opponent takes damage
-                _opp.TakeDmg(str);
+                _opp.TakeDmg(1);
                 //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
                 _opp.Stun(time);
             }
@@ -175,6 +195,12 @@ public class Fighter
         }
     }
 
+    public void SetText(bool toggle, Color c, bool add = true, int dmg = 0)
+    {
+        _dmgTxt.color = c;
+        _dmgTxt.enabled = toggle;
+        _dmgTxt.text = $"{(add ? '+' : '-')}{dmg}";
+    }
 
     public void ChangeAnimation(string a)
     {
@@ -215,29 +241,37 @@ public class Fighter
     {
         _str++;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
+        _strTxt.text = $"{_str}";
+        SetText(true, Color.yellow, dmg: 1);
     }
 
     public void PowerDown()
     {
         _str--;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
+        _strTxt.text = $"{_str}";
+        SetText(true, Color.yellow, false, dmg: 1);
     }
 
     void Stun(int time)
     {
         _stunned = true;
         _lastStunned = time;
+        _stunTxt.enabled = _stunned;
         //Debug.Log($"({time}) {obj.name} is now STUNNED!");
     }
 
     void UnStun(int time)
     {
         _stunned = false;
+        _stunTxt.enabled = _stunned;
         //Debug.Log($"({time}) {obj.name} is now UNSTUNNED!");
     }
 
     void TakeDmg(int dmg)
     {
+
+        SetText(true, Color.red, false, dmg);
         _hp -= dmg;
         _hp = Mathf.Clamp(_hp, 0, GM.maxHP);
 
