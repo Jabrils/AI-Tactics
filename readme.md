@@ -1,4 +1,4 @@
-## v0.0.15
+## v0.0.16
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -20,10 +20,13 @@
 |||model new coleseum
 |||optimize
 |||Food Health now spawns on the map
+|||Added walking sfx
+|||Added hit sfx
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.16|02.22.020|Added health points
 |v0.0.15|02.21.020|Replaced the path gizmo with something actually rendered
 |v0.0.15|02.21.020|Added pose animations
 |v0.0.15|02.21.020|added top down camera mode

@@ -8,7 +8,7 @@ using UnityEngine;
 static class GM
 {
     public static int maxMoves = 5;
-    public static int maxHP = 250;
+    public static int maxHP = 25;
     public static string lvlExt = ".map";
     public static float battleSpd = 4;
     public static Transform tilesParent;

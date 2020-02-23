@@ -15,6 +15,8 @@ public class Fighter
 
     Animator _anim;
 
+    Transform _hpHolder;
+
     public StateData stateData;
 
     public int x => Mathf.RoundToInt(obj.transform.position.x);
@@ -28,6 +30,7 @@ public class Fighter
 
     int _hp = GM.maxHP;
     public int hp => _hp;
+    public float hpPercent => (float)_hp / (float)GM.maxHP;
 
     int _str = 2;
     public int str => _str;
@@ -52,6 +55,8 @@ public class Fighter
         _myTurn = myTurn;
 
         _anim = _obj.GetComponentInChildren<Animator>();
+
+        _hpHolder = gO.GetComponentsInChildren<SpriteRenderer>()[2].transform.parent;
     }
 
     public void CheckUp(int time)
@@ -234,6 +239,9 @@ public class Fighter
     void TakeDmg(int dmg)
     {
         _hp -= dmg;
+        _hp = Mathf.Clamp(_hp, 0, GM.maxHP);
+
+        _hpHolder.localScale = new Vector3(hpPercent, 1, 1);
     }
 
     public void SetOpponent(Fighter opp)

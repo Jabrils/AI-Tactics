@@ -412,14 +412,22 @@ public class Map
             if (lost[0] && !lost[1])
             {
                 Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
+
+                fighter[0].ChangeAnimation("Defeat");
+                fighter[1].ChangeAnimation("Win");
             }
             else if (!lost[0] && lost[1])
             {
                 Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
+
+                fighter[0].ChangeAnimation("Win");
+                fighter[1].ChangeAnimation("Defeat");
             }
             else if (lost[0] && lost[1])
             {
                 Debug.Log($"GAME OVER! TIE GMAE!");
+                fighter[0].ChangeAnimation("Defeat");
+                fighter[1].ChangeAnimation("Defeat");
             }
         }
 
