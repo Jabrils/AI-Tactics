@@ -367,9 +367,16 @@ public class Map
 
         ResetAllTiles();
 
+        map.fC.StartABattle(who);
+    }
+
+    public IEnumerator FIGHT(int time, Map map, int who)
+    { 
         // 
         if (fighter[who].inAttackRange)
         {
+            fC.areInBattle = true;
+
             // 
             OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
 
@@ -443,6 +450,7 @@ public class Map
                 // remove the damage from showing over the heads
                 fighter[who].SetText(false, Color.clear);
                 fighter[who].opp.SetText(false, Color.clear);
+
             }
         }
 
@@ -493,7 +501,7 @@ public class Map
 
         // 
         GM.turnSyncer++;
-
+        fC.areInBattle = false;
     }
 
     public void PlaySFX(string sfx)

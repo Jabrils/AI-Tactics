@@ -8,6 +8,8 @@ public class FightCTRL : MonoBehaviour
     public enum Phase { Start, Battle, End };
     public static Phase phase;
 
+    public enum InputType { Random, Zero, One, DummyAI, P1, P2 };
+
     public string levelName;
     public int mMoves = 5;
     public bool randomOutputs;
@@ -18,6 +20,8 @@ public class FightCTRL : MonoBehaviour
     public float angleX = 0, angleY = 0;
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
+    public bool areInBattle;
+    public bool humansInvolved;
 
     int _turn;
     public int turn => _turn % 2;
@@ -35,11 +39,21 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
-    txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
+        GM.inpType[0] = InputType.P1;
+        //GM.inpType[1] = InputType.Zero;
 
+        for (int i = 0; i < GM.inpType.Length; i++)
+        {
+            if (GM.inpType[i] == InputType.P1 || GM.inpType[i] == InputType.P2)
+            {
+                humansInvolved = true;
+            }
+        }
 
-    // 
-    map = new Map(this, levelName);
+        txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
+
+        // 
+        map = new Map(this, levelName);
 
         // 
         fighter[0] = new Fighter(one, 0, map.mapSize);
@@ -104,10 +118,36 @@ public class FightCTRL : MonoBehaviour
             // 
             if (_turn == GM.turnSyncer)
             {
-                TakeTurn();
+                if (humansInvolved)
+                {
+                    if (Input.GetKeyDown(KeyCode.O))
+                    {
+                        ProcessTurn();
+                    }
+                }
+                else
+                {
+                    ProcessTurn();
+                }
+            }
+        }
 
-                List<Tile> tempP = new List<Tile>(p.path);
+        // 
+        ListenForControls();
+    }
 
+    void ProcessTurn()
+    {
+        TakeTurn();
+
+        // 
+        if (p != null)
+        {
+            List<Tile> tempP = new List<Tile>(p.path);
+
+            // 
+            if (!areInBattle)
+            {
                 // 
                 for (int i = 0; i < loc.Count; i++)
                 {
@@ -120,7 +160,7 @@ public class FightCTRL : MonoBehaviour
                     selLoc[i].ToggleRender(true, i == angleSelect ? Color.yellow : Color.cyan);
 
                     // 
-                    if (i==angleSelect)
+                    if (i == angleSelect)
                     {
                         tempP.Remove(selLoc[i]);
                     }
@@ -132,10 +172,11 @@ public class FightCTRL : MonoBehaviour
                     tempP[i].ToggleRender(true, Color.white);
                 }
             }
+            else
+            {
+                map.ResetAllTiles();
+            }
         }
-
-        // 
-        ListenForControls();
     }
 
     public void PlaySFX(string c)
@@ -230,35 +271,40 @@ public class FightCTRL : MonoBehaviour
         // We must reset the tile renderings
         map.ResetAllTiles();
 
-        //// 
-        //OutputRest r = OutputRest.Calculate();
-
-        //// Calculate if Resting
-        //if (r.rest)
-        //{
-        //    fighter[turn].Rest(time);
-        //GM.turnSyncer++;
-        //    _turn++;
-        //    return;
-        //}
-
-        // Calculate the move output
-        OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
-
-        // Get the movement data
-        (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
-
         // 
-        // set all of the movement data
-        p = outp.path;
-        loc = outp.loc;
-        selLoc = outp.selLoc;
-        angleSelect = outp.angleSelect;
+        OutputStay s = OutputStay.Calculate(fighter[turn]);
 
-        // start our Coroutine of moving our fighter
-        StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
+        // Calculate if moving
+        if (s.stay)
+        {
+            // 
+            StartCoroutine(map.FIGHT(time, map, turn));
+        }
+        else
+        {
+            // Calculate the move output
+            OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
+
+            // Get the movement data
+            (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
+
+            // 
+            // set all of the movement data
+            p = outp.path;
+            loc = outp.loc;
+            selLoc = outp.selLoc;
+            angleSelect = outp.angleSelect;
+
+            // start our Coroutine of moving our fighter
+            StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
+        }
 
         // incriment the turn
         _turn++;
+    }
+
+    public void StartABattle(int who)
+    {
+        StartCoroutine(map.FIGHT(time, map, who));
     }
 }

@@ -125,27 +125,41 @@ public struct OutputAttack
     }
 }
 
-public struct OutputRest
+public struct OutputStay
 {
-    float _rest;
-    public bool rest => UnityEngine.Mathf.Round(_rest) == 1;
+    float _stay;
+    public bool stay => UnityEngine.Mathf.Round(_stay) == 0;
 
-    public OutputRest(float r)
+    public OutputStay(float r)
     {
-        _rest = r;
+        _stay = r;
     }
 
-    public static OutputRest Calculate()
+    public static OutputStay Calculate(Fighter fighter)
     {
-        float d = UnityEngine.Random.value;
+        float ret = -1;
 
-        return new OutputRest(d);
+        if (fighter.isStunned)
+        {
+            return new OutputStay(0);
+        }
+
+        // 
+        if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Zero)
+        {
+            ret = 0;
+        }
+        else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.One)
+        {
+            ret = 1;
+        }
+        else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
+        {
+            ret = UnityEngine.Random.value;
+        }
+
+        return new OutputStay(ret);
     }
-}
-
-public struct InputModule
-{
-
 }
 
 public struct StateData

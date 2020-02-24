@@ -1,4 +1,4 @@
-## v0.0.19
+## v0.0.20
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -8,9 +8,9 @@
 |Version|Date|Thing|Note
 |-|-|-|-
 |||Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
+|||Add Human Input
 |||Made a Battle UI
 |||Made a Main Menu UI|create a Haxbot, battle, train
-|||units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
 |||units no longer get stuck in corners
 |||added action camera mode
 |||Food Health now spawns on the map
@@ -26,6 +26,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.20|02.24.020|units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
 |v0.0.19|02.23.020|Added Camera Shake
 |v0.0.19|02.23.020|Added UI
 |v0.0.19|02.23.020|Added icons to make decisions clear
