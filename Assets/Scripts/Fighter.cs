@@ -23,6 +23,10 @@ public class Fighter
 
     Transform _hpHolder;
 
+    ParticleSystem _powerUp, _powerDown;
+
+    MeshRenderer _display;
+
     public StateData stateData;
 
     public int x => Mathf.RoundToInt(obj.transform.position.x);
@@ -79,6 +83,16 @@ public class Fighter
 
         // 
         _strTxt = grabTMP[2];
+
+        // 
+        _powerUp = gO.GetComponentsInChildren<ParticleSystem>()[0];
+
+        // 
+        _powerDown = gO.GetComponentsInChildren<ParticleSystem>()[1];
+
+        //
+        _display = gO.GetComponentsInChildren<MeshRenderer>()[6];
+
     }
 
     public void CheckUp(int time)
@@ -92,6 +106,9 @@ public class Fighter
 
     public void MoveTo(int time, Map map, Vector2 where)
     {
+
+        map.PlaySFX("walk");
+
         Vector3 next = new Vector3(where.x, .5f, where.y);
 
         LookAt(next);
@@ -100,7 +117,7 @@ public class Fighter
         _opp.LookAtOpponent();
 
         // 
-            map.SetCamTo(map.camMode, myTurn);
+        map.SetCamTo(map.camMode, myTurn);
     }
 
     public void Battle(int time, OutputAttack[] oA, Map map)
@@ -133,7 +150,7 @@ public class Fighter
             else if (oA[1].decision == 2)
             {
                 // opponent takes damage x2
-                _opp.TakeDmg(str*2);
+                _opp.TakeDmg(str * 2);
                 //Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
             }
         }
@@ -175,7 +192,7 @@ public class Fighter
             if (oA[1].decision == 0)
             {
                 // you take damage x2
-                TakeDmg(_opp.str*2);
+                TakeDmg(_opp.str * 2);
                 //Debug.Log($"({time}) {_opp.obj.name} crit {obj.name} for {_opp.str}*2 = HP: {hp}");
             }
             else if (oA[1].decision == 1)
@@ -199,11 +216,23 @@ public class Fighter
         _dmgTxt.color = c;
         _dmgTxt.enabled = toggle;
         _dmgTxt.text = $"{(add ? '+' : '-')}{dmg}";
+
+        if (!toggle)
+        {
+            _display.enabled = false;
+        }
     }
 
-    public void ChangeAnimation(string a)
+    public void ChangeAnimation(string a, bool display = false)
     {
         _anim.SetTrigger(a);
+
+        // 
+        if (display)
+        {
+            _display.enabled = true;
+            _display.material = a[0] == 'A' ? FightCTRL.txts[0] : a[0] == 'D' ? FightCTRL.txts[1] : FightCTRL.txts[2];
+        }
     }
 
     // 
@@ -214,8 +243,8 @@ public class Fighter
         int theX = back.x + map.halfMapSize;
         int theY = back.y + map.halfMapSize;
 
-        bool xIsOkay = theX >= 0 && theX <= map.mapSize-1;
-        bool yIsOkay = theY >= 0 && theY <= map.mapSize-1;
+        bool xIsOkay = theX >= 0 && theX <= map.mapSize - 1;
+        bool yIsOkay = theY >= 0 && theY <= map.mapSize - 1;
 
         // 
         if (xIsOkay && yIsOkay && map.loc[theX, theY].free)
@@ -238,6 +267,7 @@ public class Fighter
 
     public void PowerUp()
     {
+        _powerUp.Play();
         _str++;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
         _strTxt.text = $"{_str}";
@@ -246,6 +276,7 @@ public class Fighter
 
     public void PowerDown()
     {
+        _powerDown.Play();
         _str--;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
         _strTxt.text = $"{_str}";

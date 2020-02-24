@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-class FightCTRL : MonoBehaviour
+public class FightCTRL : MonoBehaviour
 {
     public enum Phase { Start, Battle, End };
     public static Phase phase;
@@ -17,6 +17,7 @@ class FightCTRL : MonoBehaviour
     [Range(-1, 1)]
     public float angleX = 0, angleY = 0;
     public GameObject one, two;
+    public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
 
     int _turn;
     public int turn => _turn % 2;
@@ -28,11 +29,17 @@ class FightCTRL : MonoBehaviour
     List<Tile> loc = new List<Tile>();
     TilePath p;
     Fighter[] fighter = new Fighter[2];
+    AudioSource aS;
+
+    public static Material[] txts;
 
     void Start()
     {
-        // 
-        map = new Map(levelName);
+    txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
+
+
+    // 
+    map = new Map(this, levelName);
 
         // 
         fighter[0] = new Fighter(one, 0, map.mapSize);
@@ -54,6 +61,9 @@ class FightCTRL : MonoBehaviour
 
         // 
         map.SetCamTo(Map.CamMode.Field);
+
+        // 
+        aS = gameObject.AddComponent<AudioSource>();
 
         // 
         foreach (Tile ve in map.loc)
@@ -128,17 +138,63 @@ class FightCTRL : MonoBehaviour
         ListenForControls();
     }
 
+    public void PlaySFX(string c)
+    {
+        AudioClip ac = null;
+
+        if (c == "walk")
+        {
+            ac = sfx_Walk;
+        }
+        else if (c == "draw")
+        {
+            ac = sfx_Draw;
+        }
+        else if (c == "stepback")
+        {
+            ac = sfx_StepBack;
+        }
+        else if (c == "hit")
+        {
+            ac = sfx_Hit;
+        }
+        else if (c == "def")
+        {
+            ac = sfx_Def;
+        }
+        else if (c == "crit")
+        {
+            ac = sfx_Crit;
+        }
+        else if (c == "powerup")
+        {
+            ac = sfx_PowerUp;
+        }
+        else if (c == "powerdown")
+        {
+            ac = sfx_PowerDown;
+        }
+        else if (c == "end")
+        {
+            ac = sfx_End;
+        }
+
+        aS.clip = ac;
+        aS.Play();
+    }
+
     void ListenForControls()
     {
         // 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
+            phase = Phase.Start;
             GM.turnSyncer = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         // 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && phase != Phase.End)
         {
             phase = Phase.Battle;
         }

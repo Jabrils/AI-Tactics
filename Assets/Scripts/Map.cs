@@ -17,6 +17,8 @@ public class Map
     Dictionary<int, string> battleDecLookUp = new Dictionary<int, string> { { 0, "Attack" }, { 1, "Defend" }, { 2, "Taunt" }, };
     Vector3 zoomUnit = new Vector3(2, 5, 2.5f);
     public float zoom = 1f;
+    FightCTRL fC;
+    CameraShake camShake;
 
     public enum CamMode { Field, Topdown, Free, Isometric };
     public CamMode camMode;
@@ -37,8 +39,10 @@ public class Map
         InitLocations();
     }
 
-    public Map(string path)
+    public Map(FightCTRL fc, string path)
     {
+        fC = fc;
+
         MapInit();
 
         LoadLeveData(path);
@@ -46,6 +50,7 @@ public class Map
 
     void MapInit()
     {
+        camShake = Camera.main.GetComponent<CameraShake>();
         GM.tilesParent = new GameObject("Tiles").transform;
     }
 
@@ -385,10 +390,11 @@ public class Map
                 if (did[0] != -1)
                 {
                     yield return new WaitForSeconds(1);
+                    fC.PlaySFX("draw");
 
                     // change the animation to reveal battle results
-                    fighter[who].ChangeAnimation(battleDecLookUp[did[0]]);
-                    fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]]);
+                    fighter[who].ChangeAnimation(battleDecLookUp[did[0]], true);
+                    fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]], true);
 
                     yield return new WaitForSeconds(2);
 
@@ -399,6 +405,38 @@ public class Map
 
                 // result the battle
                 fighter[who].Battle(time, oA, map);
+
+                string sfx = "";
+
+                if (oA[0].decision == 1 && oA[1].decision == 1)
+                {
+                    sfx = "stepback";
+                }
+                else if (oA[0].decision + oA[1].decision == 0)
+                {
+                    sfx = "hit";
+                    camShake.ShakeCamera(.5f);
+                }
+                else if (oA[0].decision + oA[1].decision == 1)
+                {
+                    sfx = "def";
+                    camShake.ShakeCamera(.25f);
+                }
+                else if (oA[0].decision + oA[1].decision == 2)
+                {
+                    sfx = "crit";
+                    camShake.ShakeCamera();
+                }
+                else if (oA[0].decision + oA[1].decision == 3)
+                {
+                    sfx = "powerup";
+                }
+                else if (oA[0].decision + oA[1].decision == 4)
+                {
+                    sfx = "powerdown";
+                }
+
+                fC.PlaySFX(sfx);
 
                 yield return new WaitForSeconds(2);
 
@@ -423,6 +461,8 @@ public class Map
         // 
         if (lost[0] || lost[1])
         {
+            PlaySFX("end");
+
             FightCTRL.phase = FightCTRL.Phase.End;
 
             // 
@@ -454,6 +494,11 @@ public class Map
         // 
         GM.turnSyncer++;
 
+    }
+
+    public void PlaySFX(string sfx)
+    {
+        fC.PlaySFX(sfx);
     }
 
     TilePath PathFinder(int _fX, int _fY, int _tX, int _tY)

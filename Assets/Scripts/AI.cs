@@ -143,6 +143,11 @@ public struct OutputRest
     }
 }
 
+public struct InputModule
+{
+
+}
+
 public struct StateData
 {
     public StateData(int turn, Fighter me, Fighter opp)

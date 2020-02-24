@@ -1,4 +1,4 @@
-## v0.0.18
+## v0.0.19
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,28 +7,39 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added poweup animation
-|||Made a Battle UI
-|||Made a Main Menu UI
 |||Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
+|||Made a Battle UI
+|||Made a Main Menu UI|create a Haxbot, battle, train
 |||units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
-|||Added walking sfx
-|||Added hit sfx
-|||fixed level loader to read it properly
-|||Added icons to make decisions clear
-|||Added UI
-|||Added audience to stans
-|||model a few skins
 |||units no longer get stuck in corners
 |||added action camera mode
-|||model new coleseum
-|||optimize
 |||Food Health now spawns on the map
+
+### Feature Creep
 |||Maybe add like a special attack
+|||optimize
+|||fixed level loader to read it properly
+|||Added audience to stans
+|||model a few skins
+|||model new coleseum
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.19|02.23.020|Added Camera Shake
+|v0.0.19|02.23.020|Added UI
+|v0.0.19|02.23.020|Added icons to make decisions clear
+|v0.0.19|02.23.020|Added Sword
+|v0.0.19|02.23.020|Added Shield
+|v0.0.19|02.23.020|Added walking sfx
+|v0.0.19|02.23.020|Added hit sfx
+|v0.0.19|02.23.020|Added crit sfx
+|v0.0.19|02.23.020|Added def sfx
+|v0.0.19|02.23.020|Added step back sfx
+|v0.0.19|02.23.020|Added power up sfx
+|v0.0.19|02.23.020|Added power down sfx
+|v0.0.19|02.23.020|Added hit sfx
+|v0.0.19|02.23.020|Added poweup animation
 |v0.0.18|02.22.020|added topdown camera mode
 |v0.0.18|02.22.020|visualized stunned
 |v0.0.18|02.22.020|visualized strength
