@@ -1,4 +1,4 @@
-## v0.0.20
+## v0.0.21
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,13 +7,12 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
 |||Add Human Input
+|||added action camera mode
+|||Food Health now spawns on the map|now important that the AI learns this, but expert AI if so
 |||Made a Battle UI
 |||Made a Main Menu UI|create a Haxbot, battle, train
 |||units no longer get stuck in corners
-|||added action camera mode
-|||Food Health now spawns on the map
 
 ### Feature Creep
 |||Maybe add like a special attack
@@ -26,7 +25,8 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
-|v0.0.20|02.24.020|units can now choose the same spot they were already on.|(maybe,think about this, can enable AI to never move if smart enough)
+|v0.0.21|02.24.020|Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects
+|v0.0.20|02.24.020|units can now choose the same spot they were already on.|(maybe, think about this, can enable AI to never move if smart enough)
 |v0.0.19|02.23.020|Added Camera Shake
 |v0.0.19|02.23.020|Added UI
 |v0.0.19|02.23.020|Added icons to make decisions clear

@@ -39,7 +39,7 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
-        GM.inpType[0] = InputType.P1;
+        //GM.inpType[0] = InputType.P1;
         //GM.inpType[1] = InputType.Zero;
 
         for (int i = 0; i < GM.inpType.Length; i++)
@@ -92,12 +92,14 @@ public class FightCTRL : MonoBehaviour
                 {
                     g = Instantiate(Resources.Load<GameObject>("Objs/Pillar"));
                     g.transform.position = new Vector3(ve.x - map.halfMapSize, .5f, ve.y - map.halfMapSize);
+                    g.transform.tag = "Tile Dressing";
                 }
                 else if (ve.type == 'w')
                 {
                     g = Instantiate(Resources.Load<GameObject>("Objs/Wall"));
                     g.transform.localScale = new Vector3(1, 2, 1);
                     g.transform.position = new Vector3(ve.x - map.halfMapSize, 1.5f, ve.y - map.halfMapSize);
+                    g.transform.tag = "Tile Dressing";
                 }
 
                 // 
@@ -277,7 +279,6 @@ public class FightCTRL : MonoBehaviour
         // Calculate if moving
         if (s.stay)
         {
-            // 
             StartCoroutine(map.FIGHT(time, map, turn));
         }
         else
@@ -288,7 +289,6 @@ public class FightCTRL : MonoBehaviour
             // Get the movement data
             (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
 
-            // 
             // set all of the movement data
             p = outp.path;
             loc = outp.loc;

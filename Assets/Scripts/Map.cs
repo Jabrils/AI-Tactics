@@ -342,6 +342,12 @@ public class Map
 
     public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, float speed, TilePath tp)
     {
+        // !!! !!! !!!
+        while (!Input.GetKeyDown(KeyCode.A))
+        {
+            yield return null;
+        }
+
         // 
         if (canMove)
         {
@@ -371,7 +377,9 @@ public class Map
     }
 
     public IEnumerator FIGHT(int time, Map map, int who)
-    { 
+    {
+        Collider[] col = null;
+
         // 
         if (fighter[who].inAttackRange)
         {
@@ -383,6 +391,17 @@ public class Map
             // 
             if (oB.decision > .5f)
             {
+                // 
+                col = Physics.OverlapSphere((fighter[who].obj.transform.position + fighter[who].opp.obj.transform.position)/2, 1.5f);
+
+                // 
+                foreach (Collider c in col)
+                {
+                    if (c.tag == "Tile Dressing")
+                    {
+                        c.gameObject.SetActive(false);
+                    }
+                }
                 // pass in state, output 1 2 or 3
                 OutputAttack oA1 = OutputAttack.CalculateOutput(fighter[who].isStunned, fighter[who].stateData);
 
@@ -501,6 +520,19 @@ public class Map
 
         // 
         GM.turnSyncer++;
+
+        // 
+        if (col != null)
+        {
+            foreach (Collider c in col)
+            {
+                if (c.tag == "Tile Dressing")
+                {
+                    c.gameObject.SetActive(true);
+                }
+            }
+        }
+
         fC.areInBattle = false;
     }
 
