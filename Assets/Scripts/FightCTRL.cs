@@ -25,12 +25,14 @@ public class FightCTRL : MonoBehaviour
 
     int _turn;
     public int turn => _turn % 2;
+    public int gmTurn => GM.turnSyncer % 2;
     public int time => _turn;
+    public bool aHumanIsInvolved => humansInvolved[0] || humansInvolved[1];
 
     Map map;
     Fighter[] fighter = new Fighter[2];
     AudioSource aS;
-    Loc outp;
+    Loc[] outp = new Loc[2];
 
     float p_D = -1, p_aX = -1, p_aY = -1;
 
@@ -38,7 +40,7 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
-        GM.inpType[1] = InputType.P1;
+        GM.inpType[0] = InputType.P1;
         //GM.inpType[1] = InputType.Zero;
 
         humansInvolved = new bool[2];
@@ -51,9 +53,6 @@ public class FightCTRL : MonoBehaviour
                 humansInvolved[i] = true;
             }
         }
-
-        // 
-        print($"{humansInvolved[0]} - {humansInvolved[1]}");
 
         // 
         txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
@@ -84,6 +83,12 @@ public class FightCTRL : MonoBehaviour
 
         // 
         aS = gameObject.AddComponent<AudioSource>();
+
+        // 
+        for (int i = 0; i < 2; i++)
+        {
+            outp[i] = Map.OutputLocation(map, fighter[i].expression, fighter[i == 0 ? 1 : 0].expression, dist, angleX, angleY);
+        }
 
         // 
         foreach (Tile ve in map.loc)
@@ -139,28 +144,28 @@ public class FightCTRL : MonoBehaviour
         TakeTurn();
 
         // 
-        if (outp.path != null)
+        if (outp[gmTurn].path != null)
         {
-            List<Tile> tempP = new List<Tile>(outp.path.path);
+            List<Tile> tempP = new List<Tile>(outp[gmTurn].path.path);
 
             // 
             if (!areInBattle)
             {
                 // 
-                for (int i = 0; i < outp.loc.Count; i++)
+                for (int i = 0; i < outp[gmTurn].loc.Count; i++)
                 {
-                    outp.loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
+                    outp[gmTurn].loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
                 }
 
                 // 
-                for (int i = 0; i < outp.selLoc.Count; i++)
+                for (int i = 0; i < outp[gmTurn].selLoc.Count; i++)
                 {
-                    outp.selLoc[i].ToggleRender(true, i == outp.angleSelect ? Color.yellow : Color.cyan);
+                    outp[gmTurn].selLoc[i].ToggleRender(true, i == outp[gmTurn].angleSelect ? Color.yellow : Color.cyan);
 
                     // 
-                    if (i == outp.angleSelect)
+                    if (i == outp[gmTurn].angleSelect)
                     {
-                        tempP.Remove(outp.selLoc[i]);
+                        tempP.Remove(outp[gmTurn].selLoc[i]);
                     }
                 }
 
@@ -270,12 +275,15 @@ public class FightCTRL : MonoBehaviour
         map.ResetAllTiles();
 
         // 
+        print(outp[turn]);
+
+        // 
         if (humansInvolved[turn])
         {
             if (p_D != dist || p_aX != angleX || p_aY != angleY)
             {
                 // Get the movement data
-                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY);
+                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY);
                 p_D = dist;
                 p_aX = angleX;
                 p_aY = angleY;
@@ -285,7 +293,7 @@ public class FightCTRL : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A))
             {
                 // start our Coroutine of moving our fighter
-                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, outp.path));
+                StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
 
                 // incriment the turn
                 _turn++;
@@ -300,6 +308,10 @@ public class FightCTRL : MonoBehaviour
 
                 // incriment the turn
                 _turn++;
+
+                p_D = -1;
+                p_aY = -1;
+                p_aX = -1;
             }
         }
         else
@@ -318,15 +330,14 @@ public class FightCTRL : MonoBehaviour
             }
             else
             {
-
                 // Calculate the move output
                 OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
 
                 // Get the movement data
-                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : 0, m.angleX, m.angleY);
+                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : 0, m.angleX, m.angleY);
 
                 // start our Coroutine of moving our fighter
-                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, outp.path));
+                StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
 
                 // incriment the turn
                 _turn++;

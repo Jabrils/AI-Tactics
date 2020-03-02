@@ -379,91 +379,107 @@ public class Map
         {
             fC.areInBattle = true;
 
-            // 
-            OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
+            if (map.fC.aHumanIsInvolved)
+            {
+                // use left & right to select, action to make choice
 
-            // 
-            if (oB.decision > .5f)
+                while (!Input.GetKeyDown(KeyCode.A))
+                {
+                    if (Input.GetKeyDown(KeyCode.Y))
+                    {
+                        Debug.Log("Y");
+                    }
+
+                    Debug.Log("Press A");
+                    yield return null;
+                }
+
+                // Nothing
+                // Attack
+                // Defend
+                // Taunt
+
+                // have to calculate run this for both users
+            }
+            else
             {
                 // 
-                col = Physics.OverlapSphere((fighter[who].obj.transform.position + fighter[who].opp.obj.transform.position)/2, 1.5f);
+                OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
 
                 // 
-                foreach (Collider c in col)
+                if (oB.decision > .5f)
                 {
-                    if (c.tag == "Tile Dressing")
+                    col = DisableNearbyObstacles(who);
+
+                    // pass in state, output 1 2 or 3
+                    OutputAttack oA1 = OutputAttack.CalculateOutput(fighter[who].isStunned, fighter[who].stateData);
+
+                    // ask opp for their battle output
+                    OutputAttack oA2 = OutputAttack.CalculateOutput(fighter[who].opp.isStunned, fighter[who].opp.stateData);
+
+                    OutputAttack[] oA = new OutputAttack[] { oA1, oA2 };
+
+                    int[] did = new int[] { oA[0].decision, oA[1].decision };
+
+                    // 
+                    if (did[0] != -1)
                     {
-                        c.gameObject.SetActive(false);
+                        yield return new WaitForSeconds(1);
+                        fC.PlaySFX("draw");
+
+                        // change the animation to reveal battle results
+                        fighter[who].ChangeAnimation(battleDecLookUp[did[0]], true);
+                        fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]], true);
+
+                        yield return new WaitForSeconds(2);
+
+                        // idle animation the bots
+                        fighter[who].ChangeAnimation("Idle");
+                        fighter[who].opp.ChangeAnimation("Idle");
                     }
-                }
-                // pass in state, output 1 2 or 3
-                OutputAttack oA1 = OutputAttack.CalculateOutput(fighter[who].isStunned, fighter[who].stateData);
 
-                // ask opp for their battle output
-                OutputAttack oA2 = OutputAttack.CalculateOutput(fighter[who].opp.isStunned, fighter[who].opp.stateData);
+                    // result the battle
+                    fighter[who].Battle(time, oA, map);
 
-                OutputAttack[] oA = new OutputAttack[] { oA1, oA2 };
+                    string sfx = "";
 
-                int[] did = new int[] { oA[0].decision, oA[1].decision };
+                    if (oA[0].decision == 1 && oA[1].decision == 1)
+                    {
+                        sfx = "stepback";
+                    }
+                    else if (oA[0].decision + oA[1].decision == 0)
+                    {
+                        sfx = "hit";
+                        camShake.ShakeCamera(.5f);
+                    }
+                    else if (oA[0].decision + oA[1].decision == 1)
+                    {
+                        sfx = "def";
+                        camShake.ShakeCamera(.25f);
+                    }
+                    else if (oA[0].decision + oA[1].decision == 2)
+                    {
+                        sfx = "crit";
+                        camShake.ShakeCamera();
+                    }
+                    else if (oA[0].decision + oA[1].decision == 3)
+                    {
+                        sfx = "powerup";
+                    }
+                    else if (oA[0].decision + oA[1].decision == 4)
+                    {
+                        sfx = "powerdown";
+                    }
 
-                // 
-                if (did[0] != -1)
-                {
-                    yield return new WaitForSeconds(1);
-                    fC.PlaySFX("draw");
-
-                    // change the animation to reveal battle results
-                    fighter[who].ChangeAnimation(battleDecLookUp[did[0]], true);
-                    fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]], true);
+                    fC.PlaySFX(sfx);
 
                     yield return new WaitForSeconds(2);
 
-                    // idle animation the bots
-                    fighter[who].ChangeAnimation("Idle");
-                    fighter[who].opp.ChangeAnimation("Idle");
-                }
+                    // remove the damage from showing over the heads
+                    fighter[who].SetText(false, Color.clear);
+                    fighter[who].opp.SetText(false, Color.clear);
 
-                // result the battle
-                fighter[who].Battle(time, oA, map);
-
-                string sfx = "";
-
-                if (oA[0].decision == 1 && oA[1].decision == 1)
-                {
-                    sfx = "stepback";
                 }
-                else if (oA[0].decision + oA[1].decision == 0)
-                {
-                    sfx = "hit";
-                    camShake.ShakeCamera(.5f);
-                }
-                else if (oA[0].decision + oA[1].decision == 1)
-                {
-                    sfx = "def";
-                    camShake.ShakeCamera(.25f);
-                }
-                else if (oA[0].decision + oA[1].decision == 2)
-                {
-                    sfx = "crit";
-                    camShake.ShakeCamera();
-                }
-                else if (oA[0].decision + oA[1].decision == 3)
-                {
-                    sfx = "powerup";
-                }
-                else if (oA[0].decision + oA[1].decision == 4)
-                {
-                    sfx = "powerdown";
-                }
-
-                fC.PlaySFX(sfx);
-
-                yield return new WaitForSeconds(2);
-
-                // remove the damage from showing over the heads
-                fighter[who].SetText(false, Color.clear);
-                fighter[who].opp.SetText(false, Color.clear);
-
             }
         }
 
@@ -528,6 +544,23 @@ public class Map
         }
 
         fC.areInBattle = false;
+    }
+
+    private Collider[] DisableNearbyObstacles(int who)
+    {
+        // 
+        Collider[] col = Physics.OverlapSphere((fighter[who].obj.transform.position + fighter[who].opp.obj.transform.position) / 2, 1.5f);
+
+        // 
+        foreach (Collider c in col)
+        {
+            if (c.tag == "Tile Dressing")
+            {
+                c.gameObject.SetActive(false);
+            }
+        }
+
+        return col;
     }
 
     public void PlaySFX(string sfx)
