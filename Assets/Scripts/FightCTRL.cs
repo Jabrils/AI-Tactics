@@ -280,31 +280,59 @@ public class FightCTRL : MonoBehaviour
         if (s.stay)
         {
             StartCoroutine(map.FIGHT(time, map, turn));
+
+            // incriment the turn
+            _turn++;
         }
         else
         {
-            // Calculate the move output
-            OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
+            if (humansInvolved)
+            {
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                }
+            }
+            else
+            {
+                // Calculate the move output
+                OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
 
-            // Get the movement data
-            (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
+                // Get the movement data
+                Loc outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
 
-            // set all of the movement data
-            p = outp.path;
-            loc = outp.loc;
-            selLoc = outp.selLoc;
-            angleSelect = outp.angleSelect;
+                // set all of the movement data
+                p = outp.path;
+                loc = outp.loc;
+                selLoc = outp.selLoc;
+                angleSelect = outp.angleSelect;
 
-            // start our Coroutine of moving our fighter
-            StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
+                // start our Coroutine of moving our fighter
+                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
+
+                // incriment the turn
+                _turn++;
+            }
         }
-
-        // incriment the turn
-        _turn++;
     }
 
     public void StartABattle(int who)
     {
         StartCoroutine(map.FIGHT(time, map, who));
+    }
+}
+
+public class Loc
+{
+    public List<Tile> loc;
+    public List<Tile> selLoc;
+    public TilePath path;
+    public int angleSelect;
+
+    public Loc (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect)
+    {
+        this.loc = loc;
+        this.selLoc = selLoc;
+        this.path = path;
+        this.angleSelect = angleSelect;
     }
 }

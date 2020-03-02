@@ -277,7 +277,7 @@ public class Map
         }
     }
 
-    public static (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) OutputLocation(Map map, Vector2Int self, Vector2Int opponent, float dist, float angleX, float angleY)
+    public static Loc OutputLocation(Map map, Vector2Int self, Vector2Int opponent, float dist, float angleX, float angleY)
     {
         // reset our selPos list every frame, this allows us to make changes to it
         List<Tile> selLoc = new List<Tile>();
@@ -337,17 +337,11 @@ public class Map
             p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
         }
 
-        return (loc, selLoc, p, angleSelect);
+        return new Loc(loc, selLoc, p, angleSelect);
     }
 
     public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, float speed, TilePath tp)
     {
-        // !!! !!! !!!
-        while (!Input.GetKeyDown(KeyCode.A))
-        {
-            yield return null;
-        }
-
         // 
         if (canMove)
         {

@@ -28,7 +28,7 @@ public class lMove_Concept : MonoBehaviour
 
     void Update()
     {
-        (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect) outp = Map.OutputLocation(map, good, bad, dist, angleX, angleY);
+        Loc outp = Map.OutputLocation(map, good, bad, dist, angleX, angleY);
 
         p = outp.path;
         loc = outp.loc;

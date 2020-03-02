@@ -1,4 +1,4 @@
-## v0.0.21
+## v0.0.22
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
