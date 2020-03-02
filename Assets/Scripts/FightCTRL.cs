@@ -21,7 +21,7 @@ public class FightCTRL : MonoBehaviour
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
     public bool areInBattle;
-    public bool humansInvolved;
+    public bool[] humansInvolved;
 
     int _turn;
     public int turn => _turn % 2;
@@ -32,21 +32,30 @@ public class FightCTRL : MonoBehaviour
     AudioSource aS;
     Loc outp;
 
+    float p_D = -1, p_aX = -1, p_aY = -1;
+
     public static Material[] txts;
 
     void Start()
     {
-        //GM.inpType[0] = InputType.P1;
+        GM.inpType[1] = InputType.P1;
         //GM.inpType[1] = InputType.Zero;
 
+        humansInvolved = new bool[2];
+
+        // 
         for (int i = 0; i < GM.inpType.Length; i++)
         {
             if (GM.inpType[i] == InputType.P1 || GM.inpType[i] == InputType.P2)
             {
-                humansInvolved = true;
+                humansInvolved[i] = true;
             }
         }
 
+        // 
+        print($"{humansInvolved[0]} - {humansInvolved[1]}");
+
+        // 
         txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
 
         // 
@@ -117,17 +126,7 @@ public class FightCTRL : MonoBehaviour
             // 
             if (_turn == GM.turnSyncer)
             {
-                if (humansInvolved)
-                {
-                    if (Input.GetKeyDown(KeyCode.O))
-                    {
-                        ProcessTurn();
-                    }
-                }
-                else
-                {
-                    ProcessTurn();
-                }
+                ProcessTurn();
             }
         }
 
@@ -271,31 +270,60 @@ public class FightCTRL : MonoBehaviour
         map.ResetAllTiles();
 
         // 
-        OutputStay s = OutputStay.Calculate(fighter[turn]);
-
-        // Calculate if moving
-        if (s.stay)
+        if (humansInvolved[turn])
         {
-            StartCoroutine(map.FIGHT(time, map, turn));
+            if (p_D != dist || p_aX != angleX || p_aY != angleY)
+            {
+                // Get the movement data
+                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY);
+                p_D = dist;
+                p_aX = angleX;
+                p_aY = angleY;
+            }
 
-            // incriment the turn
-            _turn++;
+            // 
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                // start our Coroutine of moving our fighter
+                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, outp.path));
+
+                // incriment the turn
+                _turn++;
+
+                p_D = -1;
+                p_aY = -1;
+                p_aX = -1;
+            }
+            else if(Input.GetKeyDown(KeyCode.B))
+            {
+                StartCoroutine(map.FIGHT(time, map, turn));
+
+                // incriment the turn
+                _turn++;
+            }
         }
         else
         {
-            if (humansInvolved)
+            // 
+            OutputStay s = OutputStay.Calculate(fighter[turn]);
+
+            // Calculate if moving
+            if (s.stay)
             {
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                }
+                StartCoroutine(map.FIGHT(time, map, turn));
+
+                // incriment the turn
+                _turn++;
+                print("ENTER1");
             }
             else
             {
+
                 // Calculate the move output
                 OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
 
                 // Get the movement data
-                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
+                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : 0, m.angleX, m.angleY);
 
                 // start our Coroutine of moving our fighter
                 StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, outp.path));
@@ -319,7 +347,7 @@ public class Loc
     public TilePath path;
     public int angleSelect;
 
-    public Loc (List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect)
+    public Loc(List<Tile> loc, List<Tile> selLoc, TilePath path, int angleSelect)
     {
         this.loc = loc;
         this.selLoc = selLoc;
