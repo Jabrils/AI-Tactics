@@ -27,13 +27,10 @@ public class FightCTRL : MonoBehaviour
     public int turn => _turn % 2;
     public int time => _turn;
 
-    int angleSelect;
     Map map;
-    List<Tile> selLoc = new List<Tile>();
-    List<Tile> loc = new List<Tile>();
-    TilePath p;
     Fighter[] fighter = new Fighter[2];
     AudioSource aS;
+    Loc outp;
 
     public static Material[] txts;
 
@@ -143,28 +140,28 @@ public class FightCTRL : MonoBehaviour
         TakeTurn();
 
         // 
-        if (p != null)
+        if (outp.path != null)
         {
-            List<Tile> tempP = new List<Tile>(p.path);
+            List<Tile> tempP = new List<Tile>(outp.path.path);
 
             // 
             if (!areInBattle)
             {
                 // 
-                for (int i = 0; i < loc.Count; i++)
+                for (int i = 0; i < outp.loc.Count; i++)
                 {
-                    loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
+                    outp.loc[i].ToggleRender(true, (Color.blue + Color.red) / 2);
                 }
 
                 // 
-                for (int i = 0; i < selLoc.Count; i++)
+                for (int i = 0; i < outp.selLoc.Count; i++)
                 {
-                    selLoc[i].ToggleRender(true, i == angleSelect ? Color.yellow : Color.cyan);
+                    outp.selLoc[i].ToggleRender(true, i == outp.angleSelect ? Color.yellow : Color.cyan);
 
                     // 
-                    if (i == angleSelect)
+                    if (i == outp.angleSelect)
                     {
-                        tempP.Remove(selLoc[i]);
+                        tempP.Remove(outp.selLoc[i]);
                     }
                 }
 
@@ -298,16 +295,10 @@ public class FightCTRL : MonoBehaviour
                 OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
 
                 // Get the movement data
-                Loc outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
-
-                // set all of the movement data
-                p = outp.path;
-                loc = outp.loc;
-                selLoc = outp.selLoc;
-                angleSelect = outp.angleSelect;
+                outp = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : dist, m.angleX, m.angleY);
 
                 // start our Coroutine of moving our fighter
-                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, p));
+                StartCoroutine(map.MoveFighter(time, outp.loc.Count > 0, map, turn, GM.battleSpd, outp.path));
 
                 // incriment the turn
                 _turn++;
