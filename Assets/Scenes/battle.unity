@@ -5109,7 +5109,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 1
+  orthographic: 0
   orthographic size: 15
   m_Depth: -1
   m_CullingMask:
@@ -15071,7 +15071,6 @@ MonoBehaviour:
   sfx_PowerDown: {fileID: 8300000, guid: 70aefca43cae98149be48aa34aa0c337, type: 3}
   sfx_End: {fileID: 8300000, guid: 0f0d3fb2c00ac7749a6c34fa61d3fcff, type: 3}
   areInBattle: 0
-  humansInvolved: 0
 --- !u!4 &933027087
 Transform:
   m_ObjectHideFlags: 0

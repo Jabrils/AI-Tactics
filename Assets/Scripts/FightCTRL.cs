@@ -259,6 +259,12 @@ public class FightCTRL : MonoBehaviour
         {
             map.SetCamTo(Map.CamMode.Isometric);
         }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            map.SetCamTo(Map.CamMode.Action);
+        }
     }
 
     void TakeTurn()
@@ -286,7 +292,7 @@ public class FightCTRL : MonoBehaviour
             }
 
             // 
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 // start our Coroutine of moving our fighter
                 StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
@@ -298,7 +304,7 @@ public class FightCTRL : MonoBehaviour
                 p_aY = -1;
                 p_aX = -1;
             }
-            else if(Input.GetKeyDown(KeyCode.B))
+            else if(Input.GetKeyDown(KeyCode.Backspace))
             {
                 StartCoroutine(map.FIGHT(time, map, turn));
 

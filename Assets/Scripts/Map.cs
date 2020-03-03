@@ -94,7 +94,17 @@ public class Map
         }
         else if (c == CamMode.Action)
         {
-            // do action stuff
+            Vector3 p = fighter[who].obj.transform.position;
+            Vector3 o = fighter[who].opp.obj.transform.position;
+
+            Vector3 add = (fC.areInBattle ? fighter[who].obj.transform.right : Vector3.zero);
+
+            cam.transform.position = p + (p-o).normalized + Vector3.up + add;
+            cam.transform.LookAt(fighter[who].opp.obj.transform);
+            cam.orthographic = false;
+            cam.fieldOfView = (fC.areInBattle ? 45 : 60);
+
+            camMode = CamMode.Action;
         }
     }
 
@@ -330,12 +340,6 @@ public class Map
 
             // 
             angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
-
-            // 
-            // // 
-            // // // THROWING ERRORS IF AGENT CAN'T MOVE
-            // //
-            // 
 
             // 
             p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
