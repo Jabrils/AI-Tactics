@@ -18,7 +18,7 @@ static class GM
     public static int maxStr = 20;
     public static FightCTRL.InputType[] inpType = new FightCTRL.InputType[2];
     public static string platform = "Steam";
-
+    public static KeyCode[][] kc = new KeyCode[][] { new KeyCode[] { KeyCode.BackQuote, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3 }, new KeyCode[] { KeyCode.Alpha8, KeyCode.Alpha9, KeyCode.Alpha0, KeyCode.Minus } };
 
     public static float XYtoDeg(float x, float y)
     {

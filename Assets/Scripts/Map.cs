@@ -20,7 +20,7 @@ public class Map
     FightCTRL fC;
     CameraShake camShake;
 
-    public enum CamMode { Field, Topdown, Free, Isometric };
+    public enum CamMode { Field, Topdown, Free, Isometric, Action };
     public CamMode camMode;
 
     Tile current;
@@ -91,6 +91,10 @@ public class Map
             cam.orthographic = false;
 
             camMode = CamMode.Isometric;
+        }
+        else if (c == CamMode.Action)
+        {
+            // do action stuff
         }
     }
 
@@ -392,57 +396,56 @@ public class Map
             // create an array of output attack structs to calculate later for battle
             OutputAttack[] oA = new OutputAttack[] { new OutputAttack(), new OutputAttack() };
 
-            // check if any humans are involved on P1, or P2. (This part is a bit sloppy because I am stitching it in without thinking of its design from the beginning, stupid me)
-            if (map.fC.aHumanIsInvolved)
-            {
-                // set our chosen an answer ref to false
-                bool chosenAnAnswer = false;
+            // set our chosen an answer ref to false
+            bool[] chosenAnAnswer = new bool[2];
 
-                // while we have not chosen an answer, loop through this
-                while (!chosenAnAnswer)
+            // check if any humans are involved on P1, or P2. (This part is a bit sloppy because I am stitching it in without thinking of its design from the beginning, stupid me)
+            for (int i = 0; i < 2; i++)
+            {
+                if (!fC.humansInvolved[i])
+                {
+                    oA[i] = OutputAttack.CalculateOutput(fighter[i].isStunned, fighter[i].stateData);
+                    chosenAnAnswer[i] = true;
+                }
+            }
+
+            // while we have not chosen an answer, loop through this
+            while (!chosenAnAnswer[0] || !chosenAnAnswer[1])
+            {
+                for (int i = 0; i < 2; i++)
                 {
                     // first check for player 1 if they are attacking, & THEN if they have pressed their action 0 button
-                    if (amAttacking[0] && Input.GetKeyDown(KeyCode.Alpha0))
+                    if (amAttacking[i] && Input.GetKeyDown(GM.kc[i][0]))
                     {
-                        chosenAnAnswer = true;
+                        chosenAnAnswer[0] = true;
+                        chosenAnAnswer[1] = true;
                         desiresFighting = false;
                     }
                     // else if they have pressed their action 1 button, register that they want to attack
-                    else if (Input.GetKeyDown(KeyCode.Alpha1))
+                    else if (Input.GetKeyDown(GM.kc[i][1]))
                     {
-                        oA[0] = OutputAttack.ForceOutput(0);
-                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+                        oA[i] = OutputAttack.ForceOutput(0);
 
-                        chosenAnAnswer = true;
+                        chosenAnAnswer[i] = true;
                     }
                     // else if they have pressed their action 2 button, register that they want to defend
-                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    else if (Input.GetKeyDown(GM.kc[i][2]))
                     {
-                        oA[0] = OutputAttack.ForceOutput(1);
-                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+                        oA[i] = OutputAttack.ForceOutput(1);
 
-                        chosenAnAnswer = true;
+                        chosenAnAnswer[i] = true;
                     }
                     // else if they have pressed their action 3 button, register that they want to taunt
-                    else if (Input.GetKeyDown(KeyCode.Alpha3))
+                    else if (Input.GetKeyDown(GM.kc[i][3]))
                     {
-                        oA[0] = OutputAttack.ForceOutput(2);
-                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+                        oA[i] = OutputAttack.ForceOutput(2);
 
-                        chosenAnAnswer = true;
+                        chosenAnAnswer[i] = true;
                     }
-
-                    // this keeps the while loop going for a Ienumerator
-                    yield return null;
                 }
-            }
-            else // else if no humans are involved
-            {
-                // calculate the output for player 1
-                oA[0] = OutputAttack.CalculateOutput(fighter[0].isStunned, fighter[0].stateData);
 
-                // calculate the output for player 2
-                oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+                // this keeps the while loop going for a Ienumerator
+                yield return null;
             }
 
             // 
@@ -452,6 +455,9 @@ public class Map
             // if the human desires to fight
             if (desiresFighting)
             {
+                // Set camera to turnee
+                map.SetCamTo(map.camMode, who);
+
                 // disable nearby obstacles & store them into an array
                 col = DisableNearbyObstacles();
 
@@ -590,6 +596,16 @@ public class Map
 
         // incriment the global turn
         GM.turnSyncer++;
+
+        // add in some cinematic waiting
+        yield return new WaitForSeconds(.25f);
+
+        // if turnee is human
+        if (fC.humansInvolved[fC.turn])
+        {
+            // set the camera to the current turnee. Otherwise if the AI isn't walking or fighting, we don't care
+            map.SetCamTo(map.camMode, fC.turn);
+        }
     }
 
     void EnableNearbyObstacles(Collider[] col)

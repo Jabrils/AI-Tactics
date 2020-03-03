@@ -8,7 +8,7 @@ public class FightCTRL : MonoBehaviour
     public enum Phase { Start, Battle, End };
     public static Phase phase;
 
-    public enum InputType { Random, Zero, One, DummyAI, P1, P2 };
+    public enum InputType { Random, Zero, One, DummyAI, Human };
 
     public string levelName;
     public int mMoves = 5;
@@ -21,7 +21,6 @@ public class FightCTRL : MonoBehaviour
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
     public bool areInBattle;
-    public bool[] humansInvolved;
 
     int _turn;
     public int turn => _turn % 2;
@@ -35,20 +34,20 @@ public class FightCTRL : MonoBehaviour
     Loc[] outp = new Loc[2];
 
     float p_D = -1, p_aX = -1, p_aY = -1;
+    bool[] _humansInvolved = new bool[2];
+    public bool[] humansInvolved => _humansInvolved;
 
     public static Material[] txts;
 
     void Start()
     {
-        GM.inpType[0] = InputType.P1;
-        //GM.inpType[1] = InputType.Zero;
-
-        humansInvolved = new bool[2];
+        //GM.inpType[0] = InputType.Human;
+        //GM.inpType[1] = InputType.Human;
 
         // 
         for (int i = 0; i < GM.inpType.Length; i++)
         {
-            if (GM.inpType[i] == InputType.P1 || GM.inpType[i] == InputType.P2)
+            if (GM.inpType[i] == InputType.Human)
             {
                 humansInvolved[i] = true;
             }
