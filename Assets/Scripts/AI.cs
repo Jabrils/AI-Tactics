@@ -107,6 +107,15 @@ public struct OutputAttack
         return new OutputAttack(a, d, t);
     }
 
+    public static OutputAttack ForceOutput(int w)
+    {
+        float[] ret = new float[3];
+
+        ret[w] = 1;
+
+        return new OutputAttack(ret[0], ret[1], ret[2]);
+    }
+
     int Decision()
     {
         int ret = 0;

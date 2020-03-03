@@ -372,166 +372,228 @@ public class Map
 
     public IEnumerator FIGHT(int time, Map map, int who)
     {
+        // we need a ref to col, because this is going to store all of the blocks that we are going to disable during battle
         Collider[] col = null;
 
-        // 
-        if (fighter[who].inAttackRange)
+        // this is only for human inputs, if a human desires fighting or not, we want to ask it along side att, def, & tnt
+        bool desiresFighting = true;
+
+        Fighter attacker = fighter[who];
+
+        // We need to check if the attacker is in range
+        if (attacker.inAttackRange)
         {
+            // figure out who is attacking, player 1 or 2 simply by checking if who == 0 or 1
+            bool[] amAttacking = new bool[] { who == 0, who == 1 };
+
+            // change the fight controller to be in battle
             fC.areInBattle = true;
 
+            // create an array of output attack structs to calculate later for battle
+            OutputAttack[] oA = new OutputAttack[] { new OutputAttack(), new OutputAttack() };
+
+            // check if any humans are involved on P1, or P2. (This part is a bit sloppy because I am stitching it in without thinking of its design from the beginning, stupid me)
             if (map.fC.aHumanIsInvolved)
             {
-                // use left & right to select, action to make choice
+                // set our chosen an answer ref to false
+                bool chosenAnAnswer = false;
 
-                while (!Input.GetKeyDown(KeyCode.A))
+                // while we have not chosen an answer, loop through this
+                while (!chosenAnAnswer)
                 {
-                    if (Input.GetKeyDown(KeyCode.Y))
+                    // first check for player 1 if they are attacking, & THEN if they have pressed their action 0 button
+                    if (amAttacking[0] && Input.GetKeyDown(KeyCode.Alpha0))
                     {
-                        Debug.Log("Y");
+                        chosenAnAnswer = true;
+                        desiresFighting = false;
+                    }
+                    // else if they have pressed their action 1 button, register that they want to attack
+                    else if (Input.GetKeyDown(KeyCode.Alpha1))
+                    {
+                        oA[0] = OutputAttack.ForceOutput(0);
+                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+
+                        chosenAnAnswer = true;
+                    }
+                    // else if they have pressed their action 2 button, register that they want to defend
+                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    {
+                        oA[0] = OutputAttack.ForceOutput(1);
+                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+
+                        chosenAnAnswer = true;
+                    }
+                    // else if they have pressed their action 3 button, register that they want to taunt
+                    else if (Input.GetKeyDown(KeyCode.Alpha3))
+                    {
+                        oA[0] = OutputAttack.ForceOutput(2);
+                        oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
+
+                        chosenAnAnswer = true;
                     }
 
-                    Debug.Log("Press A");
+                    // this keeps the while loop going for a Ienumerator
                     yield return null;
                 }
-
-                // Nothing
-                // Attack
-                // Defend
-                // Taunt
-
-                // have to calculate run this for both users
             }
-            else
+            else // else if no humans are involved
             {
-                // 
-                OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
+                // calculate the output for player 1
+                oA[0] = OutputAttack.CalculateOutput(fighter[0].isStunned, fighter[0].stateData);
 
-                // 
-                if (oB.decision > .5f)
-                {
-                    col = DisableNearbyObstacles(who);
-
-                    // pass in state, output 1 2 or 3
-                    OutputAttack oA1 = OutputAttack.CalculateOutput(fighter[who].isStunned, fighter[who].stateData);
-
-                    // ask opp for their battle output
-                    OutputAttack oA2 = OutputAttack.CalculateOutput(fighter[who].opp.isStunned, fighter[who].opp.stateData);
-
-                    OutputAttack[] oA = new OutputAttack[] { oA1, oA2 };
-
-                    int[] did = new int[] { oA[0].decision, oA[1].decision };
-
-                    // 
-                    if (did[0] != -1)
-                    {
-                        yield return new WaitForSeconds(1);
-                        fC.PlaySFX("draw");
-
-                        // change the animation to reveal battle results
-                        fighter[who].ChangeAnimation(battleDecLookUp[did[0]], true);
-                        fighter[who].opp.ChangeAnimation(battleDecLookUp[did[1]], true);
-
-                        yield return new WaitForSeconds(2);
-
-                        // idle animation the bots
-                        fighter[who].ChangeAnimation("Idle");
-                        fighter[who].opp.ChangeAnimation("Idle");
-                    }
-
-                    // result the battle
-                    fighter[who].Battle(time, oA, map);
-
-                    string sfx = "";
-
-                    if (oA[0].decision == 1 && oA[1].decision == 1)
-                    {
-                        sfx = "stepback";
-                    }
-                    else if (oA[0].decision + oA[1].decision == 0)
-                    {
-                        sfx = "hit";
-                        camShake.ShakeCamera(.5f);
-                    }
-                    else if (oA[0].decision + oA[1].decision == 1)
-                    {
-                        sfx = "def";
-                        camShake.ShakeCamera(.25f);
-                    }
-                    else if (oA[0].decision + oA[1].decision == 2)
-                    {
-                        sfx = "crit";
-                        camShake.ShakeCamera();
-                    }
-                    else if (oA[0].decision + oA[1].decision == 3)
-                    {
-                        sfx = "powerup";
-                    }
-                    else if (oA[0].decision + oA[1].decision == 4)
-                    {
-                        sfx = "powerdown";
-                    }
-
-                    fC.PlaySFX(sfx);
-
-                    yield return new WaitForSeconds(2);
-
-                    // remove the damage from showing over the heads
-                    fighter[who].SetText(false, Color.clear);
-                    fighter[who].opp.SetText(false, Color.clear);
-
-                }
+                // calculate the output for player 2
+                oA[1] = OutputAttack.CalculateOutput(fighter[1].isStunned, fighter[1].stateData);
             }
-        }
-
-        // 
-        bool[] lost = new bool[2];
-
-        // 
-        for (int i = 0; i < fighter.Length; i++)
-        {
-            if (fighter[i].hp <= 0)
-            {
-                lost[i] = true;
-            }
-        }
-
-        // 
-        if (lost[0] || lost[1])
-        {
-            PlaySFX("end");
-
-            FightCTRL.phase = FightCTRL.Phase.End;
 
             // 
-            if (lost[0] && !lost[1])
-            {
-                Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
+            // //
+            // 
 
-                fighter[0].ChangeAnimation("Defeat");
-                fighter[1].ChangeAnimation("Win");
-            }
-            else if (!lost[0] && lost[1])
+            // if the human desires to fight
+            if (desiresFighting)
             {
-                Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
+                // disable nearby obstacles & store them into an array
+                col = DisableNearbyObstacles();
 
-                fighter[0].ChangeAnimation("Win");
-                fighter[1].ChangeAnimation("Defeat");
+                // simply store the output attacks in an array
+                int[] did = new int[] { oA[0].decision, oA[1].decision };
+
+                // this just checks if the outcome is not a null fight
+                if (did[0] != -1)
+                {
+                    // add in some cinematic waiting
+                    yield return new WaitForSeconds(1);
+
+                    // play draw sfx
+                    fC.PlaySFX("draw");
+
+                    // change the animation to reveal battle results
+                    fighter[0].ChangeAnimation(battleDecLookUp[did[0]], true);
+                    fighter[1].ChangeAnimation(battleDecLookUp[did[1]], true);
+
+                    // add in some cinematic waiting
+                    yield return new WaitForSeconds(2);
+
+                    // idle animation the bots
+                    fighter[0].ChangeAnimation("Idle");
+                    fighter[1].ChangeAnimation("Idle");
+                }
+                else
+                {
+                    Debug.Log("WARNING: NULL FIGHT!");
+                }
+
+                // result the battle
+                fighter[0].Battle(time, oA, map);
+
+                // Get a ref to the sfx that we want to play
+                string sfx = "";
+
+                // blah blah different conditions for the sfx
+                if (oA[0].decision == 1 && oA[1].decision == 1)
+                {
+                    sfx = "stepback";
+                }
+                else if (oA[0].decision + oA[1].decision == 0)
+                {
+                    sfx = "hit";
+                    camShake.ShakeCamera(.5f);
+                }
+                else if (oA[0].decision + oA[1].decision == 1)
+                {
+                    sfx = "def";
+                    camShake.ShakeCamera(.25f);
+                }
+                else if (oA[0].decision + oA[1].decision == 2)
+                {
+                    sfx = "crit";
+                    camShake.ShakeCamera();
+                }
+                else if (oA[0].decision + oA[1].decision == 3)
+                {
+                    sfx = "powerup";
+                }
+                else if (oA[0].decision + oA[1].decision == 4)
+                {
+                    sfx = "powerdown";
+                }
+
+                // play the sound
+                fC.PlaySFX(sfx);
+
+                // add in some cinematic waiting
+                yield return new WaitForSeconds(2);
+
+                // remove the damage from showing over the heads
+                fighter[0].SetText(false, Color.clear);
+                fighter[1].SetText(false, Color.clear);
+
             }
-            else if (lost[0] && lost[1])
+
+            // get a ref for checking if anyone (or both) has lost
+            bool[] lost = new bool[2];
+
+            // loop through both fighters & check their hp
+            for (int i = 0; i < fighter.Length; i++)
             {
-                Debug.Log($"GAME OVER! TIE GMAE!");
-                fighter[0].ChangeAnimation("Defeat");
-                fighter[1].ChangeAnimation("Defeat");
+
+                // if a fighter has <= 0 hp,
+                if (fighter[i].hp <= 0)
+                {
+                    // toggle that it has lost
+                    lost[i] = true;
+                }
             }
+
+            // if either fighter has list
+            if (lost[0] || lost[1])
+            {
+                // play a sfx
+                PlaySFX("end");
+
+                // switch to the end phase
+                FightCTRL.phase = FightCTRL.Phase.End;
+
+                // check a few different conditions for loses & tie games
+                if (lost[0] && !lost[1])
+                {
+                    Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
+
+                    fighter[0].ChangeAnimation("Defeat");
+                    fighter[1].ChangeAnimation("Win");
+                }
+                else if (!lost[0] && lost[1])
+                {
+                    Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
+
+                    fighter[0].ChangeAnimation("Win");
+                    fighter[1].ChangeAnimation("Defeat");
+                }
+                else if (lost[0] && lost[1])
+                {
+                    Debug.Log($"GAME OVER! TIE GMAE!");
+                    fighter[0].ChangeAnimation("Defeat");
+                    fighter[1].ChangeAnimation("Defeat");
+                }
+            }
+
+            // enable back on the nearby obstacles
+            EnableNearbyObstacles(col);
         }
 
-        // 
-        fighter[who].LookAtOpponent();
+        // make both fighters look at each other to result the fight
+        fighter[0].LookAtOpponent();
+        fighter[1].LookAtOpponent();
 
-        // 
+        // set in battle to false on the fight controller
+        fC.areInBattle = false;
+
+        // incriment the global turn
         GM.turnSyncer++;
+    }
 
-        // 
+    void EnableNearbyObstacles(Collider[] col)
+    {
         if (col != null)
         {
             foreach (Collider c in col)
@@ -542,14 +604,12 @@ public class Map
                 }
             }
         }
-
-        fC.areInBattle = false;
     }
 
-    private Collider[] DisableNearbyObstacles(int who)
+    Collider[] DisableNearbyObstacles()
     {
         // 
-        Collider[] col = Physics.OverlapSphere((fighter[who].obj.transform.position + fighter[who].opp.obj.transform.position) / 2, 1.5f);
+        Collider[] col = Physics.OverlapSphere((fighter[0].obj.transform.position + fighter[1].obj.transform.position) / 2, 1.5f);
 
         // 
         foreach (Collider c in col)

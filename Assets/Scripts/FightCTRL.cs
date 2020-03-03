@@ -275,9 +275,6 @@ public class FightCTRL : MonoBehaviour
         map.ResetAllTiles();
 
         // 
-        print(outp[turn]);
-
-        // 
         if (humansInvolved[turn])
         {
             if (p_D != dist || p_aX != angleX || p_aY != angleY)
@@ -322,11 +319,21 @@ public class FightCTRL : MonoBehaviour
             // Calculate if moving
             if (s.stay)
             {
-                StartCoroutine(map.FIGHT(time, map, turn));
+                // calculate if AI even wants to battle
+                OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
+
+                // if it's dice is > .5f, then we will count that as a yes!
+                if (oB.decision > .5f)
+                {
+                    StartCoroutine(map.FIGHT(time, map, turn));
+                }
+                else // otherwise we'll just entirely skip its turn
+                {
+                    GM.turnSyncer++;
+                }
 
                 // incriment the turn
                 _turn++;
-                print("ENTER1");
             }
             else
             {
