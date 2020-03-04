@@ -20,12 +20,12 @@ public class Map
     FightCTRL fC;
     CameraShake camShake;
 
-    public enum CamMode { Field, Topdown, Free, Isometric, Action };
+    public enum CamMode { Field, Topdown, Free, Isometric, Action, IsoAction };
     public CamMode camMode;
 
     Tile current;
     Tile[,] _loc;
-    public List<Tile> openTiles, closedTiles;
+    public List<Tile> openTiles, closedTiles, freeTiles, candyTiles = new List<Tile>();
 
     public Map(int size)
     {
@@ -99,12 +99,27 @@ public class Map
 
             Vector3 add = (fC.areInBattle ? fighter[who].obj.transform.right : Vector3.zero);
 
-            cam.transform.position = p + (p-o).normalized + Vector3.up + add;
+            cam.transform.position = p + (p - o).normalized + Vector3.up + add;
             cam.transform.LookAt(fighter[who].opp.obj.transform);
             cam.orthographic = false;
             cam.fieldOfView = (fC.areInBattle ? 45 : 60);
 
             camMode = CamMode.Action;
+        }
+        else if (c == CamMode.IsoAction)
+        {
+            Vector3 p = fighter[who].obj.transform.position;
+            Vector3 o = fighter[who].opp.obj.transform.position;
+
+            Vector3 a = p + (p - o).normalized + Vector3.up + fighter[who].obj.transform.right;
+            Vector3 b = new Vector3(p.x - (zoomUnit.x * zoom), p.y + (zoomUnit.y * zoom), p.z - (zoomUnit.z * zoom));
+
+            cam.transform.position = fC.areInBattle ? a : b;
+            cam.transform.LookAt(fC.areInBattle ? fighter[who].opp.obj.transform : fighter[who].obj.transform);
+            cam.orthographic = false;
+            cam.fieldOfView = (fC.areInBattle ? 60 : 60);
+
+            camMode = CamMode.IsoAction;
         }
     }
 
@@ -249,6 +264,9 @@ public class Map
             // 
             List<Vector2Int> block = new List<Vector2Int>();
 
+            // 
+            freeTiles = new List<Tile>();
+
             // loop through the mapped chars
             for (int i = 0; i < raw.Length; i++)
             {
@@ -269,6 +287,11 @@ public class Map
                         if (dice < GM.randomProbability)
                         {
                             mapped[j, i] = 'p';
+                        }
+                        else
+                        {
+                            // add that free tile to the free tiles list. (will be used for spawing food)
+                            freeTiles.Add(loc[j, i]);
                         }
 
                         // 
@@ -375,6 +398,21 @@ public class Map
 
         ResetAllTiles();
 
+        // 
+        if (candyTiles.Count > 0)
+        {
+            // 
+            if (fighter[who].expression == candyTiles[0].v2Int) // I DONT KNOW WHY EXPRESSION & v2INT ARE FLIPPED HERE FUUUUUUUCKKK
+            {
+                candyTiles[0].DeleteDressing();
+                freeTiles.Add(candyTiles[0]);
+                candyTiles.RemoveAt(0);
+
+                fighter[who].EatCandy();
+            }
+        }
+
+        // 
         map.fC.StartABattle(who);
     }
 

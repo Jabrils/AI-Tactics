@@ -1,28 +1,6 @@
 Base path: 'C:/Program Files/Unity/Hub/Editor/2019.3.0b10/Editor/Data', plugins path 'C:/Program Files/Unity/Hub/Editor/2019.3.0b10/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
-Cmd: preprocess
-  insize=7605 outsize=2406 ok=1
-Cmd: preprocess
-  insize=3466 outsize=1210 ok=1
-Cmd: preprocess
-  insize=3478 outsize=2592 ok=1
-Cmd: preprocess
-  insize=4297 outsize=3592 ok=1
-Cmd: preprocess
-  insize=3464 outsize=1257 ok=1
-Cmd: preprocess
-  insize=10559 outsize=3882 ok=1
-Cmd: preprocess
-  insize=7773 outsize=2674 ok=1
-Cmd: preprocess
-  insize=10548 outsize=3873 ok=1
-Cmd: preprocess
-  insize=3508 outsize=1607 ok=1
-Cmd: preprocess
-  insize=7631 outsize=2417 ok=1
-Cmd: preprocess
-  insize=2307 outsize=1077 ok=1
-Cmd: preprocess
-  insize=56704 outsize=2605 ok=1
-Cmd: preprocess
-  insize=67813 outsize=3314 ok=1
+Cmd: compileSnippet
+  api=4 type=0 insize=1693 outsize=690 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING ok=1
+Cmd: compileSnippet
+  api=4 type=1 insize=1693 outsize=346 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING ok=1

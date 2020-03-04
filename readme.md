@@ -1,4 +1,4 @@
-## v0.0.28
+## v0.0.29
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,22 +7,24 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Food Health now spawns on the map|now important that the AI learns this, but expert AI if so
 |||Made a Battle UI
 |||Made a Main Menu UI|create a Haxbot, battle, train
+|||Added a dummy AI
+|||Added a ML AI
 
 ### Feature Creep
+|||Added audience to stans
+|||optimize
+|||model a few skins
+|||fixed level loader to read it properly
+|||model new coleseum
 |||units no longer get stuck in corners
 |||Maybe add like a special attack
-|||optimize
-|||fixed level loader to read it properly
-|||Added audience to stans
-|||model a few skins
-|||model new coleseum
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.29|03.03.020|Food Health now spawns on the map|now important that the AI learns this, but expert AI if so
 |v0.0.27|03.02.020|added action camera mode
 |v0.0.27|03.02.020|Added Human Input
 |v0.0.21|02.24.020|Made nearby tiles see-through / invisible feature | maybe the simple solution is just a sphere that blocks rendering from some objects

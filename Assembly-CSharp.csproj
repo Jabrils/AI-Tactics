@@ -72,6 +72,7 @@
     <Compile Include="Assets\Scripts\Tile.cs" />
     <Compile Include="Assets\Scripts\ctrl.cs" />
     <Compile Include="Assets\Scripts\lMove_Concept.cs" />
+    <Compile Include="Assets\Scripts\rotate.cs" />
     <Compile Include="Assets\Scripts\takeScreencap.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />

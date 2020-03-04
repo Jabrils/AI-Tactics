@@ -21,6 +21,7 @@ public class FightCTRL : MonoBehaviour
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
     public bool areInBattle;
+    public InputType p1, p2;
 
     int _turn;
     public int turn => _turn % 2;
@@ -35,14 +36,20 @@ public class FightCTRL : MonoBehaviour
 
     float p_D = -1, p_aX = -1, p_aY = -1;
     bool[] _humansInvolved = new bool[2];
+    int nextCandySpawn;
+    int randNextFood => Random.Range(20, 40);
     public bool[] humansInvolved => _humansInvolved;
 
     public static Material[] txts;
 
     void Start()
     {
-        //GM.inpType[0] = InputType.Human;
-        //GM.inpType[1] = InputType.Human;
+        // set the 
+        GM.inpType[0] = p1;
+        GM.inpType[1] = p2;
+
+        // 
+        AddToNextFoodSpawn();
 
         // 
         for (int i = 0; i < GM.inpType.Length; i++)
@@ -75,9 +82,6 @@ public class FightCTRL : MonoBehaviour
         map.SetFighters(fighter);
 
         // 
-        GameObject blocksParent = new GameObject("Blocks");
-
-        // 
         map.SetCamTo(Map.CamMode.Field);
 
         // 
@@ -96,26 +100,13 @@ public class FightCTRL : MonoBehaviour
             {
                 Color c = ve.type == 'w' ? new Color(.75f, .25f, 0) : Color.black;
                 GameObject g = null;
-
-                // 
-                if (ve.type == 'p')
-                {
-                    g = Instantiate(Resources.Load<GameObject>("Objs/Pillar"));
-                    g.transform.position = new Vector3(ve.x - map.halfMapSize, .5f, ve.y - map.halfMapSize);
-                    g.transform.tag = "Tile Dressing";
-                }
-                else if (ve.type == 'w')
-                {
-                    g = Instantiate(Resources.Load<GameObject>("Objs/Wall"));
-                    g.transform.localScale = new Vector3(1, 2, 1);
-                    g.transform.position = new Vector3(ve.x - map.halfMapSize, 1.5f, ve.y - map.halfMapSize);
-                    g.transform.tag = "Tile Dressing";
-                }
-
-                // 
-                g.transform.SetParent(blocksParent.transform);
             }
         }
+    }
+
+    void AddToNextFoodSpawn()
+    {
+        nextCandySpawn += randNextFood;
     }
 
     void Update()
@@ -123,6 +114,12 @@ public class FightCTRL : MonoBehaviour
         GM.battleSpd = btSpd;
 
         GM.maxMoves = mMoves;
+
+        // 
+        if (_turn == nextCandySpawn)
+        {
+            SpawnCandy();
+        }
 
         // 
         if (phase == Phase.Battle)
@@ -136,6 +133,28 @@ public class FightCTRL : MonoBehaviour
 
         // 
         ListenForControls();
+    }
+
+    void SpawnCandy()
+    {
+        // 
+        GameObject food = Instantiate(Resources.Load<GameObject>("Objs/Hax! Bar"));
+        // 
+        int tileID = Random.Range(0, map.freeTiles.Count);
+        // 
+        Tile tile = map.freeTiles[tileID];
+        // 
+        tile.SetDressing(food);
+        // 
+        Vector2Int loc = tile.expression;
+        // 
+        map.candyTiles.Add(tile);
+        // 
+        map.freeTiles.RemoveAt(tileID);
+        // 
+        food.transform.position = new Vector3(loc.x, 1, loc.y);
+        // 
+        AddToNextFoodSpawn();
     }
 
     void ProcessTurn()
@@ -264,6 +283,12 @@ public class FightCTRL : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             map.SetCamTo(Map.CamMode.Action);
+        }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            map.SetCamTo(Map.CamMode.IsoAction);
         }
     }
 

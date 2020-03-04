@@ -314,11 +314,12 @@ public class Fighter
         stateData = new StateData(myTurn, this, _opp);
     }
 
-    public void Rest(float time)
+    public void EatCandy()
     {
-        _hp++;
+        _hp += 7;
 
         _hp = Mathf.Clamp(_hp, 0, GM.maxHP);
-        //Debug.Log($"({time}) {obj.name} has rested to: {hp}!");
+
+        _hpHolder.localScale = new Vector3(hpPercent, 1, 1);
     }
 }

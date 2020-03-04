@@ -20,7 +20,8 @@ public class Tile
     public Vector2Int v2Int => new Vector2Int(x, y);
     public Vector2Int expression => new Vector2Int(eX, eY);
 
-    GameObject _obj;
+    GameObject _obj, _dressing;
+    public GameObject dressing;
     Renderer _rend;
 
     Tile _parent;
@@ -51,6 +52,16 @@ public class Tile
         _obj.transform.SetParent(GM.tilesParent);
     }
 
+    public void SetDressing(GameObject d)
+    {
+        _dressing = d;
+    }
+
+    public void DeleteDressing()
+    {
+        GameObject.Destroy(_dressing);
+    }
+
     public void ToggleRender(bool t, Color c)
     {
         if (type == 'p' || type == 'w')
@@ -73,6 +84,33 @@ public class Tile
     public void AssignType(char t)
     {
         _type = t;
+
+        // 
+        if (type == 'w')
+        {
+            if (!GameObject.Find("Blocks"))
+            {
+                new GameObject("Blocks");
+            }
+
+            GameObject g = GameObject.Instantiate(Resources.Load<GameObject>("Objs/Wall"));
+            g.transform.localScale = new Vector3(1, 2, 1);
+            g.transform.position = new Vector3(eX, 1.5f, eY);
+            g.transform.tag = "Tile Dressing";
+            g.transform.SetParent(GameObject.Find("Blocks").transform);
+        }
+        else if (type == 'p')
+        {
+            if (!GameObject.Find("Blocks"))
+            {
+                new GameObject("Blocks");
+            }
+
+            GameObject g = GameObject.Instantiate(Resources.Load<GameObject>("Objs/Pillar"));
+            g.transform.position = new Vector3(eX, .5f, eY);
+            g.transform.tag = "Tile Dressing";
+            g.transform.SetParent(GameObject.Find("Blocks").transform);
+        }
     }
 
     public void SetNeighbors(List<Tile> N)
