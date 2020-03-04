@@ -1,4 +1,4 @@
-## v0.0.29
+## v0.0.30
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
@@ -7,9 +7,8 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Made a Battle UI
-|||Made a Main Menu UI|create a Haxbot, battle, train
-|||Added a dummy AI
+|||Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
+|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
 |||Added a ML AI
 
 ### Feature Creep
@@ -24,6 +23,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.30|03.03.020|Made a Battle UI
 |v0.0.29|03.03.020|Food Health now spawns on the map|now important that the AI learns this, but expert AI if so
 |v0.0.27|03.02.020|added action camera mode
 |v0.0.27|03.02.020|Added Human Input

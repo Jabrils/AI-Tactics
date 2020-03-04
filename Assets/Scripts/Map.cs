@@ -402,15 +402,21 @@ public class Map
         if (candyTiles.Count > 0)
         {
             // 
-            if (fighter[who].expression == candyTiles[0].v2Int) // I DONT KNOW WHY EXPRESSION & v2INT ARE FLIPPED HERE FUUUUUUUCKKK
+            for (int i = 0; i < candyTiles.Count; i++)
             {
-                candyTiles[0].DeleteDressing();
-                freeTiles.Add(candyTiles[0]);
-                candyTiles.RemoveAt(0);
+                // 
+                if (fighter[who].expression == candyTiles[i].v2Int) // I DONT KNOW WHY EXPRESSION & v2INT ARE FLIPPED HERE FUUUUUUUCKKK
+                {
+                    candyTiles[i].DeleteDressing();
+                    freeTiles.Add(candyTiles[i]);
+                    candyTiles.RemoveAt(i);
 
-                fighter[who].EatCandy();
+                    fighter[who].EatCandy();
+                }
             }
         }
+
+        yield return new WaitForSeconds(.5f);
 
         // 
         map.fC.StartABattle(who);
@@ -418,6 +424,8 @@ public class Map
 
     public IEnumerator FIGHT(int time, Map map, int who)
     {
+        map.fC.phase = FightCTRL.Phase.Fight;
+
         // we need a ref to col, because this is going to store all of the blocks that we are going to disable during battle
         Collider[] col = null;
 
@@ -446,7 +454,7 @@ public class Map
             {
                 if (!fC.humansInvolved[i])
                 {
-                    oA[i] = OutputAttack.CalculateOutput(fighter[i].isStunned, fighter[i].stateData);
+                    oA[i] = OutputAttack.CalculateOutput(fighter[i].isStunned, fighter[i]);
                     chosenAnAnswer[i] = true;
                 }
             }
@@ -600,7 +608,7 @@ public class Map
                 PlaySFX("end");
 
                 // switch to the end phase
-                FightCTRL.phase = FightCTRL.Phase.End;
+                FightCTRL.mode = FightCTRL.Mode.End;
 
                 // check a few different conditions for loses & tie games
                 if (lost[0] && !lost[1])
@@ -636,11 +644,11 @@ public class Map
         // set in battle to false on the fight controller
         fC.areInBattle = false;
 
+        // add in some cinematic waiting
+        //yield return new WaitForSeconds(.25f);
+
         // incriment the global turn
         GM.turnSyncer++;
-
-        // add in some cinematic waiting
-        yield return new WaitForSeconds(.25f);
 
         // if turnee is human
         if (fC.humansInvolved[fC.turn])

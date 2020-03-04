@@ -25,11 +25,35 @@ public struct OutputMove
     /// </summary>
     /// <param name="inp"></param>
     /// <returns></returns>
-    public static OutputMove CalculateOutput(StateData inp)
+    public static OutputMove CalculateOutput(Fighter fighter)
     {
         float d = UnityEngine.Random.value;
         float aX = UnityEngine.Random.Range(-1f, 1f);
         float aY = UnityEngine.Random.Range(-1f, 1f);
+
+        // 
+        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
+        //{
+        //    d = 1;
+        //    aX = UnityEngine.Random.Range(-1f, 1f);
+        //    aY = UnityEngine.Random.Range(-1f, 1f);
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
+        //{
+        //    d = 0;
+        //    aX = UnityEngine.Random.Range(-1f, 1f);
+        //    aY = UnityEngine.Random.Range(-1f, 1f);
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
+        //{
+        //    d = UnityEngine.Random.value;
+        //    aX = UnityEngine.Random.Range(-1f, 1f);
+        //    aY = UnityEngine.Random.Range(-1f, 1f);
+        //}
+
+        d = fighter.config.distance == -1 ? d : fighter.config.distance;
+        aX = fighter.config.distance == 0 ? aX : fighter.config.angleX;
+        aY = fighter.config.distance == 0 ? aY : fighter.config.angleY;
 
         return new OutputMove(d, aX, aY);
     }
@@ -38,18 +62,34 @@ public struct OutputMove
 public struct OutputToBattle
 {
     float _decision;
-    public float decision => _decision;
+    public bool toBattle => _decision > .5f;
 
     OutputToBattle(float d)
     {
         _decision = d;
     }
 
-    public static OutputToBattle CalculateOutput(StateData inp)
+    public static OutputToBattle CalculateOutput(Fighter fighter)
     {
-        float d = UnityEngine.Random.value;
+        float ret = -1;
 
-        return new OutputToBattle(d);
+        //// 
+        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
+        //{
+        //    ret = 0;
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
+        //{
+        //    ret = 1;
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
+        //{
+        //    ret = UnityEngine.Random.value;
+        //}
+
+        ret = fighter.config.toBattle == true ? 1 : 0;
+
+        return new OutputToBattle(ret);
     }
 }
 
@@ -78,11 +118,19 @@ public struct OutputAttack
         _taunt = t;
     }
 
-    public static OutputAttack CalculateOutput(bool stunned, StateData inp)
+    public static OutputAttack CalculateOutput(bool stunned, Fighter fighter)
     {
         float a = UnityEngine.Random.value;
         float d = UnityEngine.Random.Range(0, 1 - a);
         float t = 1 - (a + d);
+
+        // 
+        if (fighter.config.attack || fighter.config.defend || fighter.config.taunt)
+        {
+            a = fighter.config.attack == true ? 1 : 0;
+            d = fighter.config.defend == true ? 1 : 0;
+            t = fighter.config.taunt == true ? 1 : 0;
+        }
 
         // MOVE IS STUNNED FUNCT INTO HERE INSTEAD, PASS IN BOOL
         if (stunned)
@@ -101,6 +149,8 @@ public struct OutputAttack
                 d = 0;
                 t = 1;
             }
+
+        return new OutputAttack(a, d, t);
         }
 
         // 
@@ -154,18 +204,20 @@ public struct OutputStay
         }
 
         // 
-        if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Zero)
-        {
-            ret = 0;
-        }
-        else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.One)
-        {
-            ret = 1;
-        }
-        else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
-        {
-            ret = UnityEngine.Random.value;
-        }
+        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
+        //{
+        //    ret = 1;
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
+        //{
+        //    ret = 1;
+        //}
+        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
+        //{
+        //    ret = UnityEngine.Random.value;
+        //}
+
+        ret = fighter.config.move == true ? 1 : 0;
 
         return new OutputStay(ret);
     }

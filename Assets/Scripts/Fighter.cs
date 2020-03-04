@@ -27,6 +27,15 @@ public class Fighter
 
     MeshRenderer _display;
 
+    int _ranAway;
+    public int ranAway;
+
+    int _maxMoves = 5;
+    public int maxMoves;
+
+    AI_Config _config;
+    public AI_Config config => _config;
+
     public StateData stateData;
 
     public int x => Mathf.RoundToInt(obj.transform.position.x);
@@ -58,11 +67,12 @@ public class Fighter
 
     int mapSize;
 
-    public Fighter(GameObject gO, int myTurn, int mapSize)
+    public Fighter(GameObject gO, int myTurn, int mapSize, AI_Config aI)
     {
         _obj = gO;
         this.mapSize = mapSize;
         _myTurn = myTurn;
+        _config = aI;
 
         // 
         _anim = _obj.GetComponentInChildren<Animator>();
@@ -136,12 +146,14 @@ public class Fighter
             if (oA[1].decision == 0)
             {
                 // Both take damage
-                _opp.TakeDmg(str);
+                opp.TakeDmg(str);
                 TakeDmg(_opp.str);
                 //Debug.Log($"({time}) {obj.name} -> <- {_opp.obj.name} ATT: {obj.name} HP: {hp} - {_opp.obj.name} HP: {_opp.hp}");
             }
             else if (oA[1].decision == 1)
             {
+                // oppponent takes a damage for every 3 str you have
+                opp.TakeDmg((int)Mathf.Floor(str / 3));
                 // take damage & is stunned
                 TakeDmg(1);
                 //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
@@ -150,7 +162,7 @@ public class Fighter
             else if (oA[1].decision == 2)
             {
                 // opponent takes damage x2
-                _opp.TakeDmg(str * 2);
+                opp.TakeDmg(str * 2);
                 //Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
             }
         }
@@ -160,6 +172,8 @@ public class Fighter
 
             if (oA[1].decision == 0)
             {
+                // you take a damage for every 3 str your opponent has
+                TakeDmg((int)Mathf.Floor(opp.str/3));
                 // opponent takes damage
                 _opp.TakeDmg(1);
                 //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
@@ -209,6 +223,11 @@ public class Fighter
                 //Debug.Log($"({time}) Both powered down -1. {_opp.obj.name} = {_opp.str} str : {obj.name} = {str} str");
             }
         }
+    }
+
+    public void RanAway()
+    {
+        _ranAway++;
     }
 
     public void SetText(bool toggle, Color c, bool add = true, int dmg = 0)

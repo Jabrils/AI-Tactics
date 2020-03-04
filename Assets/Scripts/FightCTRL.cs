@@ -2,17 +2,20 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class FightCTRL : MonoBehaviour
 {
-    public enum Phase { Start, Battle, End };
-    public static Phase phase;
+    public enum Mode { Start, Battle, End };
+    public static Mode mode;
 
-    public enum InputType { Random, Zero, One, DummyAI, Human };
+    public enum Phase { Null, Movement, Fight };
+    public Phase phase;
+
+    public enum InputType { Random, Run, Pursue, DummyAI, Human };
 
     public string levelName;
     public int mMoves = 5;
-    public bool randomOutputs;
     public float btSpd;
     [Range(0, 1)]
     public float dist = 1;
@@ -21,7 +24,8 @@ public class FightCTRL : MonoBehaviour
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
     public bool areInBattle;
-    public InputType p1, p2;
+    public AI_Config p1, p2;
+    public TextMeshProUGUI uiBattle;
 
     int _turn;
     public int turn => _turn % 2;
@@ -44,21 +48,8 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
-        // set the 
-        GM.inpType[0] = p1;
-        GM.inpType[1] = p2;
-
         // 
         AddToNextFoodSpawn();
-
-        // 
-        for (int i = 0; i < GM.inpType.Length; i++)
-        {
-            if (GM.inpType[i] == InputType.Human)
-            {
-                humansInvolved[i] = true;
-            }
-        }
 
         // 
         txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
@@ -67,8 +58,17 @@ public class FightCTRL : MonoBehaviour
         map = new Map(this, levelName);
 
         // 
-        fighter[0] = new Fighter(one, 0, map.mapSize);
-        fighter[1] = new Fighter(two, 1, map.mapSize);
+        fighter[0] = new Fighter(one, 0, map.mapSize, p1);
+        fighter[1] = new Fighter(two, 1, map.mapSize, p2);
+
+        // 
+        for (int i = 0; i < fighter.Length; i++)
+        {
+            if (fighter[i].config == null)
+            {
+                humansInvolved[i] = true;
+            }
+        }
 
         // 
         fighter[0].SetOpponent(fighter[1]);
@@ -115,6 +115,8 @@ public class FightCTRL : MonoBehaviour
 
         GM.maxMoves = mMoves;
 
+        uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
+
         // 
         if (_turn == nextCandySpawn)
         {
@@ -122,7 +124,7 @@ public class FightCTRL : MonoBehaviour
         }
 
         // 
-        if (phase == Phase.Battle)
+        if (mode == Mode.Battle)
         {
             // 
             if (_turn == GM.turnSyncer)
@@ -159,6 +161,8 @@ public class FightCTRL : MonoBehaviour
 
     void ProcessTurn()
     {
+        phase = Phase.Movement;
+
         TakeTurn();
 
         // 
@@ -250,15 +254,15 @@ public class FightCTRL : MonoBehaviour
         // 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            phase = Phase.Start;
+            mode = Mode.Start;
             GM.turnSyncer = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         // 
-        if (Input.GetKeyDown(KeyCode.Space) && phase != Phase.End)
+        if (Input.GetKeyDown(KeyCode.Space) && mode != Mode.End)
         {
-            phase = Phase.Battle;
+            mode = Mode.Battle;
         }
 
         // 
@@ -316,20 +320,11 @@ public class FightCTRL : MonoBehaviour
                 p_aY = angleY;
             }
 
+            // Set camera to turnee
+            map.SetCamTo(map.camMode, turn);
+
             // 
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                // start our Coroutine of moving our fighter
-                StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
-
-                // incriment the turn
-                _turn++;
-
-                p_D = -1;
-                p_aY = -1;
-                p_aX = -1;
-            }
-            else if(Input.GetKeyDown(KeyCode.Backspace))
+            if (fighter[turn].isStunned)
             {
                 StartCoroutine(map.FIGHT(time, map, turn));
 
@@ -339,6 +334,32 @@ public class FightCTRL : MonoBehaviour
                 p_D = -1;
                 p_aY = -1;
                 p_aX = -1;
+            }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    // start our Coroutine of moving our fighter
+                    StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
+
+                    // incriment the turn
+                    _turn++;
+
+                    p_D = -1;
+                    p_aY = -1;
+                    p_aX = -1;
+                }
+                else if (Input.GetKeyDown(KeyCode.Backspace))
+                {
+                    StartCoroutine(map.FIGHT(time, map, turn));
+
+                    // incriment the turn
+                    _turn++;
+
+                    p_D = -1;
+                    p_aY = -1;
+                    p_aX = -1;
+                }
             }
         }
         else
@@ -350,11 +371,12 @@ public class FightCTRL : MonoBehaviour
             if (s.stay)
             {
                 // calculate if AI even wants to battle
-                OutputToBattle oB = OutputToBattle.CalculateOutput(new StateData());
+                OutputToBattle oB = OutputToBattle.CalculateOutput(fighter[turn]);
 
-                // if it's dice is > .5f, then we will count that as a yes!
-                if (oB.decision > .5f)
+                // if the result of oB is to battle,
+                if (oB.toBattle)
                 {
+                    // start the coroutine to start the fight
                     StartCoroutine(map.FIGHT(time, map, turn));
                 }
                 else // otherwise we'll just entirely skip its turn
@@ -368,10 +390,10 @@ public class FightCTRL : MonoBehaviour
             else
             {
                 // Calculate the move output
-                OutputMove m = OutputMove.CalculateOutput(fighter[turn].stateData);
+                OutputMove m = OutputMove.CalculateOutput(fighter[turn]);
 
                 // Get the movement data
-                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, randomOutputs ? m.distance : 0, m.angleX, m.angleY);
+                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, m.distance, m.angleX, m.angleY);
 
                 // start our Coroutine of moving our fighter
                 StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
@@ -384,7 +406,25 @@ public class FightCTRL : MonoBehaviour
 
     public void StartABattle(int who)
     {
-        StartCoroutine(map.FIGHT(time, map, who));
+        if (humansInvolved[who])
+        {
+            StartCoroutine(map.FIGHT(time, map, who));
+        }
+        else
+        {
+            // calculate if AI even wants to battle
+            OutputToBattle oB = OutputToBattle.CalculateOutput(fighter[who]);
+
+            // if the result of oB is to battle,
+            if (oB.toBattle)
+            {
+                StartCoroutine(map.FIGHT(time, map, who));
+            }
+            else // otherwise we'll just entirely skip its turn
+            {
+                GM.turnSyncer++;
+            }
+        }
     }
 }
 
