@@ -1,7 +1,10 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
+    - AI_Config
+    - CameraShake
     - FightCTRL
+    - rotate
     Unity.RenderPipelines.Core.Runtime.dll:
     - UnityEngine.Rendering.UI.DebugUIHandlerBitField
     - UnityEngine.Rendering.UI.DebugUIHandlerButton
@@ -43,6 +46,7 @@ ScriptsOnlyBuild:
     - TMPro.TMP_SpriteAsset
     - TMPro.TMP_StyleSheet
     - TMPro.TextMeshPro
+    - TMPro.TextMeshProUGUI
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
@@ -54,6 +58,8 @@ ScriptsOnlyBuild:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
     - UnityEditor.TestTools.TestRunner.TestRun.TestJobDataHolder
     UnityEngine.UI.dll:
+    - UnityEngine.EventSystems.EventSystem
+    - UnityEngine.EventSystems.StandaloneInputModule
     - UnityEngine.UI.Button
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.ContentSizeFitter
@@ -112,95 +118,107 @@ ScriptsOnlyBuild:
     - Class: 109
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 11358}
+      Script: {instanceID: 11362}
     - Class: 114
-      Script: {instanceID: 11470}
+      Script: {instanceID: 11372}
     - Class: 114
-      Script: {instanceID: 11574}
+      Script: {instanceID: 11476}
     - Class: 114
-      Script: {instanceID: 11596}
+      Script: {instanceID: 11580}
     - Class: 114
-      Script: {instanceID: 11694}
+      Script: {instanceID: 11602}
     - Class: 114
-      Script: {instanceID: 11698}
+      Script: {instanceID: 11700}
     - Class: 114
-      Script: {instanceID: 11772}
+      Script: {instanceID: 11704}
     - Class: 114
-      Script: {instanceID: 11814}
+      Script: {instanceID: 11778}
     - Class: 114
-      Script: {instanceID: 11952}
+      Script: {instanceID: 11820}
     - Class: 114
-      Script: {instanceID: 11984}
+      Script: {instanceID: 11958}
     - Class: 114
-      Script: {instanceID: 12280}
+      Script: {instanceID: 11990}
     - Class: 114
-      Script: {instanceID: 12324}
+      Script: {instanceID: 12286}
     - Class: 114
-      Script: {instanceID: 12384}
+      Script: {instanceID: 12330}
     - Class: 114
-      Script: {instanceID: 12560}
+      Script: {instanceID: 12390}
     - Class: 114
-      Script: {instanceID: 12610}
+      Script: {instanceID: 12508}
     - Class: 114
-      Script: {instanceID: 12816}
+      Script: {instanceID: 12566}
     - Class: 114
-      Script: {instanceID: 12862}
+      Script: {instanceID: 12616}
     - Class: 114
-      Script: {instanceID: 12918}
+      Script: {instanceID: 12822}
     - Class: 114
-      Script: {instanceID: 13020}
+      Script: {instanceID: 12868}
     - Class: 114
-      Script: {instanceID: 13286}
+      Script: {instanceID: 12924}
     - Class: 114
-      Script: {instanceID: 13312}
+      Script: {instanceID: 13026}
     - Class: 114
-      Script: {instanceID: 13438}
+      Script: {instanceID: 13292}
     - Class: 114
-      Script: {instanceID: 13590}
+      Script: {instanceID: 13318}
     - Class: 114
-      Script: {instanceID: 13652}
+      Script: {instanceID: 13444}
     - Class: 114
-      Script: {instanceID: 13656}
+      Script: {instanceID: 13596}
     - Class: 114
-      Script: {instanceID: 13672}
+      Script: {instanceID: 13658}
+    - Class: 114
+      Script: {instanceID: 13662}
     - Class: 114
       Script: {instanceID: 13678}
     - Class: 114
-      Script: {instanceID: 13750}
+      Script: {instanceID: 13684}
     - Class: 114
-      Script: {instanceID: 13800}
+      Script: {instanceID: 13756}
     - Class: 114
-      Script: {instanceID: 13828}
+      Script: {instanceID: 13804}
+    - Class: 114
+      Script: {instanceID: 13808}
     - Class: 114
       Script: {instanceID: 13836}
     - Class: 114
-      Script: {instanceID: 14140}
+      Script: {instanceID: 13844}
     - Class: 114
-      Script: {instanceID: 14156}
+      Script: {instanceID: 14042}
     - Class: 114
-      Script: {instanceID: 14206}
+      Script: {instanceID: 14148}
     - Class: 114
-      Script: {instanceID: 14430}
+      Script: {instanceID: 14164}
     - Class: 114
-      Script: {instanceID: 14476}
+      Script: {instanceID: 14214}
     - Class: 114
-      Script: {instanceID: 14616}
+      Script: {instanceID: 14438}
     - Class: 114
-      Script: {instanceID: 14662}
+      Script: {instanceID: 14484}
     - Class: 114
-      Script: {instanceID: 14692}
+      Script: {instanceID: 14624}
     - Class: 114
-      Script: {instanceID: 14864}
+      Script: {instanceID: 14670}
     - Class: 114
-      Script: {instanceID: 14866}
+      Script: {instanceID: 14700}
     - Class: 114
-      Script: {instanceID: 14918}
+      Script: {instanceID: 14748}
     - Class: 114
-      Script: {instanceID: 14920}
+      Script: {instanceID: 14874}
     - Class: 114
-      Script: {instanceID: 15040}
+      Script: {instanceID: 14876}
     - Class: 114
-      Script: {instanceID: 15046}
+      Script: {instanceID: 14904}
+    - Class: 114
+      Script: {instanceID: 14928}
+    - Class: 114
+      Script: {instanceID: 14930}
+    - Class: 114
+      Script: {instanceID: 15050}
+    - Class: 114
+      Script: {instanceID: 15056}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -240,6 +258,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: CanvasScaler
+  - hash:
+      serializedVersion: 2
+      Hash: af2682a4414bf9cb8bc1d9e8ad8ad60e
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: AI_Config
   - hash:
       serializedVersion: 2
       Hash: 726fcf7961cbb4108aa5be5e55b8c8bf
@@ -800,7 +824,7 @@ ScriptsOnlyBuild:
     className: Physics2DRaycaster
   - hash:
       serializedVersion: 2
-      Hash: fb7c18c3c0b4badc39bc6ef46fc707d8
+      Hash: 15c0343b5ecaf81e6ef504ed37f6b451
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: FightCTRL
@@ -816,6 +840,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: TimelineAsset
+  - hash:
+      serializedVersion: 2
+      Hash: e4995d7db96d9f352696631ce5b5d718
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: rotate
   - hash:
       serializedVersion: 2
       Hash: 8d35f16c5022311c6f4d9432be73bfcf
@@ -1008,6 +1038,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.RenderPipelines.Core.Runtime.dll
     namespaceName: 
     className: SceneRenderPipeline
+  - hash:
+      serializedVersion: 2
+      Hash: c58ff49b90d2c97813137837a05aa8bc
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: CameraShake
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f

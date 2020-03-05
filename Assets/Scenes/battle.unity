@@ -15053,6 +15053,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phase: 0
+  p1_Name: testbot
+  p2_Name: testbot
+  p1_Intelli: {fileID: 11400000, guid: 4f1b02195d104ec4e98c12f0e312dcf3, type: 2}
+  p2_Intelli: {fileID: 11400000, guid: 1858a91493e853740aaff7a0877d96b7, type: 2}
   levelName: colle
   mMoves: 5
   btSpd: 5
@@ -15070,9 +15074,9 @@ MonoBehaviour:
   sfx_PowerUp: {fileID: 8300000, guid: 5afe05ff070351d48bfcc58a0d93c91b, type: 3}
   sfx_PowerDown: {fileID: 8300000, guid: 70aefca43cae98149be48aa34aa0c337, type: 3}
   sfx_End: {fileID: 8300000, guid: 0f0d3fb2c00ac7749a6c34fa61d3fcff, type: 3}
+  sfx_Wrong: {fileID: 8300000, guid: f3bcf2898eedc2540b4dee550d249184, type: 3}
+  sfx_Eat: {fileID: 8300000, guid: 38231109752a9fc4989883bb6aa7c9f5, type: 3}
   areInBattle: 0
-  p1: {fileID: 0}
-  p2: {fileID: 11400000, guid: f0d8ffcb84980874b916fb94689e1b8e, type: 2}
   uiBattle: {fileID: 1045016501}
 --- !u!4 &933027087
 Transform:

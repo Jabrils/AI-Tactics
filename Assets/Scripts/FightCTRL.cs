@@ -9,11 +9,13 @@ public class FightCTRL : MonoBehaviour
     public enum Mode { Start, Battle, End };
     public static Mode mode;
 
-    public enum Phase { Null, Movement, Fight };
+    public enum Phase { Wait, Movement, Fight };
     public Phase phase;
 
     public enum InputType { Random, Run, Pursue, DummyAI, Human };
 
+    public string p1_Name, p2_Name;
+    public AI_Config p1_Intelli, p2_Intelli;
     public string levelName;
     public int mMoves = 5;
     public float btSpd;
@@ -22,9 +24,8 @@ public class FightCTRL : MonoBehaviour
     [Range(-1, 1)]
     public float angleX = 0, angleY = 0;
     public GameObject one, two;
-    public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End;
+    public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
-    public AI_Config p1, p2;
     public TextMeshProUGUI uiBattle;
 
     int _turn;
@@ -48,6 +49,11 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
+        string o = "";
+
+        LoadHaxbot(one, p1_Name);
+        LoadHaxbot(two, p2_Name);
+
         // 
         AddToNextFoodSpawn();
 
@@ -58,8 +64,8 @@ public class FightCTRL : MonoBehaviour
         map = new Map(this, levelName);
 
         // 
-        fighter[0] = new Fighter(one, 0, map.mapSize, p1);
-        fighter[1] = new Fighter(two, 1, map.mapSize, p2);
+        fighter[0] = new Fighter(one, 0, map.mapSize, p1_Intelli);
+        fighter[1] = new Fighter(two, 1, map.mapSize, p2_Intelli);
 
         // 
         for (int i = 0; i < fighter.Length; i++)
@@ -104,6 +110,27 @@ public class FightCTRL : MonoBehaviour
         }
     }
 
+    private static string LoadHaxbot(GameObject bot, string who)
+    {
+        string o;
+
+        // 
+        using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
+        {
+            string[] grab = sR.ReadToEnd().Split('\n');
+            bot.name = grab[0];
+            o = grab[1];
+        }
+
+        // 
+        foreach (Renderer r in bot.GetComponentsInChildren<Renderer>())
+        {
+            r.material.SetTexture("_BaseMap", HXB.Base64ToTexture2D(o));
+        }
+
+        return o;
+    }
+
     void AddToNextFoodSpawn()
     {
         nextCandySpawn += randNextFood;
@@ -114,6 +141,8 @@ public class FightCTRL : MonoBehaviour
         GM.battleSpd = btSpd;
 
         GM.maxMoves = mMoves;
+
+        GM.time = time;
 
         uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
 
@@ -151,6 +180,7 @@ public class FightCTRL : MonoBehaviour
         Vector2Int loc = tile.expression;
         // 
         map.candyTiles.Add(tile);
+
         // 
         map.freeTiles.RemoveAt(tileID);
         // 
@@ -244,6 +274,14 @@ public class FightCTRL : MonoBehaviour
         {
             ac = sfx_End;
         }
+        else if (c == "wrong")
+        {
+            ac = sfx_Wrong;
+        }
+        else if (c == "eat")
+        {
+            ac = sfx_Eat;
+        }
 
         aS.clip = ac;
         aS.Play();
@@ -257,6 +295,11 @@ public class FightCTRL : MonoBehaviour
             mode = Mode.Start;
             GM.turnSyncer = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Period))
+        {
+            SpawnCandy();
         }
 
         // 
@@ -298,11 +341,13 @@ public class FightCTRL : MonoBehaviour
 
     void TakeTurn()
     {
+        //print(fighter[turn].stateData.PrintState());
+
         // At the start of the turn, do a checkup on the fighters
         for (int i = 0; i < fighter.Length; i++)
         {
             fighter[i].stateData.Update(turn);
-            fighter[i].CheckUp(time);
+            fighter[i].CheckUp(map);
         }
 
         // We must reset the tile renderings
@@ -368,7 +413,7 @@ public class FightCTRL : MonoBehaviour
             OutputStay s = OutputStay.Calculate(fighter[turn]);
 
             // Calculate if moving
-            if (s.stay)
+            if (s.stay || fighter[turn].isStunned)
             {
                 // calculate if AI even wants to battle
                 OutputToBattle oB = OutputToBattle.CalculateOutput(fighter[turn]);
@@ -391,6 +436,12 @@ public class FightCTRL : MonoBehaviour
             {
                 // Calculate the move output
                 OutputMove m = OutputMove.CalculateOutput(fighter[turn]);
+
+                // 
+                if (m.distance >= .5f)
+                {
+                    fighter[turn].RanAway();
+                }
 
                 // Get the movement data
                 outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, m.distance, m.angleX, m.angleY);
@@ -423,6 +474,8 @@ public class FightCTRL : MonoBehaviour
             else // otherwise we'll just entirely skip its turn
             {
                 GM.turnSyncer++;
+
+                fighter[who].CheckIfRanTooMuch();
             }
         }
     }

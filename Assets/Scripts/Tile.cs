@@ -33,7 +33,7 @@ public class Tile
     char _type;
     public char type => _type;
 
-    public Tile(int X, int Y, char type = 'o', int halfMapSize = 0)
+    public Tile(int X, int Y, int halfMapSize, char type = 'o')
     {
         _x = X;
         _y = Y;

@@ -176,6 +176,12 @@ public class Map
         return (Mathf.Abs(a.x - b.x) + (Mathf.Abs(a.y - b.y)));
     }
 
+    public static Vector2Int DistanceXY(Vector2Int a, Vector2Int b)
+    {
+        // calculate the X + Y distance between a & b
+        return new Vector2Int((a.x - b.x), (a.y - b.y));
+    }
+
     public static int SelectAnAngle(List<Tile> toCheck, float iX, float iY, Vector2Int whoLoc)
     {
         int ret = -1;
@@ -411,6 +417,7 @@ public class Map
                     freeTiles.Add(candyTiles[i]);
                     candyTiles.RemoveAt(i);
 
+                    PlaySFX("eat");
                     fighter[who].EatCandy();
                 }
             }
@@ -474,9 +481,16 @@ public class Map
                     // else if they have pressed their action 1 button, register that they want to attack
                     else if (Input.GetKeyDown(GM.kc[i][1]))
                     {
-                        oA[i] = OutputAttack.ForceOutput(0);
+                        if (fighter[i].isStunned)
+                        {
+                            PlaySFX("wrong");
+                        }
+                        else
+                        {
+                            oA[i] = OutputAttack.ForceOutput(0);
 
-                        chosenAnAnswer[i] = true;
+                            chosenAnAnswer[i] = true;
+                        }
                     }
                     // else if they have pressed their action 2 button, register that they want to defend
                     else if (Input.GetKeyDown(GM.kc[i][2]))
@@ -649,6 +663,9 @@ public class Map
 
         // incriment the global turn
         GM.turnSyncer++;
+
+        // 
+        fighter[who].CheckIfRanTooMuch();
 
         // if turnee is human
         if (fC.humansInvolved[fC.turn])
@@ -891,7 +908,7 @@ public class Map
     Tile GetLowestFCost()
     {
         // 
-        Tile lowest = new Tile(0, 0);
+        Tile lowest = new Tile(0, 0, halfMapSize);
         lowest.SetGnH(0, Mathf.Infinity);
 
         // 

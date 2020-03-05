@@ -150,7 +150,7 @@ public struct OutputAttack
                 t = 1;
             }
 
-        return new OutputAttack(a, d, t);
+            return new OutputAttack(a, d, t);
         }
 
         // 
@@ -237,10 +237,11 @@ public struct StateData
         theTurn = turn;
     }
 
-    public void PrintState()
+    public string PrintState()
     {
-        Debug.Log($"dX: {distX}, dY: {distY}\nmyT: {myTurn}, mX: {myX}, mY: {myY}, mH: {myHP}, mS: {myStr}, iS: {iStunned}" +
-        $"\noT: {oppTurn}, oX: {oppX}, oY: {oppY}, oH: {oppHP}, oS: {oppStr}, oS: {oppStunned}");
+        return $"distX: {distX}, distY: {distY}" +
+            $"\nmyTurn: {myTurn}, myX: {myX}, myY: {myY}, myHp: {myHP}, myStr: {myStr}, isStunned: {iStunned}, myRuns: {myRuns}, myCandyX: {myCandyX}, myCandyY: {myCandyY}" +
+        $"\nopTurn: {oppTurn}, opX: {oppX}, opY: {oppY}, opHp: {oppHP}, opStr: {oppStr}, opStunned: {oppStunned}, oppRuns: {oppRuns}, oppCandyX: {oppCandyX}, oppCandyY: {oppCandyY}";
     }
 
     public Fighter me;
@@ -272,21 +273,34 @@ public struct StateData
     public float myStr => (float)me.str / (float)GM.maxStr;
     // 8- iStunned
     public int iStunned => me.isStunned ? 1 : 0;
+    // 9 - myRuns
+    public float myRuns => (float)me.ranAway / (float)GM.maxRunAway;
+    // 
+    public float myCandyX => (float)me.candyX / (float)GM.mapSize;
+    // 
+    public float myCandyY => (float)me.candyY / (float)GM.mapSize;
 
     // 
     // // OPPONENT
     // 
 
-    // 9- oppTurn
+    // 10 - oppTurn
     public int oppTurn => myTurn == 0 ? 1 : 0;
-    // 10- oppX
+    // 11- oppX
     public float oppX => (float)opp.eX / (float)GM.mapSize;
-    // 11- oppY
+    // 12- oppY
     public float oppY => (float)opp.eY / (float)GM.mapSize;
-    // 12- oppHp
+    // 13- oppHp
     public float oppHP => (float)opp.hp / (float)GM.maxHP;
-    // 13- oppStr
+    // 14- oppStr
     public float oppStr => (float)opp.str / (float)GM.maxStr;
-    // 14- oppStunned
+    // 15- oppStunned
     public int oppStunned => opp.isStunned ? 1 : 0;
+    // 16 - myRuns
+    public float oppRuns => (float)opp.ranAway / (float)GM.maxRunAway;
+    // 
+    public float oppCandyX => (float)opp.candyX / (float)GM.mapSize;
+    // 
+    public float oppCandyY => (float)opp.candyY / (float)GM.mapSize;
+
 }

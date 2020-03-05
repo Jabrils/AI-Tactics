@@ -28,7 +28,7 @@ public class Fighter
     MeshRenderer _display;
 
     int _ranAway;
-    public int ranAway;
+    public int ranAway => _ranAway;
 
     int _maxMoves = 5;
     public int maxMoves;
@@ -43,6 +43,12 @@ public class Fighter
 
     public int eX => x + (mapSize / 2);
     public int eY => y + (mapSize / 2);
+
+    int _candyX;
+    int _candyY;
+
+    public int candyX => _candyX;
+    public int candyY => _candyY;
 
     int _myTurn;
     public int myTurn => _myTurn;
@@ -105,12 +111,46 @@ public class Fighter
 
     }
 
-    public void CheckUp(int time)
+    public void UpdateClosestCandy(List<Tile> candies)
     {
         // 
-        if (_stunned && (time > _lastStunned + 1))
+        if (candies.Count == 0)
         {
-            UnStun(time);
+            _candyX = -GM.mapSize;
+            _candyY = -GM.mapSize;
+        }
+        else
+        {
+            int id = -1;
+            int dist = 1000;
+
+            // 
+            for (int i = 0; i < candies.Count; i++)
+            {
+                int computeD = Map.ManhattanDistance(candies[i].v2Int, expression);
+
+                // 
+                if (computeD < dist)
+                {
+                    id = i;
+                    dist = computeD;
+                }
+            }
+
+            // 
+            _candyX = candies[id].x;
+            _candyY = candies[id].y;
+        }
+    }
+
+    public void CheckUp(Map map)
+    {
+        UpdateClosestCandy(map.candyTiles);
+
+        // 
+        if (_stunned && (GM.time > _lastStunned + 1))
+        {
+            UnStun();
         }
     }
 
@@ -157,7 +197,7 @@ public class Fighter
                 // take damage & is stunned
                 TakeDmg(1);
                 //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
-                Stun(time);
+                Stun();
             }
             else if (oA[1].decision == 2)
             {
@@ -173,16 +213,15 @@ public class Fighter
             if (oA[1].decision == 0)
             {
                 // you take a damage for every 3 str your opponent has
-                TakeDmg((int)Mathf.Floor(opp.str/3));
+                TakeDmg((int)Mathf.Floor(opp.str / 3));
                 // opponent takes damage
                 _opp.TakeDmg(1);
                 //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
-                _opp.Stun(time);
+                _opp.Stun();
             }
             else if (oA[1].decision == 1)
             {
                 // take one step away from each other
-                //Debug.Log($"({time}) Both took 1 step away from each other");
 
                 // 
                 Vector2Int s1 = v2Int;
@@ -196,7 +235,6 @@ public class Fighter
             {
                 // opponent powers up
                 _opp.PowerUp();
-                //Debug.Log($"({time}) {_opp.obj.name} powered up +1 = {_opp.str} str");
             }
         }
         else if (oA[0].decision == 2)
@@ -207,20 +245,17 @@ public class Fighter
             {
                 // you take damage x2
                 TakeDmg(_opp.str * 2);
-                //Debug.Log($"({time}) {_opp.obj.name} crit {obj.name} for {_opp.str}*2 = HP: {hp}");
             }
             else if (oA[1].decision == 1)
             {
                 // you power up
                 PowerUp();
-                //Debug.Log($"({time}) {obj.name} powered up +1 = {str} str");
             }
             else if (oA[1].decision == 2)
             {
                 // both powers down
                 PowerDown();
                 _opp.PowerDown();
-                //Debug.Log($"({time}) Both powered down -1. {_opp.obj.name} = {_opp.str} str : {obj.name} = {str} str");
             }
         }
     }
@@ -228,6 +263,15 @@ public class Fighter
     public void RanAway()
     {
         _ranAway++;
+    }
+
+    public void CheckIfRanTooMuch()
+    {
+        if (ranAway >= GM.maxRunAway)
+        {
+            Stun(1);
+            _ranAway = 0;
+        }
     }
 
     public void SetText(bool toggle, Color c, bool add = true, int dmg = 0)
@@ -302,19 +346,17 @@ public class Fighter
         SetText(true, Color.yellow, false, dmg: 1);
     }
 
-    void Stun(int time)
+    void Stun(int offset = 0)
     {
         _stunned = true;
-        _lastStunned = time;
+        _lastStunned = GM.time + offset;
         _stunSpr.enabled = _stunned;
-        //Debug.Log($"({time}) {obj.name} is now STUNNED!");
     }
 
-    void UnStun(int time)
+    void UnStun()
     {
         _stunned = false;
         _stunSpr.enabled = _stunned;
-        //Debug.Log($"({time}) {obj.name} is now UNSTUNNED!");
     }
 
     void TakeDmg(int dmg)

@@ -1,17 +1,20 @@
-## v0.0.30
+## v0.0.31
 
 ## Notes
-- There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation.
+- There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
 - make sure you vs opp turn it is makes it into the state
+- If your str is at least 3, & > opp str & hp > opp.hp, beserk
+- if your str is higher, beserk
 
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
 |||Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
-|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
 |||Added a ML AI
 
 ### Feature Creep
+|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
+|||Added last 10 battle actions to state data | going to have to build a memory NN to be able to properly feed this as input
 |||Added audience to stans
 |||optimize
 |||model a few skins
@@ -23,6 +26,8 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.31|03.04.020|Added closest candy location to state data
+|v0.0.31|03.04.020|Added Ran counts to state data
 |v0.0.30|03.03.020|Made a Battle UI
 |v0.0.29|03.03.020|Food Health now spawns on the map|now important that the AI learns this, but expert AI if so
 |v0.0.27|03.02.020|added action camera mode
