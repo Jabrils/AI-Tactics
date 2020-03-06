@@ -1,4 +1,4 @@
-## v0.0.31
+## v0.0.32
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.

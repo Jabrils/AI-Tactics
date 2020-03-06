@@ -51,8 +51,8 @@ public class FightCTRL : MonoBehaviour
     {
         string o = "";
 
-        LoadHaxbot(one, p1_Name);
-        LoadHaxbot(two, p2_Name);
+        HXB.LoadHaxbot(one, p1_Name);
+        HXB.LoadHaxbot(two, p2_Name);
 
         // 
         AddToNextFoodSpawn();
@@ -108,27 +108,6 @@ public class FightCTRL : MonoBehaviour
                 GameObject g = null;
             }
         }
-    }
-
-    private static string LoadHaxbot(GameObject bot, string who)
-    {
-        string o;
-
-        // 
-        using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
-        {
-            string[] grab = sR.ReadToEnd().Split('\n');
-            bot.name = grab[0];
-            o = grab[1];
-        }
-
-        // 
-        foreach (Renderer r in bot.GetComponentsInChildren<Renderer>())
-        {
-            r.material.SetTexture("_BaseMap", HXB.Base64ToTexture2D(o));
-        }
-
-        return o;
     }
 
     void AddToNextFoodSpawn()

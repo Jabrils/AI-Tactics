@@ -15053,8 +15053,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phase: 0
-  p1_Name: testbot
-  p2_Name: testbot
+  p1_Name: Ben Hax
+  p2_Name: rita mote
   p1_Intelli: {fileID: 11400000, guid: 4f1b02195d104ec4e98c12f0e312dcf3, type: 2}
   p2_Intelli: {fileID: 11400000, guid: 1858a91493e853740aaff7a0877d96b7, type: 2}
   levelName: colle

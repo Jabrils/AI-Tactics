@@ -4,6 +4,27 @@ using UnityEngine;
 
 public static class HXB
 {
+    public static string LoadHaxbot(GameObject bot, string who, string mainTexture="_BaseMap")
+    {
+        string o;
+
+        // 
+        using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
+        {
+            string[] grab = sR.ReadToEnd().Split('\n');
+            bot.name = grab[0];
+            o = grab[1];
+        }
+
+        // 
+        foreach (Renderer r in bot.GetComponentsInChildren<Renderer>())
+        {
+            r.material.SetTexture(mainTexture, Base64ToTexture2D(o));
+        }
+
+        return o;
+    }
+
     public static void SaveHXB(string loc, string filename, Texture2D txt)
     {
         string b64 = Texture2DToBase64(txt);
