@@ -12,10 +12,6 @@ public class FightCTRL : MonoBehaviour
     public enum Phase { Wait, Movement, Fight };
     public Phase phase;
 
-    public enum InputType { Random, Run, Pursue, DummyAI, Human };
-
-    public string p1_Name, p2_Name;
-    public AI_Config p1_Intelli, p2_Intelli;
     public string levelName;
     public int mMoves = 5;
     public float btSpd;
@@ -51,8 +47,8 @@ public class FightCTRL : MonoBehaviour
     {
         string o = "";
 
-        HXB.LoadHaxbot(one, p1_Name);
-        HXB.LoadHaxbot(two, p2_Name);
+        HXB.LoadHaxbot(one, GM.hbName[0]);
+        HXB.LoadHaxbot(two, GM.hbName[1]);
 
         // 
         AddToNextFoodSpawn();
@@ -64,8 +60,8 @@ public class FightCTRL : MonoBehaviour
         map = new Map(this, levelName);
 
         // 
-        fighter[0] = new Fighter(one, 0, map.mapSize, p1_Intelli);
-        fighter[1] = new Fighter(two, 1, map.mapSize, p2_Intelli);
+        fighter[0] = new Fighter(one, 0, map.mapSize, GM.intelli[0]);
+        fighter[1] = new Fighter(two, 1, map.mapSize, GM.intelli[1]);
 
         // 
         for (int i = 0; i < fighter.Length; i++)

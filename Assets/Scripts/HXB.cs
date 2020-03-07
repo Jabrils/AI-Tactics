@@ -4,14 +4,15 @@ using UnityEngine;
 
 public static class HXB
 {
-    public static string LoadHaxbot(GameObject bot, string who, string mainTexture="_BaseMap")
+    public static HaxbotData LoadHaxbot(GameObject bot, string who, string mainTexture="_BaseMap")
     {
         string o;
+        string[] grab = new string[2];
 
         // 
         using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
         {
-            string[] grab = sR.ReadToEnd().Split('\n');
+            grab = sR.ReadToEnd().Split('\n');
             bot.name = grab[0];
             o = grab[1];
         }
@@ -22,7 +23,7 @@ public static class HXB
             r.material.SetTexture(mainTexture, Base64ToTexture2D(o));
         }
 
-        return o;
+        return new HaxbotData(grab[0], grab[1]);
     }
 
     public static void SaveHXB(string loc, string filename, Texture2D txt)
@@ -85,5 +86,20 @@ public static class HXB
         RenderTexture.active = previous;
         RenderTexture.ReleaseTemporary(renderTex);
         return readableText;
+    }
+}
+
+public struct HaxbotData
+{
+    string _name;
+    public string name => _name;
+
+    string _base64;
+    public string base64 => _base64;
+
+    public HaxbotData(string n, string b64)
+    {
+        _name = n;
+        _base64 = b64;
     }
 }

@@ -20,6 +20,8 @@ static class GM
     public static KeyCode[][] kc = new KeyCode[][] { new KeyCode[] { KeyCode.BackQuote, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3 }, new KeyCode[] { KeyCode.Alpha8, KeyCode.Alpha9, KeyCode.Alpha0, KeyCode.Minus } };
     public static int time;
     public static int maxRunAway = 5;
+    public static string[] hbName = new string[2];
+    public static AI_Config[] intelli = new AI_Config[2];
 
     public static float XYtoDeg(float x, float y)
     {
