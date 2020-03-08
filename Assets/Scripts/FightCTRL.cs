@@ -124,7 +124,7 @@ public class FightCTRL : MonoBehaviour
         // 
         if (_turn == nextCandySpawn)
         {
-            SpawnCandy();
+            SpawnWaffle();
         }
 
         // 
@@ -141,10 +141,10 @@ public class FightCTRL : MonoBehaviour
         ListenForControls();
     }
 
-    void SpawnCandy()
+    void SpawnWaffle()
     {
         // 
-        GameObject food = Instantiate(Resources.Load<GameObject>("Objs/Hax! Bar"));
+        GameObject food = Instantiate(Resources.Load<GameObject>("Objs/Waffle"));
         // 
         int tileID = Random.Range(0, map.freeTiles.Count);
         // 
@@ -272,9 +272,17 @@ public class FightCTRL : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        // 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            mode = Mode.Start;
+            GM.turnSyncer = 0;
+            SceneManager.LoadScene("mainMenu");
+        }
+
         if (Input.GetKeyDown(KeyCode.Period))
         {
-            SpawnCandy();
+            SpawnWaffle();
         }
 
         // 
@@ -385,7 +393,7 @@ public class FightCTRL : MonoBehaviour
         else
         {
             // 
-            OutputStay s = OutputStay.Calculate(fighter[turn]);
+            OutputStay s = OutputStay.CalculateNormal(fighter[turn]);
 
             // Calculate if moving
             if (s.stay || fighter[turn].isStunned)

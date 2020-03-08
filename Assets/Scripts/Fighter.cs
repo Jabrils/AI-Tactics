@@ -178,6 +178,9 @@ public class Fighter
         //oA1.DEBUGSetVals(0, 1, 0);
         //oA2.DEBUGSetVals(0, 1, 0);
 
+        // reset ran away after every battle
+        _ranAway = 0;
+
         // compare & calculate
         if (oA[0].decision == 0)
         {

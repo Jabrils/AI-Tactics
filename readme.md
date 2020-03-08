@@ -1,15 +1,13 @@
-## v0.0.33
+## v0.0.34
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
 - make sure you vs opp turn it is makes it into the state
-- If your str is at least 3, & > opp str & hp > opp.hp, beserk
-- if your str is higher, beserk
+- I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implimentation.
 
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
 |||Added a ML AI
 
 ### Feature Creep
@@ -26,6 +24,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.34|03.08.020|Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
 |v0.0.31|03.04.020|Added closest candy location to state data
 |v0.0.31|03.04.020|Added Ran counts to state data
 |v0.0.30|03.03.020|Made a Battle UI

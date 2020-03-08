@@ -31,29 +31,23 @@ public struct OutputMove
         float aX = UnityEngine.Random.Range(-1f, 1f);
         float aY = UnityEngine.Random.Range(-1f, 1f);
 
-        // 
-        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
-        //{
-        //    d = 1;
-        //    aX = UnityEngine.Random.Range(-1f, 1f);
-        //    aY = UnityEngine.Random.Range(-1f, 1f);
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
-        //{
-        //    d = 0;
-        //    aX = UnityEngine.Random.Range(-1f, 1f);
-        //    aY = UnityEngine.Random.Range(-1f, 1f);
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
-        //{
-        //    d = UnityEngine.Random.value;
-        //    aX = UnityEngine.Random.Range(-1f, 1f);
-        //    aY = UnityEngine.Random.Range(-1f, 1f);
-        //}
+        AI_Config conf = fighter.config;
 
-        d = fighter.config.distance == -1 ? d : fighter.config.distance;
-        aX = fighter.config.distance == 0 ? aX : fighter.config.angleX;
-        aY = fighter.config.distance == 0 ? aY : fighter.config.angleY;
+        // 
+        //if (conf.neuralNetwork)
+        //{
+
+        //}
+        //else
+        {
+            float dice = UnityEngine.Random.value;
+
+            d = dice < conf.movement ? 0 : 1;
+        }
+
+        //d = fighter.config.distance == -1 ? d : fighter.config.distance;
+        //aX = fighter.config.distance == 0 ? aX : fighter.config.angleX;
+        //aY = fighter.config.distance == 0 ? aY : fighter.config.angleY;
 
         return new OutputMove(d, aX, aY);
     }
@@ -71,23 +65,21 @@ public struct OutputToBattle
 
     public static OutputToBattle CalculateOutput(Fighter fighter)
     {
-        float ret = -1;
+        float ret = UnityEngine.Random.value;
 
-        //// 
-        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
-        //{
-        //    ret = 0;
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
-        //{
-        //    ret = 1;
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
-        //{
-        //    ret = UnityEngine.Random.value;
-        //}
+        AI_Config conf = fighter.config;
 
-        ret = fighter.config.toBattle == true ? 1 : 0;
+        // 
+        //if (conf.neuralNetwork)
+        //{
+
+        //}
+        //else
+        {
+            float dice = UnityEngine.Random.value;
+
+            ret = dice < conf.battle ? 1 : 0;
+        }
 
         return new OutputToBattle(ret);
     }
@@ -124,12 +116,18 @@ public struct OutputAttack
         float d = UnityEngine.Random.Range(0, 1 - a);
         float t = 1 - (a + d);
 
+        AI_Config conf = fighter.config;
+
         // 
-        if (fighter.config.attack || fighter.config.defend || fighter.config.taunt)
+        //if (conf.neuralNetwork)
+        //{
+
+        //}
+        //else
         {
-            a = fighter.config.attack == true ? 1 : 0;
-            d = fighter.config.defend == true ? 1 : 0;
-            t = fighter.config.taunt == true ? 1 : 0;
+            a = UnityEngine.Random.Range(0, conf.attack);
+            d = UnityEngine.Random.Range(0, conf.defend);
+            t = UnityEngine.Random.Range(0, conf.taunt);
         }
 
         // MOVE IS STUNNED FUNCT INTO HERE INSTEAD, PASS IN BOOL
@@ -194,32 +192,92 @@ public struct OutputStay
         _stay = r;
     }
 
-    public static OutputStay Calculate(Fighter fighter)
+    public static OutputStay CalculateNormal(Fighter fighter)
     {
-        float ret = -1;
+        float ret = UnityEngine.Random.value;
 
+        AI_Config conf = fighter.config;
+
+        // when fighter is stunned, it has to stay put
         if (fighter.isStunned)
         {
             return new OutputStay(0);
         }
 
         // 
-        //if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Run)
+        //if (conf.neuralNetwork)
         //{
-        //    ret = 1;
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Pursue)
-        //{
-        //    ret = 1;
-        //}
-        //else if (GM.inpType[fighter.myTurn] == FightCTRL.InputType.Random)
-        //{
-        //    ret = UnityEngine.Random.value;
-        //}
 
-        ret = fighter.config.move == true ? 1 : 0;
+        //}
+        //else
+        {
+            float dice = UnityEngine.Random.value;
+
+            ret = dice < conf.stay ? 1 : 0;
+        }
 
         return new OutputStay(ret);
+    }
+
+    public static OutputStay CalculateNN(Fighter fighter)
+    {
+        float ret = -1;
+        float[][][] w = new float[2][][];
+        float[] x = fighter.stateData.fullState;
+        int layers = 2;
+        float[] hL = new float[2], o = new float[2];
+        float[][] b = new float[2][];
+
+        // weight[layer][node][weight]
+
+        // 
+        for (int k = 0; k < layers; k++)
+        {
+            for (int j = 0; j < w[k].Length; j++)
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    hL[j] = AI.ReLu((x[i] * w[k][j][i]) + b[k][j]);
+                }
+            }
+        }
+
+        o[0] = AI.Sigmoid(hL[0] * w[1][0][0]);
+
+        return new OutputStay(ret);
+    }
+}
+
+public struct AI
+{
+    public static float Sigmoid(float x)
+    {
+        return 1 / (1 + Mathf.Exp(-x));
+    }
+
+    public static float Sinh(float x)
+    {
+        return (Mathf.Exp(x) - Mathf.Exp(-x)) / 2;
+    }
+
+    public static float Cosh(float x)
+    {
+        return (Mathf.Exp(x) + Mathf.Exp(-x)) / 2;
+    }
+
+    public static float Tanh(float x)
+    {
+        return (Mathf.Exp(2 * x) - 1) / (Mathf.Exp(2 * x) + 1);
+    }
+
+    public static float Softsign(float x)
+    {
+        return x / (1 + Math.Abs(x));
+    }
+
+    public static float ReLu(float x)
+    {
+        return Mathf.Clamp(x, 0, x);
     }
 }
 
@@ -247,6 +305,7 @@ public struct StateData
     public Fighter me;
     public Fighter opp;
     int theTurn;
+    public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myCandyX, myCandyY, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppCandyX, oppCandyY };
 
     // 
     // // SHARED
@@ -275,32 +334,31 @@ public struct StateData
     public int iStunned => me.isStunned ? 1 : 0;
     // 9 - myRuns
     public float myRuns => (float)me.ranAway / (float)GM.maxRunAway;
-    // 
+    // 10 - myCandyX
     public float myCandyX => (float)me.candyX / (float)GM.mapSize;
-    // 
+    // 11 - myCandyY
     public float myCandyY => (float)me.candyY / (float)GM.mapSize;
 
     // 
     // // OPPONENT
     // 
 
-    // 10 - oppTurn
+    // 12 - oppTurn
     public int oppTurn => myTurn == 0 ? 1 : 0;
-    // 11- oppX
+    // 13- oppX
     public float oppX => (float)opp.eX / (float)GM.mapSize;
-    // 12- oppY
+    // 14- oppY
     public float oppY => (float)opp.eY / (float)GM.mapSize;
-    // 13- oppHp
+    // 15- oppHp
     public float oppHP => (float)opp.hp / (float)GM.maxHP;
-    // 14- oppStr
+    // 16- oppStr
     public float oppStr => (float)opp.str / (float)GM.maxStr;
-    // 15- oppStunned
+    // 17- oppStunned
     public int oppStunned => opp.isStunned ? 1 : 0;
-    // 16 - myRuns
+    // 18 - oppRuns
     public float oppRuns => (float)opp.ranAway / (float)GM.maxRunAway;
-    // 
+    // 19 - oppCandyX
     public float oppCandyX => (float)opp.candyX / (float)GM.mapSize;
-    // 
+    // 20 - oppCandyY
     public float oppCandyY => (float)opp.candyY / (float)GM.mapSize;
-
 }
