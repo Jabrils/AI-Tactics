@@ -22,6 +22,7 @@ static class GM
     public static int maxRunAway = 5;
     public static string[] hbName = new string[2];
     public static AI_Config[] intelli = new AI_Config[2];
+    public static int nodePerConstant = 4;
 
     public static float XYtoDeg(float x, float y)
     {

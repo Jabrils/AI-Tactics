@@ -25,7 +25,8 @@ public class Map
 
     Tile current;
     Tile[,] _loc;
-    public List<Tile> openTiles, closedTiles, freeTiles, candyTiles = new List<Tile>();
+    public List<Tile> openTiles, closedTiles, freeTiles, waffleTiles = new List<Tile>();
+    public int waffleCount => waffleTiles.Count;
 
     public Map(int size)
     {
@@ -404,21 +405,26 @@ public class Map
 
         ResetAllTiles();
 
-        // 
-        if (candyTiles.Count > 0)
+        // if there are actual waffles on the field
+        if (waffleCount > 0)
         {
-            // 
-            for (int i = 0; i < candyTiles.Count; i++)
+            // loop through all those waffles
+            for (int i = 0; i < waffleCount; i++)
             {
-                // 
-                if (fighter[who].expression == candyTiles[i].v2Int) // I DONT KNOW WHY EXPRESSION & v2INT ARE FLIPPED HERE FUUUUUUUCKKK
+                // Check if at the same location of a waffle. (picked up a waffle)
+                if (fighter[who].expression == waffleTiles[i].v2Int) // I DONT KNOW WHY EXPRESSION & v2INT ARE FLIPPED HERE FUUUUUUUCKKK
                 {
-                    candyTiles[i].DeleteDressing();
-                    freeTiles.Add(candyTiles[i]);
-                    candyTiles.RemoveAt(i);
+                    // delete that waffle GUI
+                    waffleTiles[i].DeleteDressing();
+                    // free that tile again
+                    freeTiles.Add(waffleTiles[i]);
+                    // remove it from the waffle tiles
+                    waffleTiles.RemoveAt(i);
 
+                    // play eat sfx
                     PlaySFX("eat");
-                    fighter[who].EatCandy();
+                    // add that HP to the fighter
+                    fighter[who].EatWaffle();
                 }
             }
         }

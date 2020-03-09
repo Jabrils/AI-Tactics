@@ -5,6 +5,55 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+public struct AI
+{
+    public static float Sigmoid(float x)
+    {
+        return 1 / (1 + Mathf.Exp(-x));
+    }
+
+    public static float Sinh(float x)
+    {
+        return (Mathf.Exp(x) - Mathf.Exp(-x)) / 2;
+    }
+
+    public static float Cosh(float x)
+    {
+        return (Mathf.Exp(x) + Mathf.Exp(-x)) / 2;
+    }
+
+    public static float Tanh(float x)
+    {
+        return (float)Math.Tanh((double)x);
+    }
+
+    public static float Softsign(float x)
+    {
+        return x / (1 + Math.Abs(x));
+    }
+
+    public static float ReLu(float x)
+    {
+        return Mathf.Clamp(x, 0, x);
+    }
+
+    public static float Σ(params float[][] s)
+    {
+        float ret = 0;
+
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            for (int j = 0; j < s[0].Length; j++)
+            {
+                ret += s[i][j] * (i + 1 < s.Length ? s[i + 1][j] : 1);
+            }
+        }
+
+        return ret;
+    }
+}
+
 public struct OutputMove
 {
     float _distance, _angleX, _angleY;
@@ -32,22 +81,82 @@ public struct OutputMove
         float aY = UnityEngine.Random.Range(-1f, 1f);
 
         AI_Config conf = fighter.config;
+        StateData state = fighter.stateData;
 
         // 
-        //if (conf.neuralNetwork)
-        //{
+        if (conf.neuralNetwork[1])
+        {
+            // get a ref to how many inputs will we be using for the move output network
+            int inpCount = state.fullState.Length;
+            // ref to number of output nodes for move network
+            int numOutputNodes = 3;
 
-        //}
-        //else
+            // ref to output nodes
+            float[] o = new float[numOutputNodes];
+            // ref to hidden layer nodes
+            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            // ref to hidden layer node weights
+            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            // ref to output layer weights
+            float[][] wO = new float[numOutputNodes][];
+            // ref to the when the hidden layer weights end
+            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+
+            // init our hidden layer nodes wieghts
+            for (int i = 0; i < wHL.Length; i++)
+            {
+                wHL[i] = new float[inpCount];
+            }
+
+            // init our output nodes wieghts
+            for (int i = 0; i < wO.Length; i++)
+            {
+                wO[i] = new float[hL.Length];
+            }
+
+            // convert config string NN into 12 float arrays
+            for (int j = 0; j < wHL.Length; j++)
+            {
+                for (int i = 0; i < inpCount; i++)
+                {
+                    wHL[j][i] = float.Parse(conf.movementNN[(inpCount * j) + (i)]);
+                }
+            }
+
+            // convert the remaining config string NN into 3 float arrays
+            for (int j = 0; j < wO.Length; j++)
+            {
+                for (int i = 0; i < wHL.Length; i++)
+                {
+                    wO[j][i] = float.Parse(conf.movementNN[lastHLW + (wHL.Length * j) + i]);
+                }
+            }
+
+            // calculate the hidden layer nodes output
+            for (int i = 0; i < hL.Length; i++)
+            {
+                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+            }
+
+            // calculate the output nodes output
+            for (int i = 0; i < o.Length; i++)
+            {
+                o[i] = AI.Σ(hL, wO[i]);
+            }
+
+            // squash & set the the final values for returning
+            d = AI.Sigmoid(o[0]);
+            aX = AI.Tanh(o[1]);
+            aY = AI.Tanh(o[2]);
+
+            Debug.Log($"{fighter.name} dXY: {d},{aX},{ aY}");
+        }
+        else
         {
             float dice = UnityEngine.Random.value;
 
-            d = dice < conf.movement ? 0 : 1;
+            d = dice < conf.movementTrad ? 0 : 1;
         }
-
-        //d = fighter.config.distance == -1 ? d : fighter.config.distance;
-        //aX = fighter.config.distance == 0 ? aX : fighter.config.angleX;
-        //aY = fighter.config.distance == 0 ? aY : fighter.config.angleY;
 
         return new OutputMove(d, aX, aY);
     }
@@ -68,17 +177,80 @@ public struct OutputToBattle
         float ret = UnityEngine.Random.value;
 
         AI_Config conf = fighter.config;
+        StateData state = fighter.stateData;
 
         // 
-        //if (conf.neuralNetwork)
-        //{
+        if (conf.neuralNetwork[2])
+        {
+            // get a ref to how many inputs will we be using for the To Battle output network
+            int inpCount = state.fullState.Length;
+            // ref to number of output nodes for To Battle network
+            int numOutputNodes = 1;
 
-        //}
-        //else
+            // ref to output nodes
+            float[] o = new float[numOutputNodes];
+            // ref to hidden layer nodes
+            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            // ref to hidden layer node weights
+            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            // ref to output layer weights
+            float[][] wO = new float[numOutputNodes][];
+            // ref to the when the hidden layer weights end
+            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+
+            // init our hidden layer nodes wieghts
+            for (int i = 0; i < wHL.Length; i++)
+            {
+                wHL[i] = new float[inpCount];
+            }
+
+            // init our output nodes wieghts
+            for (int i = 0; i < wO.Length; i++)
+            {
+                wO[i] = new float[hL.Length];
+            }
+
+            // convert config string NN into 12 float arrays
+            for (int j = 0; j < wHL.Length; j++)
+            {
+                for (int i = 0; i < inpCount; i++)
+                {
+                    wHL[j][i] = float.Parse(conf.battleNN[(inpCount * j) + (i)]);
+                }
+            }
+
+            // convert the remaining config string NN into 3 float arrays
+            for (int j = 0; j < wO.Length; j++)
+            {
+                for (int i = 0; i < wHL.Length; i++)
+                {
+                    //Debug.Log($"{lastHLW + (wHL.Length * j) + i}");
+                    wO[j][i] = float.Parse(conf.battleNN[lastHLW + (wHL.Length * j) + i]);
+                }
+            }
+
+            // calculate the hidden layer nodes output
+            for (int i = 0; i < hL.Length; i++)
+            {
+                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+            }
+
+            // calculate the output nodes output
+            for (int i = 0; i < o.Length; i++)
+            {
+                o[i] = AI.Σ(hL, wO[i]);
+            }
+
+            // squash & set the the final values for returning
+            ret = AI.Sigmoid(o[0]);
+
+            Debug.Log($"{fighter.name} Battle: {ret}");
+        }
+        else
         {
             float dice = UnityEngine.Random.value;
 
-            ret = dice < conf.battle ? 1 : 0;
+            ret = dice < conf.battleTrad ? 1 : 0;
         }
 
         return new OutputToBattle(ret);
@@ -117,17 +289,81 @@ public struct OutputAttack
         float t = 1 - (a + d);
 
         AI_Config conf = fighter.config;
+        StateData state = fighter.stateData;
 
         // 
-        //if (conf.neuralNetwork)
-        //{
-
-        //}
-        //else
+        if (conf.neuralNetwork[3])
         {
-            a = UnityEngine.Random.Range(0, conf.attack);
-            d = UnityEngine.Random.Range(0, conf.defend);
-            t = UnityEngine.Random.Range(0, conf.taunt);
+            // get a ref to how many inputs will we be using for the attack output network
+            int inpCount = state.fullState.Length;
+            // ref to number of output nodes for attack network
+            int numOutputNodes = 3;
+
+            // ref to output nodes
+            float[] o = new float[numOutputNodes];
+            // ref to hidden layer nodes
+            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            // ref to hidden layer node weights
+            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            // ref to output layer weights
+            float[][] wO = new float[numOutputNodes][];
+            // ref to the when the hidden layer weights end
+            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+
+            // init our hidden layer nodes wieghts
+            for (int i = 0; i < wHL.Length; i++)
+            {
+                wHL[i] = new float[inpCount];
+            }
+
+            // init our output nodes wieghts
+            for (int i = 0; i < wO.Length; i++)
+            {
+                wO[i] = new float[hL.Length];
+            }
+
+            // convert config string NN into 12 float arrays
+            for (int j = 0; j < wHL.Length; j++)
+            {
+                for (int i = 0; i < inpCount; i++)
+                {
+                    wHL[j][i] = float.Parse(conf.attackNN[(inpCount * j) + (i)]);
+                }
+            }
+
+            // convert the remaining config string NN into 3 float arrays
+            for (int j = 0; j < wO.Length; j++)
+            {
+                for (int i = 0; i < wHL.Length; i++)
+                {
+                    wO[j][i] = float.Parse(conf.attackNN[lastHLW + (wHL.Length * j) + i]);
+                }
+            }
+
+            // calculate the hidden layer nodes output
+            for (int i = 0; i < hL.Length; i++)
+            {
+                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+            }
+
+            // calculate the output nodes output
+            for (int i = 0; i < o.Length; i++)
+            {
+                o[i] = AI.Σ(hL, wO[i]);
+            }
+
+            // squash & set the the final values for returning
+            a = AI.Sigmoid(o[0]);
+            d = AI.Sigmoid(o[1]);
+            t = AI.Sigmoid(o[2]);
+
+            Debug.Log($"{fighter.name} adt: {a},{d},{ t}");
+        }
+        else
+        {
+            a = UnityEngine.Random.Range(0, conf.attackTrad);
+            d = UnityEngine.Random.Range(0, conf.defendTrad);
+            t = UnityEngine.Random.Range(0, conf.tauntTrad);
         }
 
         // MOVE IS STUNNED FUNCT INTO HERE INSTEAD, PASS IN BOOL
@@ -182,45 +418,109 @@ public struct OutputAttack
     }
 }
 
-public struct OutputStay
+public struct OutputMakeMove
 {
     float _stay;
     public bool stay => UnityEngine.Mathf.Round(_stay) == 0;
 
-    public OutputStay(float r)
+    public OutputMakeMove(float r)
     {
         _stay = r;
     }
 
-    public static OutputStay CalculateNormal(Fighter fighter)
+    public static OutputMakeMove CalculateNormal(Fighter fighter)
     {
         float ret = UnityEngine.Random.value;
 
         AI_Config conf = fighter.config;
+        StateData state = fighter.stateData;
 
         // when fighter is stunned, it has to stay put
         if (fighter.isStunned)
         {
-            return new OutputStay(0);
+            return new OutputMakeMove(0);
         }
 
         // 
-        //if (conf.neuralNetwork)
-        //{
+        if (conf.neuralNetwork[0])
+        {
+            // get a ref to how many inputs will we be using for the stay output network
+            int inpCount = state.fullState.Length;
+            // ref to number of output nodes for stay network
+            int numOutputNodes = 1;
 
-        //}
-        //else
+            // ref to output nodes
+            float[] o = new float[numOutputNodes];
+            // ref to hidden layer nodes
+            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            // ref to hidden layer node weights
+            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            // ref to output layer weights
+            float[][] wO = new float[numOutputNodes][];
+            // ref to the when the hidden layer weights end
+            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+
+            // init our hidden layer nodes wieghts
+            for (int i = 0; i < wHL.Length; i++)
+            {
+                wHL[i] = new float[inpCount];
+            }
+
+            // init our output nodes wieghts
+            for (int i = 0; i < wO.Length; i++)
+            {
+                wO[i] = new float[hL.Length];
+            }
+
+            // convert config string NN into 12 float arrays
+            for (int j = 0; j < wHL.Length; j++)
+            {
+                for (int i = 0; i < inpCount; i++)
+                {
+                    wHL[j][i] = float.Parse(conf.stayNN[(inpCount * j) + (i)]);
+                }
+            }
+
+
+            // convert the remaining config string NN into 3 float arrays
+            for (int j = 0; j < wO.Length; j++)
+            {
+                for (int i = 0; i < wHL.Length; i++)
+                {
+                    //Debug.Log($"{lastHLW + (wHL.Length * j) + i}");
+                    wO[j][i] = float.Parse(conf.stayNN[lastHLW + (wHL.Length * j) + i]);
+                }
+            }
+
+            // calculate the hidden layer nodes output
+            for (int i = 0; i < hL.Length; i++)
+            {
+                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+            }
+
+            // calculate the output nodes output
+            for (int i = 0; i < o.Length; i++)
+            {
+                o[i] = AI.Σ(hL, wO[i]);
+            }
+
+            // squash & set the the final values for returning
+            ret = AI.Sigmoid(o[0]);
+
+            Debug.Log($"{fighter.name} Stay: {ret}");
+        }
+        else
         {
             float dice = UnityEngine.Random.value;
 
-            ret = dice < conf.stay ? 1 : 0;
+            ret = dice < conf.stayTrad ? 1 : 0;
         }
 
-        return new OutputStay(ret);
+        return new OutputMakeMove(ret);
     }
 
-    public static OutputStay CalculateNN(Fighter fighter)
-    {
+    public static OutputMakeMove CalculateNN(Fighter fighter)
+    { 
         float ret = -1;
         float[][][] w = new float[2][][];
         float[] x = fighter.stateData.fullState;
@@ -244,40 +544,7 @@ public struct OutputStay
 
         o[0] = AI.Sigmoid(hL[0] * w[1][0][0]);
 
-        return new OutputStay(ret);
-    }
-}
-
-public struct AI
-{
-    public static float Sigmoid(float x)
-    {
-        return 1 / (1 + Mathf.Exp(-x));
-    }
-
-    public static float Sinh(float x)
-    {
-        return (Mathf.Exp(x) - Mathf.Exp(-x)) / 2;
-    }
-
-    public static float Cosh(float x)
-    {
-        return (Mathf.Exp(x) + Mathf.Exp(-x)) / 2;
-    }
-
-    public static float Tanh(float x)
-    {
-        return (Mathf.Exp(2 * x) - 1) / (Mathf.Exp(2 * x) + 1);
-    }
-
-    public static float Softsign(float x)
-    {
-        return x / (1 + Math.Abs(x));
-    }
-
-    public static float ReLu(float x)
-    {
-        return Mathf.Clamp(x, 0, x);
+        return new OutputMakeMove(ret);
     }
 }
 

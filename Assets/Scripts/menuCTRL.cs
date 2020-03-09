@@ -21,6 +21,7 @@ public class menuCTRL : MonoBehaviour
     public Button createAI;
     public TMP_InputField brainInp;
     public Slider[] percSlider;
+    public RectTransform msgBox;
 
     HaxbotData[] hbD;
     List<TMP_Dropdown.OptionData> dd = new List<TMP_Dropdown.OptionData>();
@@ -127,6 +128,11 @@ public class menuCTRL : MonoBehaviour
         dd_Intelli[0].onValueChanged.AddListener(delegate { SetIntelli(0); });
         dd_Intelli[1].onValueChanged.AddListener(delegate { SetIntelli(1); });
 
+        UpdatePanel(0);
+        UpdatePanel(1);
+        UpdatePanel(2);
+        UpdatePanel(3);
+
         // set the proper menu
         ChangeMenu(0);
         CheckIfCanCreateAI();
@@ -149,7 +155,7 @@ public class menuCTRL : MonoBehaviour
 
         string[] strat = new string[4];
 
-        int[] weightCount = new int[] { 80, 240, 80, 240 };
+        int[] weightCount = new int[] { 84, 276, 84, 276 };
 
         // 
         string ret = "";
@@ -176,9 +182,10 @@ public class menuCTRL : MonoBehaviour
             //
             for (int i = 0; i < weightCount[j]; i++)
             {
-                strat[j] += $"{ch}{(i != weightCount[j] - 1 ? "," : "")}";
+                strat[j] += $"{(ch == "-1" ? Random.Range(-1f,1f).ToString() : ch)}{(i != weightCount[j] - 1 ? "," : "")}";
             }
 
+            // 
             ret += $"{strat[j]}{(last ? "" : ";")}";
         }
 
@@ -197,7 +204,7 @@ public class menuCTRL : MonoBehaviour
             sW.Write($"{brainInp.text}\n{ret}");
         }
 
-        print("Brain Saved");
+        StartCoroutine(ShowMessage("Your AI Brain has been Saved in the data file/Brains!"));
     }
 
     public void CheckIfCanCreateAI()
@@ -254,6 +261,14 @@ public class menuCTRL : MonoBehaviour
         {
             Application.Quit();
         }
+    }
+
+    IEnumerator ShowMessage(string msg)
+    {
+        msgBox.gameObject.SetActive(true);
+        msgBox.GetComponentInChildren<TextMeshProUGUI>().text = msg;
+        yield return new WaitForSeconds(3);
+        msgBox.gameObject.SetActive(false);
     }
 
     public void ChangeMenu(int w)

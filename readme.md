@@ -1,4 +1,4 @@
-## v0.0.34
+## v0.0.35
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -8,22 +8,28 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added Human control to the Menu UI
+|||Made the human control be fully controllable with a keyboard
 |||Added a ML AI
 
+## Polish
+|||A menu popup now displays to confirm
+|||Added audience to stands
+
 ### Feature Creep
-|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
 |||Added last 10 battle actions to state data | going to have to build a memory NN to be able to properly feed this as input
-|||Added audience to stans
 |||optimize
 |||model a few skins
-|||fixed level loader to read it properly
+|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
 |||model new coleseum
 |||units no longer get stuck in corners
 |||Maybe add like a special attack
+|||fixed level loader to read it properly
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.35|03.08.020|You can now click "start battle" or can still press space
 |v0.0.34|03.08.020|Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
 |v0.0.31|03.04.020|Added closest candy location to state data
 |v0.0.31|03.04.020|Added Ran counts to state data

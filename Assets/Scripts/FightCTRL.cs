@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
@@ -23,12 +24,14 @@ public class FightCTRL : MonoBehaviour
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
     public TextMeshProUGUI uiBattle;
+    public Button start;
 
     int _turn;
     public int turn => _turn % 2;
     public int gmTurn => GM.turnSyncer % 2;
     public int time => _turn;
     public bool aHumanIsInvolved => humansInvolved[0] || humansInvolved[1];
+    public bool[] humansInvolved => _humansInvolved;
 
     Map map;
     Fighter[] fighter = new Fighter[2];
@@ -37,9 +40,9 @@ public class FightCTRL : MonoBehaviour
 
     float p_D = -1, p_aX = -1, p_aY = -1;
     bool[] _humansInvolved = new bool[2];
-    int nextCandySpawn;
+    int nextWaffleSpawn;
     int randNextFood => Random.Range(20, 40);
-    public bool[] humansInvolved => _humansInvolved;
+    bool canSpawnWaffle => map.waffleCount < 3;
 
     public static Material[] txts;
 
@@ -51,7 +54,7 @@ public class FightCTRL : MonoBehaviour
         HXB.LoadHaxbot(two, GM.hbName[1]);
 
         // 
-        AddToNextFoodSpawn();
+        AddToNextWaffleSpawn();
 
         // 
         txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
@@ -106,9 +109,9 @@ public class FightCTRL : MonoBehaviour
         }
     }
 
-    void AddToNextFoodSpawn()
+    void AddToNextWaffleSpawn()
     {
-        nextCandySpawn += randNextFood;
+        nextWaffleSpawn += randNextFood;
     }
 
     void Update()
@@ -122,7 +125,7 @@ public class FightCTRL : MonoBehaviour
         uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
 
         // 
-        if (_turn == nextCandySpawn)
+        if (_turn == nextWaffleSpawn)
         {
             SpawnWaffle();
         }
@@ -143,25 +146,29 @@ public class FightCTRL : MonoBehaviour
 
     void SpawnWaffle()
     {
-        // 
-        GameObject food = Instantiate(Resources.Load<GameObject>("Objs/Waffle"));
-        // 
-        int tileID = Random.Range(0, map.freeTiles.Count);
-        // 
-        Tile tile = map.freeTiles[tileID];
-        // 
-        tile.SetDressing(food);
-        // 
-        Vector2Int loc = tile.expression;
-        // 
-        map.candyTiles.Add(tile);
+        if (canSpawnWaffle)
+        {
+            // 
+            GameObject food = Instantiate(Resources.Load<GameObject>("Objs/Waffle"));
+            // 
+            int tileID = Random.Range(0, map.freeTiles.Count);
+            // 
+            Tile tile = map.freeTiles[tileID];
+            // 
+            tile.SetDressing(food);
+            // 
+            Vector2Int loc = tile.expression;
+            // 
+            map.waffleTiles.Add(tile);
 
-        // 
-        map.freeTiles.RemoveAt(tileID);
-        // 
-        food.transform.position = new Vector3(loc.x, 1, loc.y);
-        // 
-        AddToNextFoodSpawn();
+            // 
+            map.freeTiles.RemoveAt(tileID);
+            // 
+            food.transform.position = new Vector3(loc.x, 1, loc.y);
+            // 
+        }
+
+        AddToNextWaffleSpawn();
     }
 
     void ProcessTurn()
@@ -280,9 +287,12 @@ public class FightCTRL : MonoBehaviour
             SceneManager.LoadScene("mainMenu");
         }
 
+        // 
         if (Input.GetKeyDown(KeyCode.Period))
         {
-            SpawnWaffle();
+            fighter[0].DMGTEMP(1);
+            fighter[0].PowerUp();
+            //SpawnWaffle();
         }
 
         // 
@@ -393,7 +403,7 @@ public class FightCTRL : MonoBehaviour
         else
         {
             // 
-            OutputStay s = OutputStay.CalculateNormal(fighter[turn]);
+            OutputMakeMove s = OutputMakeMove.CalculateNormal(fighter[turn]);
 
             // Calculate if moving
             if (s.stay || fighter[turn].isStunned)
@@ -436,6 +446,12 @@ public class FightCTRL : MonoBehaviour
                 _turn++;
             }
         }
+    }
+
+    public void StartBattle()
+    {
+        mode = Mode.Battle;
+        start.gameObject.SetActive(false);
     }
 
     public void StartABattle(int who)

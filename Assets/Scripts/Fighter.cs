@@ -12,6 +12,8 @@ public class Fighter
     GameObject _obj;
     public GameObject obj => _obj;
 
+    public string name => obj.name;
+
     Fighter _opp;
     public Fighter opp => _opp;
 
@@ -44,11 +46,11 @@ public class Fighter
     public int eX => x + (mapSize / 2);
     public int eY => y + (mapSize / 2);
 
-    int _candyX;
-    int _candyY;
+    int _waffleX;
+    int _waffleY;
 
-    public int candyX => _candyX;
-    public int candyY => _candyY;
+    public int candyX => _waffleX;
+    public int candyY => _waffleY;
 
     int _myTurn;
     public int myTurn => _myTurn;
@@ -111,13 +113,13 @@ public class Fighter
 
     }
 
-    public void UpdateClosestCandy(List<Tile> candies)
+    public void UpdateClosestCandy(List<Tile> waffle)
     {
         // 
-        if (candies.Count == 0)
+        if (waffle.Count == 0)
         {
-            _candyX = -GM.mapSize;
-            _candyY = -GM.mapSize;
+            _waffleX = 0;
+            _waffleY = 0;
         }
         else
         {
@@ -125,9 +127,9 @@ public class Fighter
             int dist = 1000;
 
             // 
-            for (int i = 0; i < candies.Count; i++)
+            for (int i = 0; i < waffle.Count; i++)
             {
-                int computeD = Map.ManhattanDistance(candies[i].v2Int, expression);
+                int computeD = Map.ManhattanDistance(waffle[i].v2Int, expression);
 
                 // 
                 if (computeD < dist)
@@ -138,14 +140,14 @@ public class Fighter
             }
 
             // 
-            _candyX = candies[id].x;
-            _candyY = candies[id].y;
+            _waffleX = waffle[id].x;
+            _waffleY = waffle[id].y;
         }
     }
 
     public void CheckUp(Map map)
     {
-        UpdateClosestCandy(map.candyTiles);
+        UpdateClosestCandy(map.waffleTiles);
 
         // 
         if (_stunned && (GM.time > _lastStunned + 1))
@@ -362,6 +364,11 @@ public class Fighter
         _stunSpr.enabled = _stunned;
     }
 
+    public void DMGTEMP(int dmg)
+    {
+        TakeDmg(dmg);
+    }
+
     void TakeDmg(int dmg)
     {
 
@@ -378,7 +385,7 @@ public class Fighter
         stateData = new StateData(myTurn, this, _opp);
     }
 
-    public void EatCandy()
+    public void EatWaffle()
     {
         _hp += 7;
 
