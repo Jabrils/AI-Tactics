@@ -48,6 +48,8 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
+        GenerateAudience(GM.attendence);
+
         string o = "";
 
         HXB.LoadHaxbot(one, GM.hbName[0]);
@@ -105,6 +107,28 @@ public class FightCTRL : MonoBehaviour
             {
                 Color c = ve.type == 'w' ? new Color(.75f, .25f, 0) : Color.black;
                 GameObject g = null;
+            }
+        }
+    }
+
+    void GenerateAudience(float attendence)
+    {
+        int seats = 30, rows = 7;
+
+        for (int j = 0; j < rows; j++)
+        {
+            for (int i = 0; i < seats; i++)
+            {
+                float dice = Random.value;
+
+                if (dice < attendence)
+                {
+                    GameObject ob = Instantiate(Resources.Load<GameObject>("Objs/aud"));
+                    float where = (Mathf.PI * 2 * i) / seats;
+                    float r = 16.5f + (2 * j);
+                    ob.transform.position = new Vector3(Mathf.Sin(where) * r, 2.9f + (.6f * j), Mathf.Cos(where) * r);
+                    ob.transform.LookAt(Vector3.zero);
+                }
             }
         }
     }

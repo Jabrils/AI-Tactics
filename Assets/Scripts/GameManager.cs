@@ -23,6 +23,7 @@ static class GM
     public static string[] hbName = new string[2];
     public static AI_Config[] intelli = new AI_Config[2];
     public static int nodePerConstant = 4;
+    public static float attendence = .66f;
 
     public static float XYtoDeg(float x, float y)
     {

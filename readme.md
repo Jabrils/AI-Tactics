@@ -1,9 +1,10 @@
-## v0.0.35
+## v0.0.36
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
 - make sure you vs opp turn it is makes it into the state
 - I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implimentation.
+- dont forget if all else fails I can force 1 hot encoding for any network
 
 ### To-Do
 |Version|Date|Thing|Note
@@ -11,10 +12,10 @@
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
 |||Added a ML AI
+|||Added exporation vs exploitation
+|||Separated training vs battle
 
 ## Polish
-|||A menu popup now displays to confirm
-|||Added audience to stands
 
 ### Feature Creep
 |||Added last 10 battle actions to state data | going to have to build a memory NN to be able to properly feed this as input
@@ -29,6 +30,8 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.36|03.08.020|Added audience to stands
+|v0.0.35|03.08.020|A menu popup now displays to confirm
 |v0.0.35|03.08.020|You can now click "start battle" or can still press space
 |v0.0.34|03.08.020|Made a Main Menu UI|create a Haxbot, battle, train. Drag in the haxbot creator made for patreon
 |v0.0.31|03.04.020|Added closest candy location to state data
