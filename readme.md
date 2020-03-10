@@ -1,4 +1,4 @@
-## v0.0.36
+## v0.0.37
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -9,15 +9,18 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added a ML AI
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
-|||Added a ML AI
-|||Added exporation vs exploitation
 |||Separated training vs battle
 
 ## Polish
+|||Added a battle menu bar
 
 ### Feature Creep
+|||Added a battle replay feature
+|||The crowd now reacts to the battle with cheers
+|||Added crowd SFX
 |||Added last 10 battle actions to state data | going to have to build a memory NN to be able to properly feed this as input
 |||optimize
 |||model a few skins
@@ -26,10 +29,12 @@
 |||units no longer get stuck in corners
 |||Maybe add like a special attack
 |||fixed level loader to read it properly
+|||Added a level builder
 
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.37|03.09.020|Added exporation vs exploitation|for combat, the rest doesn't really make sense
 |v0.0.36|03.08.020|Added audience to stands
 |v0.0.35|03.08.020|A menu popup now displays to confirm
 |v0.0.35|03.08.020|You can now click "start battle" or can still press space

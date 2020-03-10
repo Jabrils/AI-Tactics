@@ -72,6 +72,7 @@ public class Fighter
     public bool isStunned => _stunned;
 
     public bool inAttackRange => distToOpp == 1;
+    public bool strIsMin => _str == 1;
 
     int mapSize;
 
@@ -187,28 +188,40 @@ public class Fighter
         if (oA[0].decision == 0)
         {
             // ATTACK
-
-            if (oA[1].decision == 0)
+            if (oA[1].decision == 0) 
             {
                 // Both take damage
                 opp.TakeDmg(str);
-                TakeDmg(_opp.str);
-                //Debug.Log($"({time}) {obj.name} -> <- {_opp.obj.name} ATT: {obj.name} HP: {hp} - {_opp.obj.name} HP: {_opp.hp}");
+                TakeDmg(opp.str);
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { str - opp.str, opp.str - str };
+                //Debug.Log($"[A-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
             {
+                // 
+                int shieldStr = (int)Mathf.Floor(str / 3);
                 // oppponent takes a damage for every 3 str you have
-                opp.TakeDmg((int)Mathf.Floor(str / 3));
+                opp.TakeDmg(shieldStr);
                 // take damage & is stunned
                 TakeDmg(1);
-                //Debug.Log($"({time}) {_opp.obj.name} blocked {obj.name} for {_opp.str}. {obj.name} HP = {hp}");
+                // You get stunned
                 Stun();
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { shieldStr - 2, 2 - shieldStr };
+                //Debug.Log($"[A-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
             {
+                int crit = str * 2;
                 // opponent takes damage x2
-                opp.TakeDmg(str * 2);
-                //Debug.Log($"({time}) {obj.name} crit {_opp.obj.name} for {str}*2 = HP: {_opp.hp}");
+                opp.TakeDmg(crit);
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { crit, -crit };
+                //Debug.Log($"[A-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
         }
         else if (oA[0].decision == 1)
@@ -217,12 +230,18 @@ public class Fighter
 
             if (oA[1].decision == 0)
             {
+                // 
+                int oppShieldStr = (int)Mathf.Floor(opp.str / 3);
                 // you take a damage for every 3 str your opponent has
-                TakeDmg((int)Mathf.Floor(opp.str / 3));
+                TakeDmg((int)Mathf.Floor(oppShieldStr));
                 // opponent takes damage
                 _opp.TakeDmg(1);
-                //Debug.Log($"({time}) {obj.name} blocked {_opp.obj.name} for {str}. {_opp.obj.name} HP = {_opp.hp}");
+                // 
                 _opp.Stun();
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { 2 - oppShieldStr, oppShieldStr - 2 };
+                //Debug.Log($"[D-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
             {
@@ -235,11 +254,19 @@ public class Fighter
                 // 
                 StepBackwardsFrom(time, map, s2);
                 _opp.StepBackwardsFrom(time, map, s1);
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { 0, 0 };
+                //Debug.Log($"[D-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
             {
                 // opponent powers up
                 _opp.PowerUp();
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { 3 - 0, 0 - 3 };
+                //Debug.Log($"[D-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
         }
         else if (oA[0].decision == 2)
@@ -248,19 +275,33 @@ public class Fighter
 
             if (oA[1].decision == 0)
             {
+                // 
+                int oppCrit = _opp.str * 2;
                 // you take damage x2
-                TakeDmg(_opp.str * 2);
+                TakeDmg(oppCrit);
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { -oppCrit, oppCrit };
+                //Debug.Log($"[T-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
             {
                 // you power up
                 PowerUp();
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { 3 - 0, 0 - 3 };
+                //Debug.Log($"[T-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
             {
                 // both powers down
                 PowerDown();
                 _opp.PowerDown();
+
+                // how much i did to them - how much they did to me
+                float[] reward = new float[] { strIsMin ? 0 : -1, opp.strIsMin ? 0 : -1 };
+                //Debug.Log($"[T-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
         }
     }
@@ -345,10 +386,10 @@ public class Fighter
     public void PowerDown()
     {
         _powerDown.Play();
+        SetText(true, Color.yellow, false, dmg: strIsMin ? 0 : 1);
         _str--;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
         _strTxt.text = $"{_str}";
-        SetText(true, Color.yellow, false, dmg: 1);
     }
 
     void Stun(int offset = 0)
@@ -371,7 +412,6 @@ public class Fighter
 
     void TakeDmg(int dmg)
     {
-
         SetText(true, Color.red, false, dmg);
         _hp -= dmg;
         _hp = Mathf.Clamp(_hp, 0, GM.maxHP);

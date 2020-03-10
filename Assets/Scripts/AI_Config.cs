@@ -18,6 +18,8 @@ public class AI_Config
     public string[] movementNN => _movement.Split(',');
     public string[] battleNN => _battle.Split(',');
     public string[] attackNN => _attack.Split(',');
+    float _exploit = .33f;
+    public float exploit => _exploit;
 
     public AI_Config(string data)
     {
@@ -40,5 +42,10 @@ public class AI_Config
         {
             _attack = split[3];
         }
+    }
+
+    public void SetExploit(float e)
+    {
+        _exploit = e;
     }
 }
