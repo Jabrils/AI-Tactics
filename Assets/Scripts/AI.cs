@@ -587,7 +587,7 @@ public struct StateData
     public Fighter opp;
     int theTurn;
     public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myCandyX, myCandyY, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppCandyX, oppCandyY };
-
+    public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myCandyX}, {myCandyY}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppCandyX}, {oppCandyY}";
     // 
     // // SHARED
     // 

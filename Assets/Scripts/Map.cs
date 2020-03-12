@@ -651,6 +651,8 @@ public class Map
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Defeat");
                 }
+
+                fC.Restart();
             }
 
             // enable back on the nearby obstacles

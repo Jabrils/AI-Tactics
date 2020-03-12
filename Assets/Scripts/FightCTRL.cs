@@ -298,9 +298,7 @@ public class FightCTRL : MonoBehaviour
         // 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            mode = Mode.Start;
-            GM.turnSyncer = 0;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Restart();
         }
 
         // 
@@ -314,8 +312,8 @@ public class FightCTRL : MonoBehaviour
         // 
         if (Input.GetKeyDown(KeyCode.Period))
         {
-            fighter[0].DMGTEMP(1);
-            fighter[0].PowerUp();
+            //fighter[0].DMGTEMP(1);
+            //fighter[0].PowerUp();
             //SpawnWaffle();
         }
 
@@ -354,6 +352,13 @@ public class FightCTRL : MonoBehaviour
         {
             map.SetCamTo(Map.CamMode.IsoAction);
         }
+    }
+
+    public void Restart()
+    {
+        mode = Mode.Start;
+        GM.turnSyncer = 0;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     void TakeTurn()

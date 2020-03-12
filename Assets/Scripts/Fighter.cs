@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -183,6 +184,7 @@ public class Fighter
 
         // reset ran away after every battle
         _ranAway = 0;
+        float[] reward = new float[2];
 
         // compare & calculate
         if (oA[0].decision == 0)
@@ -195,7 +197,7 @@ public class Fighter
                 TakeDmg(opp.str);
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { str - opp.str, opp.str - str };
+                reward = new float[] { str - opp.str, opp.str - str };
                 //Debug.Log($"[A-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
@@ -210,7 +212,7 @@ public class Fighter
                 Stun();
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { shieldStr - 2, 2 - shieldStr };
+                reward = new float[] { shieldStr - 2, 2 - shieldStr };
                 //Debug.Log($"[A-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
@@ -220,7 +222,7 @@ public class Fighter
                 opp.TakeDmg(crit);
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { crit, -crit };
+                reward = new float[] { crit, -crit };
                 //Debug.Log($"[A-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
         }
@@ -240,7 +242,7 @@ public class Fighter
                 _opp.Stun();
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { 2 - oppShieldStr, oppShieldStr - 2 };
+                reward = new float[] { 2 - oppShieldStr, oppShieldStr - 2 };
                 //Debug.Log($"[D-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
@@ -256,7 +258,7 @@ public class Fighter
                 _opp.StepBackwardsFrom(time, map, s1);
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { 0, 0 };
+                reward = new float[] { 0, 0 };
                 //Debug.Log($"[D-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
@@ -265,7 +267,7 @@ public class Fighter
                 _opp.PowerUp();
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { 3 - 0, 0 - 3 };
+                reward = new float[] { 3 - 0, 0 - 3 };
                 //Debug.Log($"[D-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
         }
@@ -281,7 +283,7 @@ public class Fighter
                 TakeDmg(oppCrit);
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { -oppCrit, oppCrit };
+                reward = new float[] { -oppCrit, oppCrit };
                 //Debug.Log($"[T-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 1)
@@ -290,7 +292,7 @@ public class Fighter
                 PowerUp();
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { 3 - 0, 0 - 3 };
+                reward = new float[] { 3 - 0, 0 - 3 };
                 //Debug.Log($"[T-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
             else if (oA[1].decision == 2)
@@ -300,9 +302,15 @@ public class Fighter
                 _opp.PowerDown();
 
                 // how much i did to them - how much they did to me
-                float[] reward = new float[] { strIsMin ? 0 : -1, opp.strIsMin ? 0 : -1 };
+                reward = new float[] { strIsMin ? 0 : -1, opp.strIsMin ? 0 : -1 };
                 //Debug.Log($"[T-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
             }
+        }
+
+        using (StreamWriter sW = File.AppendText("masterLog.tsv"))
+        {
+            sW.WriteLine($"{stateData.rawState}\t{oA[0].decision}\t{reward[0]}");
+            sW.WriteLine($"{stateData.rawState}\t{oA[1].decision}\t{reward[1]}");
         }
     }
 

@@ -1,10 +1,11 @@
-## v0.0.37
+## v0.0.38
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
 - make sure you vs opp turn it is makes it into the state
 - I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implimentation.
 - dont forget if all else fails I can force 1 hot encoding for any network
+- deriv of sigmoid is fucking bonk, it will not work for me, but I think it is close enough to use, so just add the summation of all output nodes & it should be alright.
 
 ### To-Do
 |Version|Date|Thing|Note
