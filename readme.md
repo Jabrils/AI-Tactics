@@ -1,4 +1,4 @@
-## v0.0.38
+## v0.0.39
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -6,6 +6,9 @@
 - I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implimentation.
 - dont forget if all else fails I can force 1 hot encoding for any network
 - deriv of sigmoid is fucking bonk, it will not work for me, but I think it is close enough to use, so just add the summation of all output nodes & it should be alright.
+- THE SMALLER EPSILON IS (change in input) THE MORE ACCURATE DERV OF SIGMOID IS, THATS JUST CALCULUS BABY
+- if training doesn't work out, I can try beefing up the NN architecture, or adding memory to the reward (use the 3 outputs to try & predict the future & obtain a totalReward[i] vector for a few timesteps ahead.)
+- For graphing, graph the acculative reward over time ( r=0; r+=2; r+= -3; r+=2 ...)
 
 ### To-Do
 |Version|Date|Thing|Note

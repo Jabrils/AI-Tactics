@@ -492,7 +492,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randWeights: 0
-  lR: 0.1
+  lR: 0.01
   oppDecide: 1
 --- !u!4 &1891760266
 Transform:

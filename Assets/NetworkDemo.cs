@@ -9,10 +9,9 @@ using System.IO;
 public class NetworkDemo : MonoBehaviour
 {
     public bool randWeights;
-    public float lR = .1f;
+    public float lR = .01f;
     GameObject canv;
     RectTransform canvRT, pointTo;
-    int decided = -1;
     public int oppDecide = -1;
     int inp = 20, hid = 12, outp = 3;
     float[] state;
@@ -28,7 +27,7 @@ public class NetworkDemo : MonoBehaviour
     float[][] D_hidden;
     TextMeshProUGUI[] inpTxt, hLTxt, hLDTxt, oTxt, oDTxt, fTxt, fDTxt;
     TextMeshProUGUI[][] hLWTxt, hLWDTxt, oWTxt, oWDTxt;
-    int dp;
+    int dp, decided = -1;
     List<string[]> data = new List<string[]>(), dataOG = new List<string[]>();
 
     // Start is called before the first frame update
@@ -407,10 +406,13 @@ public class NetworkDemo : MonoBehaviour
 
         int dp = Random.Range(0, data.Count);
 
-        int tempDecide = int.Parse(data[dp][1]);
-        int reward = int.Parse(data[dp][2]);
+        string[] r = data[dp][2].Split(',');
+        int[] reward = new int[r.Length];
 
-        print(tempDecide);
+        for (int i = 0; i < reward.Length; i++)
+        {
+            reward[i] = int.Parse(r[i]);
+        }
 
         string[] newInpTemp = data[dp][0].Split(',');
 
@@ -464,44 +466,44 @@ public class NetworkDemo : MonoBehaviour
             }
         }
 
-        // back prop
-        float target = fin[decided] + (lR * reward);
-        float error = Mathf.Pow(lR * reward * fin[decided],2);
-        //print($"{dp}/{data.Count} -> Reward: {reward} - Target: {target} - Error: {error} = {decided == tempDecide}");
-
-        // 
-        derivF[decided] = 2*(lR * reward * fin[decided]);
-
-        // 
-        derivO[decided] = derivF[decided] * (AI.Sigmoid(fin[decided], true));
-
-        // 
-        for (int j = 0; j < D_out[decided].Length; j++)
+        for (int k = 0; k < 3; k++)
         {
-            D_out[decided][j] = derivO[decided] * hOut[j];
-        }
+            // back prop
+            float target = fin[k] + (lR * reward[k]);
+            float error = Mathf.Pow(lR * reward[k] * fin[k], 2);
 
-        // 
-        for (int i = 0; i < derivH.Length; i++)
-        {
-            derivH[i] = D_out[decided][i] * derivO[decided];
-        }
+            // 
+            derivF[k] = 2 * (lR * reward[k] * fin[k]);
 
-        // 
-        for (int i = 0; i < D_hidden.Length; i++)
-        {
-            for (int j = 0; j < D_hidden[i].Length; j++)
+            // 
+            derivO[k] = derivF[k] * (AI.Sigmoid(fin[k], true));
+
+            // 
+            for (int j = 0; j < D_out[k].Length; j++)
             {
-                D_hidden[i][j] = derivH[i] * state[j];
+                D_out[k][j] = derivO[k] * hOut[j];
+            }
+
+            // 
+            for (int i = 0; i < derivH.Length; i++)
+            {
+                derivH[i] = D_out[k][i] * derivO[k];
+            }
+
+            // 
+            for (int i = 0; i < D_hidden.Length; i++)
+            {
+                for (int j = 0; j < D_hidden[i].Length; j++)
+                {
+                    D_hidden[i][j] = derivH[i] * state[j];
+                }
             }
         }
 
         //
-        if (update && tempDecide == decided)
+        if (update)
         {
             data.RemoveAt(dp);
-
-            //print($"{(float)ct0 / (float)(dataOG.Count-94f)} - {(float)ct1 / (float)(dataOG.Count - 94f)} - {(float)ct2 / (float)(dataOG.Count - 94f)}");
 
             // W - D
             for (int i = 0; i < W_hidden.Length; i++)
@@ -554,11 +556,11 @@ public class NetworkDemo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (data.Count > 94)
-        {
-            BackProp(data, true);
-            UpdateAllText();
-        }
+        //if (data.Count > 94)
+        //{
+        //    BackProp(data, true);
+        //    UpdateAllText();
+        //}
 
         if (Input.GetKey(KeyCode.W))
         {

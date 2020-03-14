@@ -160,7 +160,6 @@ public class Fighter
 
     public void MoveTo(int time, Map map, Vector2 where)
     {
-
         map.PlaySFX("walk");
 
         Vector3 next = new Vector3(where.x, .5f, where.y);
@@ -174,6 +173,116 @@ public class Fighter
         map.SetCamTo(map.camMode, myTurn);
     }
 
+    int[][] Rewarder(Map map, int x, int y)
+    {
+        return new int[][] { new int[] { Reward(map, 0, y), Reward(map, 1, y), Reward(map, 2, y)}, new int[] { -Reward(map, x, 0), -Reward(map, x, 1), -Reward(map, x, 2) } };
+    }
+
+    int Reward(Map map, int x, int y)
+    {
+        int[] str = new int[] { map.fighter[0].str, map.fighter[1].str };
+
+        if (x == 0)
+        {
+            if (y == 0)
+            {
+                return str[0] - str[1];
+            }
+            else if (y == 1)
+            {
+                return 2 - Mathf.FloorToInt(str[0] / 3);
+            }
+            else if (y == 2)
+            {
+                return str[0] * 2;
+            }
+            else
+            {
+                Debug.Log($"ERROR: [{x},{y}]");
+                return 0;
+            }
+        }
+        else if (x == 1)
+        {
+            if (y == 0)
+            {
+                return 2 - Mathf.FloorToInt(str[1] / 3);
+            }
+            else if (y == 1)
+            {
+                return 0;
+            }
+            else if (y == 2)
+            {
+                return -PowerUpRemap(str[1] - str[0]);
+            }
+            else
+            {
+                Debug.Log($"ERROR: [{x},{y}]");
+                return 0;
+            }
+        }
+        else if (x == 2)
+        {
+            if (y == 0)
+            {
+                return -str[1] * 2;
+            }
+            else if (y == 1)
+            {
+                return PowerUpRemap(str[0] - str[1]);
+            }
+            else if (y == 2)
+            {
+                return TauntOff(str[0], str[1]);
+            }
+            else
+            {
+                Debug.Log($"ERROR: [{x},{y}]");
+                return 0;
+            }
+        }
+        else
+        {
+            Debug.Log($"ERROR: [{x},{y}]");
+            return 0;
+        }
+    }
+
+    int TauntOff(int str0, int str1)
+    {
+        if (str0 == 1)
+        {
+            return str1 - str0;
+        }
+        else if (str1 == 1)
+        {
+            return str0 - str1;
+        }
+        else if (str0 == str1)
+        {
+            return 0;
+        }
+        else if (str0 < str1)
+        {
+            return 1;
+        }
+        else if (str1 < str0)
+        {
+            return -1;
+        }
+        else
+        {
+            Debug.Log($"ERROR: [{str0},{str1}]");
+            return 0;
+        }
+    }
+
+    int PowerUpRemap(int inp)
+    {
+        return inp < 0 ? 3 : inp + 3;
+    }
+
     public void Battle(int time, OutputAttack[] oA, Map map)
     {
 
@@ -184,21 +293,24 @@ public class Fighter
 
         // reset ran away after every battle
         _ranAway = 0;
-        float[] reward = new float[2];
+
+        int[][] r = Rewarder(map, oA[0].decision, oA[1].decision);
+
+        Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
 
         // compare & calculate
         if (oA[0].decision == 0)
         {
             // ATTACK
-            if (oA[1].decision == 0) 
+            if (oA[1].decision == 0)
             {
                 // Both take damage
                 opp.TakeDmg(str);
                 TakeDmg(opp.str);
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { str - opp.str, opp.str - str };
-                //Debug.Log($"[A-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { str - opp.str, opp.str - str };
+                //reward[0] = new float[] { str - opp.str, };
             }
             else if (oA[1].decision == 1)
             {
@@ -212,8 +324,7 @@ public class Fighter
                 Stun();
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { shieldStr - 2, 2 - shieldStr };
-                //Debug.Log($"[A-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { shieldStr - 2, 2 - shieldStr };
             }
             else if (oA[1].decision == 2)
             {
@@ -222,8 +333,7 @@ public class Fighter
                 opp.TakeDmg(crit);
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { crit, -crit };
-                //Debug.Log($"[A-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { crit, -crit };
             }
         }
         else if (oA[0].decision == 1)
@@ -242,8 +352,7 @@ public class Fighter
                 _opp.Stun();
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { 2 - oppShieldStr, oppShieldStr - 2 };
-                //Debug.Log($"[D-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { 2 - oppShieldStr, oppShieldStr - 2 };
             }
             else if (oA[1].decision == 1)
             {
@@ -258,8 +367,7 @@ public class Fighter
                 _opp.StepBackwardsFrom(time, map, s1);
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { 0, 0 };
-                //Debug.Log($"[D-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { 0, 0 };
             }
             else if (oA[1].decision == 2)
             {
@@ -267,8 +375,7 @@ public class Fighter
                 _opp.PowerUp();
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { 3 - 0, 0 - 3 };
-                //Debug.Log($"[D-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { 3 - 0, 0 - 3 };
             }
         }
         else if (oA[0].decision == 2)
@@ -283,8 +390,7 @@ public class Fighter
                 TakeDmg(oppCrit);
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { -oppCrit, oppCrit };
-                //Debug.Log($"[T-A] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { -oppCrit, oppCrit };
             }
             else if (oA[1].decision == 1)
             {
@@ -292,8 +398,7 @@ public class Fighter
                 PowerUp();
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { 3 - 0, 0 - 3 };
-                //Debug.Log($"[T-D] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { 3 - 0, 0 - 3 };
             }
             else if (oA[1].decision == 2)
             {
@@ -302,15 +407,19 @@ public class Fighter
                 _opp.PowerDown();
 
                 // how much i did to them - how much they did to me
-                reward = new float[] { strIsMin ? 0 : -1, opp.strIsMin ? 0 : -1 };
-                //Debug.Log($"[T-T] {name}: {reward[0]}\t{opp.name}: {reward[1]}");
+                //reward = new float[] { strIsMin ? 0 : -1, opp.strIsMin ? 0 : -1 };
             }
         }
 
+        string[] sD = new string[] { stateData.rawState, opp.stateData.rawState };
+
+        //
         using (StreamWriter sW = File.AppendText("masterLog.tsv"))
         {
-            sW.WriteLine($"{stateData.rawState}\t{oA[0].decision}\t{reward[0]}");
-            sW.WriteLine($"{stateData.rawState}\t{oA[1].decision}\t{reward[1]}");
+            for (int i = 0; i < 2; i++)
+            {
+                sW.WriteLine($"{sD[i]}\t{oA[i].decision}\t{r[i][0]},{r[i][1]},{r[i][2]}");
+            }
         }
     }
 

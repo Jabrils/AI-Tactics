@@ -12,7 +12,7 @@ public class Map
     public Tile[,] loc => _loc;
     int fX, fY, tX, tY;
     public TilePath thee;
-    Fighter[] fighter;
+    public Fighter[] fighter;
     Camera cam = Camera.main;
     Dictionary<int, string> battleDecLookUp = new Dictionary<int, string> { { 0, "Attack" }, { 1, "Defend" }, { 2, "Taunt" }, };
     Vector3 zoomUnit = new Vector3(2, 5, 2.5f);
@@ -651,8 +651,6 @@ public class Map
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Defeat");
                 }
-
-                fC.Restart();
             }
 
             // enable back on the nearby obstacles
