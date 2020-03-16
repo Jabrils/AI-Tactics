@@ -175,7 +175,7 @@ public class Fighter
 
     int[][] Rewarder(Map map, int x, int y)
     {
-        return new int[][] { new int[] { Reward(map, 0, y), Reward(map, 1, y), Reward(map, 2, y)}, new int[] { -Reward(map, x, 0), -Reward(map, x, 1), -Reward(map, x, 2) } };
+        return new int[][] { new int[] { Reward(map, 0, y), Reward(map, 1, y), Reward(map, 2, y) }, new int[] { -Reward(map, x, 0), -Reward(map, x, 1), -Reward(map, x, 2) } };
     }
 
     int Reward(Map map, int x, int y)
@@ -296,7 +296,7 @@ public class Fighter
 
         int[][] r = Rewarder(map, oA[0].decision, oA[1].decision);
 
-        Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
+        //Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
 
         // compare & calculate
         if (oA[0].decision == 0)
@@ -412,6 +412,87 @@ public class Fighter
         }
 
         string[] sD = new string[] { stateData.rawState, opp.stateData.rawState };
+
+        //float[] oOut, hOut;
+        //float[][] W_hidden, W_out;
+        //OutputAttack.ConvertFightWeights(config, stateData, out oOut, out hOut, out W_hidden, out W_out);
+
+        int z = 0;
+
+        // 
+        if (config.usingAttackNN)
+        {
+            NNState nn = oA[z].nn;
+            float[] state = stateData.fullState;
+            float[] error = new float[nn.O_out.Length];
+            float[] fin = new float[nn.O_out.Length]; // assign this 
+
+            float[] derivF = new float[nn.O_out.Length];
+            float[] derivO = new float[nn.O_out.Length];
+            float[] derivH = new float[nn.H_out.Length];
+
+            float[][] D_out = new float[nn.O_out.Length][];
+            float[][] D_hidden = new float[nn.H_out.Length][];
+
+            //Debug.Log($"oOut: {nn.O_out.Length}, hOut: {nn.H_out.Length}, wOut: [{nn.W_out.Length}][{nn.W_out[0].Length}], wHidden: [{nn.W_hidden.Length}][{nn.W_hidden[0].Length}]");
+
+            // 
+            for (int i = 0; i < nn.W_hidden.Length; i++)
+            {
+                D_hidden[i] = new float[state.Length];
+            }
+
+            // 
+            for (int i = 0; i < fin.Length; i++)
+            {
+                // 
+                fin[i] = AI.Sigmoid(nn.O_out[i]);
+                // 
+                D_out[i] = new float[nn.H_out.Length];
+            }
+
+            float[][] newWH = new float[0][];
+            float[][] newWO = new float[0][];
+
+            // BackProp
+            for (int i = 0; i < r[z].Length; i++) //3
+            {
+                // back prop
+                error[i] = GM.lR * Mathf.Pow(r[z][i] * fin[i], 2);
+                //Debug.Log($"{error[i]} = {GM.lR} * { Mathf.Pow(r[z][i] * fin[i], 2)}");
+
+                derivF[i] = 2 * (GM.lR * Mathf.Pow(r[z][i], 2)) * fin[i];
+
+                // 
+                derivO[i] = AI.Sigmoid(nn.O_out[i], true) * derivF[i];
+                //Debug.Log($"{derivO[i]} = {AI.Sigmoid(nn.O_out[i], true)} * {derivF[i]}");
+                //
+                for (int j = 0; j < D_out[i].Length; j++) //12
+                {
+                    D_out[i][j] = nn.H_out[j] * derivO[i];
+                    //Debug.Log($"{D_out[i][j]} = {nn.H_out[j]} * {derivO[i]}");
+
+                    derivH[j] = nn.W_out[i][j] * derivO[i];
+
+                    // 
+                    for (int k = 0; k < D_hidden[j].Length; k++) //20
+                    {
+                        D_hidden[j][k] = state[k] * derivH[j];
+                        //Debug.Log($"{k}/{D_hidden[j].Length} - {D_out[i].Length}");
+                        newWH = nn.W_hidden;
+                        newWH[j][k] += D_hidden[j][k] * Mathf.Sign(r[z][i]);
+                    }
+
+                    newWO = nn.W_out;
+                    newWO[i][j] += D_out[i][j] * Mathf.Sign(r[z][i]);
+
+                    //Debug.Log($"{a == nn.W_out[i][j]} -> {a-nn.W_out[i][j]}");
+                    //Debug.Log($"{D_out[i][j]} * {Mathf.Sign(reward[i])}");
+                }
+            }
+
+            config.UpdateAttack(newWH, newWO);
+        }
 
         //
         using (StreamWriter sW = File.AppendText("masterLog.tsv"))

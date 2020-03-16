@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class AI_Config
 {
     public bool[] neuralNetwork => new bool[] { stayNN.Length > 10, movementNN.Length > 10, battleNN.Length > 10, attackNN.Length > 10 };
 
-    string _stay, _movement, _battle, _attack, _defend, _taunt;
+    public bool usingAttackNN => neuralNetwork[3];
+
+    string _raw, _stay, _movement, _battle, _attack, _defend, _taunt, _filename, _aiName;
     public float stayTrad => float.Parse(_stay);
     public float movementTrad => float.Parse(_movement);
     public float battleTrad => float.Parse(_battle);
@@ -18,12 +21,19 @@ public class AI_Config
     public string[] movementNN => _movement.Split(',');
     public string[] battleNN => _battle.Split(',');
     public string[] attackNN => _attack.Split(',');
-    float _exploit = .33f;
+    float _exploit = 1f;
     public float exploit => _exploit;
 
-    public AI_Config(string data)
+    public AI_Config(string fname, string data)
     {
-        string[] split = data.Split(';');
+        string[] split = data.Split('\n');
+        _aiName = split[0];
+        _raw = split[1];
+        Debug.Log(_aiName);
+        Debug.Log(_raw);
+        _filename = fname;
+
+        split = _raw.Split(';');
 
         _stay = split[0];
         _movement = split[1];
@@ -41,6 +51,48 @@ public class AI_Config
         else
         {
             _attack = split[3];
+        }
+    }
+
+    public void UpdateAttack(float[][] wH, float[][] wO)
+    {
+        string add = "";
+
+        for (int i = 0; i < wH.Length; i++)
+        {
+            for (int j = 0; j < wH[i].Length; j++)
+            {
+                add += $"{wH[i][j]},";
+            }
+        }
+
+        for (int i = 0; i < wO.Length; i++)
+        {
+            for (int j = 0; j < wO[i].Length; j++)
+            {
+                add += $"{wO[i][j]},";
+            }
+        }
+
+        add = add.Remove(add.Length-1);
+
+        _attack = add;
+
+        SaveIntelligence();
+    }
+
+    public void SaveIntelligence()
+    {
+        string[] save = _raw.Split(';');
+
+        save[3] = _attack;
+
+        string concat = string.Join(";", save);
+
+        // 
+        using (StreamWriter sR = new StreamWriter(_filename))
+        {
+            sR.Write(concat);
         }
     }
 

@@ -20,7 +20,7 @@ public class Map
     FightCTRL fC;
     CameraShake camShake;
 
-    public enum CamMode { Field, Topdown, Free, Isometric, Action, IsoAction };
+    public enum CamMode { Field, Isometric, Topdown, IsoAction, Action, Free };
     public CamMode camMode;
 
     Tile current;

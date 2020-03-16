@@ -1,4 +1,4 @@
-## v0.0.39
+## v0.0.40
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -13,7 +13,8 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added a ML AI
+|||Added graphs
+|||Added a ML AI for Movement
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
 |||Separated training vs battle
@@ -38,6 +39,8 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.40|03.15.020|Added Saving & Loading of AI Brains
+|v0.0.40|03.15.020|Added a ML AI for Combat
 |v0.0.37|03.09.020|Added exporation vs exploitation|for combat, the rest doesn't really make sense
 |v0.0.36|03.08.020|Added audience to stands
 |v0.0.35|03.08.020|A menu popup now displays to confirm

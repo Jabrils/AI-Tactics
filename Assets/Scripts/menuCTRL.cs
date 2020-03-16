@@ -232,22 +232,7 @@ public class menuCTRL : MonoBehaviour
     void SetIntelli(int i)
     {
         //print($"{dd_Intelli[i].value} -> {aI_Config[dd_Intelli[i].value]}");
-        GM.intelli[i] = LoadIntelligence(newAI_Config[dd_Intelli[i].value]);
-    }
-
-    AI_Config LoadIntelligence(string fName)
-    {
-        string data;
-
-        // 
-        using (StreamReader sR = new StreamReader(fName))
-        {
-            data = sR.ReadToEnd().Split('\n')[1];
-        }
-
-        AI_Config conf = new AI_Config(data);
-
-        return conf;
+        GM.intelli[i] = AI.LoadIntelligence(newAI_Config[dd_Intelli[i].value]);
     }
 
     // Update is called once per frame

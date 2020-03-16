@@ -23,7 +23,6 @@ public class FightCTRL : MonoBehaviour
     public GameObject one, two;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
-    public TextMeshProUGUI uiBattle;
     public Button start;
 
     int _turn;
@@ -146,7 +145,7 @@ public class FightCTRL : MonoBehaviour
 
         GM.time = time;
 
-        uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
+        //uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
 
         // 
         if (_turn == nextWaffleSpawn)
@@ -352,6 +351,11 @@ public class FightCTRL : MonoBehaviour
         {
             map.SetCamTo(Map.CamMode.IsoAction);
         }
+    }
+
+    public void SetCam(int c)
+    {
+        map.SetCamTo((Map.CamMode)c);
     }
 
     public void Restart()

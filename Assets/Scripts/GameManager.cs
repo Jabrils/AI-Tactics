@@ -24,6 +24,7 @@ static class GM
     public static AI_Config[] intelli = new AI_Config[2];
     public static int nodePerConstant = 4;
     public static float attendence = .88f;
+    public static float lR = .01f;
 
     public static float XYtoDeg(float x, float y)
     {

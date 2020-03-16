@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.IO;
 
 public struct AI
 {
@@ -43,16 +44,32 @@ public struct AI
     {
         float ret = 0;
 
-
-        for (int i = 0; i < s.Length; i++)
+        for (int i = 0; i < s.Length - 1; i++)
         {
-            for (int j = 0; j < s[0].Length; j++)
+            for (int j = 0; j < s[i].Length; j++)
             {
-                ret += s[i][j] * (i + 1 < s.Length ? s[i + 1][j] : 1);
+                //Debug.Log($"{s[i][j]} * {((i + 1) < s.Length ? (s[i + 1][j]) : 1)}");
+                // we subtract 1 from the length & multiply s j of i by s i+1 of j, which will always be out of reach, otherwise we just multiply the single array by itself (I think that works)
+                ret += s[i][j] * ((i + 1) < s.Length ? (s[i + 1][j]) : 1);
             }
         }
 
         return ret;
+    }
+
+    public static AI_Config LoadIntelligence(string fName)
+    {
+        string data;
+
+        // 
+        using (StreamReader sR = new StreamReader(fName))
+        {
+            data = sR.ReadToEnd();
+        }
+
+        AI_Config conf = new AI_Config(fName, data);
+
+        return conf;
     }
 }
 
@@ -259,22 +276,46 @@ public struct OutputToBattle
     }
 }
 
+public struct NNState
+{
+    float[] _O_out;
+    float[] _H_out;
+    float[][] _W_out;
+    float[][] _W_hidden;
+
+    public float[] O_out => _O_out;
+    public float[] H_out => _H_out;
+    public float[][] W_out => _W_out;
+    public float[][] W_hidden => _W_hidden;
+
+    public NNState(float[] Oo, float[] Ho, float[][] Wo, float[][] Wh)
+    {
+        _O_out = Oo;
+        _H_out = Ho;
+        _W_out = Wo;
+        _W_hidden = Wh;
+    }
+}
+
 public struct OutputAttack
 {
     float _attack, _defend, _taunt;
     public float attack => _attack;
     public float defend => _defend;
     public float taunt => _taunt;
+    NNState _nn;
+    public NNState nn => _nn;
 
     float[] votes => new float[] { attack, defend, taunt };
     public int decision => Decision();
     public string choice => decision == 0 ? "Attack" : decision == 1 ? "Defend" : "Taunt";
 
-    OutputAttack(float a, float d, float t)
+    OutputAttack(float a, float d, float t, NNState nn)
     {
         _attack = a;
         _defend = d;
         _taunt = t;
+        _nn = nn;
     }
 
     public void DEBUGSetVals(float a, float d, float t)
@@ -289,6 +330,8 @@ public struct OutputAttack
         float a = UnityEngine.Random.value;
         float d = UnityEngine.Random.Range(0, 1 - a);
         float t = 1 - (a + d);
+        float[] o = new float[0], hL = new float[0];
+        float[][] wHL = new float[0][], wO = new float[0][];
 
         AI_Config conf = fighter.config;
         StateData state = fighter.stateData;
@@ -296,74 +339,31 @@ public struct OutputAttack
         float greedy = UnityEngine.Random.value;
 
         // 
-        if (conf.neuralNetwork[3])
+        if (conf.usingAttackNN)
         {
+            ConvertFightWeights(conf, state, out o, out hL, out wHL, out wO);
+
+            Debug.Log(wHL[0][0]);
+
+            // calculate the hidden layer nodes output
+            for (int i = 0; i < hL.Length; i++)
+            {
+                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+            }
+
+            // calculate the output nodes output
+            for (int i = 0; i < o.Length; i++)
+            {
+                o[i] = AI.Σ(hL, wO[i]);
+            }
+
+            // 
             if (greedy < conf.exploit)
             {
-                // get a ref to how many inputs will we be using for the attack output network
-                int inpCount = state.fullState.Length;
-                // ref to number of output nodes for attack network
-                int numOutputNodes = 3;
-
-                // ref to output nodes
-                float[] o = new float[numOutputNodes];
-                // ref to hidden layer nodes
-                float[] hL = new float[numOutputNodes * GM.nodePerConstant];
-                // ref to hidden layer node weights
-                float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
-                // ref to output layer weights
-                float[][] wO = new float[numOutputNodes][];
-                // ref to the when the hidden layer weights end
-                int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
-
-                // init our hidden layer nodes wieghts
-                for (int i = 0; i < wHL.Length; i++)
-                {
-                    wHL[i] = new float[inpCount];
-                }
-
-                // init our output nodes wieghts
-                for (int i = 0; i < wO.Length; i++)
-                {
-                    wO[i] = new float[hL.Length];
-                }
-
-                // convert config string NN into 12 float arrays
-                for (int j = 0; j < wHL.Length; j++)
-                {
-                    for (int i = 0; i < inpCount; i++)
-                    {
-                        wHL[j][i] = float.Parse(conf.attackNN[(inpCount * j) + (i)]);
-                    }
-                }
-
-                // convert the remaining config string NN into 3 float arrays
-                for (int j = 0; j < wO.Length; j++)
-                {
-                    for (int i = 0; i < wHL.Length; i++)
-                    {
-                        wO[j][i] = float.Parse(conf.attackNN[lastHLW + (wHL.Length * j) + i]);
-                    }
-                }
-
-                // calculate the hidden layer nodes output
-                for (int i = 0; i < hL.Length; i++)
-                {
-                    hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
-                }
-
-                // calculate the output nodes output
-                for (int i = 0; i < o.Length; i++)
-                {
-                    o[i] = AI.Σ(hL, wO[i]);
-                }
-
                 // squash & set the the final values for returning
                 a = AI.Sigmoid(o[0]);
                 d = AI.Sigmoid(o[1]);
                 t = AI.Sigmoid(o[2]);
-
-                //Debug.Log($"{fighter.name} adt: {a},{d},{ t}");
 
                 //Debug.Log($"{fighter.name}: Combat Exploit");
             }
@@ -398,11 +398,63 @@ public struct OutputAttack
                 t = 1;
             }
 
-            return new OutputAttack(a, d, t);
+
+            return new OutputAttack(a, d, t, new NNState());
         }
 
+        NNState nn = new NNState(o, hL, wO, wHL);
         // 
-        return new OutputAttack(a, d, t);
+        return new OutputAttack(a, d, t, nn);
+    }
+
+    public static void ConvertFightWeights(AI_Config conf, StateData state, out float[] o, out float[] hL, out float[][] wHL, out float[][] wO)
+    {
+        // get a ref to how many inputs will we be using for the attack output network
+        int inpCount = state.fullState.Length;
+        // ref to number of output nodes for attack network
+        int numOutputNodes = 3;
+
+        // ref to output nodes
+        o = new float[numOutputNodes];
+        // ref to hidden layer nodes
+        hL = new float[numOutputNodes * GM.nodePerConstant];
+        // ref to hidden layer node weights
+        wHL = new float[numOutputNodes * GM.nodePerConstant][];
+        // ref to output layer weights
+        wO = new float[numOutputNodes][];
+        // ref to the when the hidden layer weights end
+        int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+
+        // init our hidden layer nodes wieghts
+        for (int i = 0; i < wHL.Length; i++)
+        {
+            wHL[i] = new float[inpCount];
+        }
+
+        // init our output nodes wieghts
+        for (int i = 0; i < wO.Length; i++)
+        {
+            wO[i] = new float[hL.Length];
+        }
+
+        // convert config string NN into 12 float arrays
+        for (int j = 0; j < wHL.Length; j++)
+        {
+            for (int i = 0; i < inpCount; i++)
+            {
+                wHL[j][i] = float.Parse(conf.attackNN[(inpCount * j) + (i)]);
+            }
+        }
+
+        // convert the remaining config string NN into 3 float arrays
+        for (int j = 0; j < wO.Length; j++)
+        {
+            for (int i = 0; i < wHL.Length; i++)
+            {
+                wO[j][i] = float.Parse(conf.attackNN[lastHLW + (wHL.Length * j) + i]);
+            }
+        }
+
     }
 
     public static OutputAttack ForceOutput(int w)
@@ -411,7 +463,7 @@ public struct OutputAttack
 
         ret[w] = 1;
 
-        return new OutputAttack(ret[0], ret[1], ret[2]);
+        return new OutputAttack(ret[0], ret[1], ret[2], new NNState());
     }
 
     int Decision()
