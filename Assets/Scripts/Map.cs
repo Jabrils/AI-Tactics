@@ -17,11 +17,11 @@ public class Map
     Dictionary<int, string> battleDecLookUp = new Dictionary<int, string> { { 0, "Attack" }, { 1, "Defend" }, { 2, "Taunt" }, };
     Vector3 zoomUnit = new Vector3(2, 5, 2.5f);
     public float zoom = 1f;
-    FightCTRL fC;
+    public FightCTRL fC;
     CameraShake camShake;
 
     public enum CamMode { Field, Isometric, Topdown, IsoAction, Action, Free };
-    public CamMode camMode;
+    public static CamMode camMode;
 
     Tile current;
     Tile[,] _loc;
@@ -526,7 +526,7 @@ public class Map
             if (desiresFighting)
             {
                 // Set camera to turnee
-                map.SetCamTo(map.camMode, who);
+                map.SetCamTo(Map.camMode, who);
 
                 // disable nearby obstacles & store them into an array
                 col = DisableNearbyObstacles();
@@ -637,6 +637,8 @@ public class Map
 
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Win");
+
+                    GM.win[1]++;
                 }
                 else if (!lost[0] && lost[1])
                 {
@@ -644,6 +646,8 @@ public class Map
 
                     fighter[0].ChangeAnimation("Win");
                     fighter[1].ChangeAnimation("Defeat");
+
+                    GM.win[0]++;
                 }
                 else if (lost[0] && lost[1])
                 {
@@ -651,6 +655,8 @@ public class Map
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Defeat");
                 }
+
+                fC.EnableRoundsUI();
             }
 
             // enable back on the nearby obstacles
@@ -677,7 +683,7 @@ public class Map
         if (fC.humansInvolved[fC.turn])
         {
             // set the camera to the current turnee. Otherwise if the AI isn't walking or fighting, we don't care
-            map.SetCamTo(map.camMode, fC.turn);
+            map.SetCamTo(Map.camMode, fC.turn);
         }
     }
 

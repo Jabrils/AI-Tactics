@@ -343,8 +343,6 @@ public struct OutputAttack
         {
             ConvertFightWeights(conf, state, out o, out hL, out wHL, out wO);
 
-            Debug.Log(wHL[0][0]);
-
             // calculate the hidden layer nodes output
             for (int i = 0; i < hL.Length; i++)
             {

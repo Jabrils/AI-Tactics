@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
+using System.Linq;
 
 public class FightCTRL : MonoBehaviour
 {
@@ -20,10 +22,12 @@ public class FightCTRL : MonoBehaviour
     public float dist = 1;
     [Range(-1, 1)]
     public float angleX = 0, angleY = 0;
-    public GameObject one, two;
+    public GameObject one, two, roundsUI;
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
     public Button start;
+    public GameObject[] graphObj, tGraphObj;
+    public TextMeshProUGUI[] rounds;
 
     int _turn;
     public int turn => _turn % 2;
@@ -42,12 +46,19 @@ public class FightCTRL : MonoBehaviour
     int nextWaffleSpawn;
     int randNextFood => Random.Range(20, 40);
     bool canSpawnWaffle => map.waffleCount < 3;
+    Graph[] graph = new Graph[2], totalGraph = new Graph[2];
 
     public static Material[] txts;
 
     void Start()
     {
         GenerateAudience(GM.attendence);
+
+        for (int i = 0; i < graph.Length; i++)
+        {
+            graph[i] = new Graph(graphObj[i], accumulative: true);
+            totalGraph[i] = new Graph(tGraphObj[i], accumulative: true);
+        }
 
         string o = "";
 
@@ -62,6 +73,23 @@ public class FightCTRL : MonoBehaviour
 
         // 
         map = new Map(this, levelName);
+
+        // We dont want to see this pesky button in the heat of battle
+        if (GM.currentRound > 0)
+        {
+            start.gameObject.SetActive(false);
+        }
+        else
+        {
+            for (int i = 0; i < totalGraph.Length; i++)
+            {
+                totalGraph[i] = new Graph(tGraphObj[i], accumulative: true);
+            }
+
+            GM.FullReset();
+
+            map.SetCamTo(Map.CamMode.Field);
+        }
 
         // 
         fighter[0] = new Fighter(one, 0, map.mapSize, GM.intelli[0]);
@@ -86,9 +114,6 @@ public class FightCTRL : MonoBehaviour
 
         // 
         map.SetFighters(fighter);
-
-        // 
-        map.SetCamTo(Map.CamMode.Field);
 
         // 
         aS = gameObject.AddComponent<AudioSource>();
@@ -144,8 +169,6 @@ public class FightCTRL : MonoBehaviour
         GM.maxMoves = mMoves;
 
         GM.time = time;
-
-        //uiBattle.text = $"{fighter[gmTurn].obj.name} - {phase}";
 
         // 
         if (_turn == nextWaffleSpawn)
@@ -239,6 +262,12 @@ public class FightCTRL : MonoBehaviour
         }
     }
 
+    public void UpdateGraph(int who, int r)
+    {
+        graph[who].AddValueToGraph(r);
+        graph[who].UpdateGraph();
+    }
+
     public void PlaySFX(string c)
     {
         AudioClip ac = null;
@@ -304,16 +333,14 @@ public class FightCTRL : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             mode = Mode.Start;
-            GM.turnSyncer = 0;
+            GM.FullReset();
             SceneManager.LoadScene("mainMenu");
         }
 
         // 
         if (Input.GetKeyDown(KeyCode.Period))
         {
-            //fighter[0].DMGTEMP(1);
-            //fighter[0].PowerUp();
-            //SpawnWaffle();
+            fighter[0].DMGTEMP(25);
         }
 
         // 
@@ -361,7 +388,7 @@ public class FightCTRL : MonoBehaviour
     public void Restart()
     {
         mode = Mode.Start;
-        GM.turnSyncer = 0;
+        GM.Init();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -392,7 +419,7 @@ public class FightCTRL : MonoBehaviour
             }
 
             // Set camera to turnee
-            map.SetCamTo(map.camMode, turn);
+            map.SetCamTo(Map.camMode, turn);
 
             // 
             if (fighter[turn].isStunned)
@@ -478,6 +505,41 @@ public class FightCTRL : MonoBehaviour
                 // incriment the turn
                 _turn++;
             }
+        }
+    }
+
+    public void EnableRoundsUI()
+    {
+        for (int i = 0; i < fighter.Length; i++)
+        {
+            rounds[i].text = $"{GM.win[i]} / {GM.totalRounds} - {Mathf.Round(100 * ((float)GM.win[i] / GM.totalRounds))}%";
+            GM.battleAvg[i][GM.currentRound-1] = (int)GM.battleAvgThisMatch[i].Average();
+
+            // 
+            for (int j = 0; j < GM.currentRound; j++)
+            {
+                totalGraph[i].AddValueToGraph(GM.battleAvg[i][j]);
+            }
+
+            totalGraph[i].UpdateGraph();
+        }
+
+        roundsUI.gameObject.SetActive(true);
+
+        StartCoroutine(NextRound());
+    }
+
+    IEnumerator NextRound()
+    {
+        yield return new WaitForSeconds(5);
+
+        bool stillBattling = (GM.win[0] + GM.win[1]) < GM.totalRounds;
+
+        // 
+        if (stillBattling)
+        {
+            Restart();
+            StartBattle();
         }
     }
 

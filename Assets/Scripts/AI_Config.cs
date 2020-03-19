@@ -29,8 +29,7 @@ public class AI_Config
         string[] split = data.Split('\n');
         _aiName = split[0];
         _raw = split[1];
-        Debug.Log(_aiName);
-        Debug.Log(_raw);
+
         _filename = fname;
 
         split = _raw.Split(';');
@@ -87,12 +86,13 @@ public class AI_Config
 
         save[3] = _attack;
 
-        string concat = string.Join(";", save);
+        string concat0 = $"{_aiName}\n";
+        string concat1 = string.Join(";", save);
 
         // 
         using (StreamWriter sR = new StreamWriter(_filename))
         {
-            sR.Write(concat);
+            sR.Write(concat0+concat1);
         }
     }
 

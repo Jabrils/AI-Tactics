@@ -170,7 +170,7 @@ public class Fighter
         _opp.LookAtOpponent();
 
         // 
-        map.SetCamTo(map.camMode, myTurn);
+        map.SetCamTo(Map.camMode, myTurn);
     }
 
     int[][] Rewarder(Map map, int x, int y)
@@ -190,7 +190,7 @@ public class Fighter
             }
             else if (y == 1)
             {
-                return 2 - Mathf.FloorToInt(str[0] / 3);
+                return Mathf.FloorToInt(str[0] / 3) - 2;
             }
             else if (y == 2)
             {
@@ -417,6 +417,7 @@ public class Fighter
         //float[][] W_hidden, W_out;
         //OutputAttack.ConvertFightWeights(config, stateData, out oOut, out hOut, out W_hidden, out W_out);
 
+        // FIX THIS TO PROCESS BOTH NN
         int z = 0;
 
         // 
@@ -500,6 +501,9 @@ public class Fighter
             for (int i = 0; i < 2; i++)
             {
                 sW.WriteLine($"{sD[i]}\t{oA[i].decision}\t{r[i][0]},{r[i][1]},{r[i][2]}");
+                int currentReward = r[i][oA[i].decision];
+                map.fC.UpdateGraph(i, currentReward);
+                GM.battleAvgThisMatch[i].Add(currentReward);
             }
         }
     }

@@ -1,4 +1,4 @@
-## v0.0.40
+## v0.0.41
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -13,16 +13,22 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added graphs
-|||Added a ML AI for Movement
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
 |||Separated training vs battle
+|||Fixed NN code to be able to work for both player 1 & 2
 
 ## Polish
+|Version|Date|Thing|Note
+|-|-|-|-
 |||Added a battle menu bar
+|||Removed the weird thing on the Haxbots
+|||Added a number on the graphs to display highest anything
 
 ### Feature Creep
+|Version|Date|Thing|Note
+|-|-|-|-
+|||Added a ML AI for Movement
 |||Added a battle replay feature
 |||The crowd now reacts to the battle with cheers
 |||Added crowd SFX
@@ -39,6 +45,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.41|03.19.020|Added graphs
 |v0.0.40|03.15.020|Added Saving & Loading of AI Brains
 |v0.0.40|03.15.020|Added a ML AI for Combat
 |v0.0.37|03.09.020|Added exporation vs exploitation|for combat, the rest doesn't really make sense

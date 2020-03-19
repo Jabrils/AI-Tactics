@@ -12,7 +12,7 @@ public class menuCTRL : MonoBehaviour
     public GameObject[] bot;
     public RectTransform[] menu;
     public TextMeshProUGUI[] name, percentage;
-    public TextMeshProUGUI toolTipTxt, vText;
+    public TextMeshProUGUI toolTipTxt, vText, roundsTxt;
     public TMP_Dropdown[] dd_Haxbot, dd_Intelli, dd_aiType;
     public Image bCol;
     public RectTransform title;
@@ -22,6 +22,8 @@ public class menuCTRL : MonoBehaviour
     public TMP_InputField brainInp;
     public Slider[] percSlider;
     public RectTransform msgBox;
+    public Slider roundsSli;
+    int multiplier = 1;
 
     HaxbotData[] hbD;
     List<TMP_Dropdown.OptionData> dd = new List<TMP_Dropdown.OptionData>();
@@ -29,6 +31,7 @@ public class menuCTRL : MonoBehaviour
     string botsPath, brainsPath;
     bool[] nn_strat => new bool[] { Mathf.RoundToInt(scroll[0].value) == 1, Mathf.RoundToInt(scroll[1].value) == 1, Mathf.RoundToInt(scroll[2].value) == 1, Mathf.RoundToInt(scroll[3].value) == 1, };
     List<string> newAI_Config = new List<string>();
+    int menuState;
 
     // Start is called before the first frame update
     void Start()
@@ -121,6 +124,9 @@ public class menuCTRL : MonoBehaviour
     void MenuInit()
     {
         // 
+        roundsSli.value = GM.totalRounds;
+
+        // 
         dd_Haxbot[0].onValueChanged.AddListener(delegate { LoadNSetHaxbot(0); });
         dd_Haxbot[1].onValueChanged.AddListener(delegate { LoadNSetHaxbot(1); });
 
@@ -128,6 +134,7 @@ public class menuCTRL : MonoBehaviour
         dd_Intelli[0].onValueChanged.AddListener(delegate { SetIntelli(0); });
         dd_Intelli[1].onValueChanged.AddListener(delegate { SetIntelli(1); });
 
+        // 
         UpdatePanel(0);
         UpdatePanel(1);
         UpdatePanel(2);
@@ -136,6 +143,12 @@ public class menuCTRL : MonoBehaviour
         // set the proper menu
         ChangeMenu(0);
         CheckIfCanCreateAI();
+    }
+
+    public void SliderValChanged()
+    {
+        GM.totalRounds = (int)roundsSli.value * multiplier;
+        roundsTxt.text = $"Rounds {(multiplier > 1 ? $"x{multiplier}" : "")}: {GM.totalRounds * multiplier}";
     }
 
     public void UpdatePercentage(int who)
@@ -246,6 +259,25 @@ public class menuCTRL : MonoBehaviour
         {
             Application.Quit();
         }
+
+        if (menuState == 1)
+        {
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                multiplier++;
+
+                multiplier = Mathf.Clamp(multiplier, 1, multiplier);
+            }
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                multiplier--;
+
+                multiplier = Mathf.Clamp(multiplier, 1, multiplier);
+            }
+
+            SliderValChanged();
+        }
     }
 
     IEnumerator ShowMessage(string msg)
@@ -258,6 +290,7 @@ public class menuCTRL : MonoBehaviour
 
     public void ChangeMenu(int w)
     {
+        menuState = w;
 
         if (w == 1)
         {
