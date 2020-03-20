@@ -338,6 +338,8 @@ public struct OutputAttack
 
         float greedy = UnityEngine.Random.value;
 
+        NNState nn = new NNState();
+        
         // 
         if (conf.usingAttackNN)
         {
@@ -355,8 +357,11 @@ public struct OutputAttack
                 o[i] = AI.Σ(hL, wO[i]);
             }
 
+            // ship this.
+            nn = new NNState(o, hL, wO, wHL);
+
             // 
-            if (greedy < conf.exploit)
+            if (greedy < conf.showoff)
             {
                 // squash & set the the final values for returning
                 a = AI.Sigmoid(o[0]);
@@ -396,11 +401,9 @@ public struct OutputAttack
                 t = 1;
             }
 
-
-            return new OutputAttack(a, d, t, new NNState());
+            return new OutputAttack(a, d, t, nn);
         }
 
-        NNState nn = new NNState(o, hL, wO, wHL);
         // 
         return new OutputAttack(a, d, t, nn);
     }

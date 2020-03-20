@@ -30,10 +30,13 @@ static class GM
     public static List<int>[] battleAvgThisMatch = new List<int>[] { new List<int>(), new List<int>()};
     public static int[][] battleAvg = new int[2][];
     public static int currentRound => win[0] + win[1];
+    public static float[] explSetter = new float[2];
+    public static bool[] nnIsLearning = new bool[] { true, true };
 
     public static void Init()
     {
         turnSyncer = 0;
+        battleAvgThisMatch = new List<int>[] { new List<int>(), new List<int>() };
     }
 
     public static void FullReset()

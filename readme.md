@@ -1,4 +1,4 @@
-## v0.0.41
+## v0.0.42
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -9,21 +9,25 @@
 - THE SMALLER EPSILON IS (change in input) THE MORE ACCURATE DERV OF SIGMOID IS, THATS JUST CALCULUS BABY
 - if training doesn't work out, I can try beefing up the NN architecture, or adding memory to the reward (use the 3 outputs to try & predict the future & obtain a totalReward[i] vector for a few timesteps ahead.)
 - For graphing, graph the acculative reward over time ( r=0; r+=2; r+= -3; r+=2 ...)
+- try an AI that cycles, att, def, taunt
 
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added exploitation sliders
+|||Added a "Do you want NN to learn?" Scrollbar
+|||Added random vs nn icons to battle decisions
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
-|||Separated training vs battle
 |||Fixed NN code to be able to work for both player 1 & 2
+|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added a battle menu bar
+|Added a reset & exit button to battle
+|||Added helmets
 |||Removed the weird thing on the Haxbots
-|||Added a number on the graphs to display highest anything
 
 ### Feature Creep
 |Version|Date|Thing|Note
@@ -45,7 +49,9 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
-|v0.0.41|03.19.020|Added graphs
+|v0.0.42|03.19.020|Added a number on the graphs to display highest anything / max
+|v0.0.42|03.19.020|Added the AI Name under the fighter's graph
+|v0.0.41|03.18.020|Added graphs
 |v0.0.40|03.15.020|Added Saving & Loading of AI Brains
 |v0.0.40|03.15.020|Added a ML AI for Combat
 |v0.0.37|03.09.020|Added exporation vs exploitation|for combat, the rest doesn't really make sense

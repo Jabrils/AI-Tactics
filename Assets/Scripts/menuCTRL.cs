@@ -11,7 +11,7 @@ public class menuCTRL : MonoBehaviour
     public Image mainBG;
     public GameObject[] bot;
     public RectTransform[] menu;
-    public TextMeshProUGUI[] name, percentage;
+    public TextMeshProUGUI[] name, percentage, txtShowoff;
     public TextMeshProUGUI toolTipTxt, vText, roundsTxt;
     public TMP_Dropdown[] dd_Haxbot, dd_Intelli, dd_aiType;
     public Image bCol;
@@ -20,7 +20,8 @@ public class menuCTRL : MonoBehaviour
     public Transform[] panelSwitch;
     public Button createAI;
     public TMP_InputField brainInp;
-    public Slider[] percSlider;
+    public Slider[] percSlider, sliShowoff;
+    public Scrollbar[] scro_Learning;
     public RectTransform msgBox;
     public Slider roundsSli;
     int multiplier = 1;
@@ -32,6 +33,8 @@ public class menuCTRL : MonoBehaviour
     bool[] nn_strat => new bool[] { Mathf.RoundToInt(scroll[0].value) == 1, Mathf.RoundToInt(scroll[1].value) == 1, Mathf.RoundToInt(scroll[2].value) == 1, Mathf.RoundToInt(scroll[3].value) == 1, };
     List<string> newAI_Config = new List<string>();
     int menuState;
+    bool[] isNN = new bool[2];
+    bool matchHasNN => isNN[0] || isNN[1];
 
     // Start is called before the first frame update
     void Start()
@@ -82,7 +85,7 @@ public class menuCTRL : MonoBehaviour
 
                 // 
                 for (int i = 0; i < newAI_Config.Count; i++)
-                { 
+                {
                     string name = "";
 
                     // 
@@ -127,6 +130,13 @@ public class menuCTRL : MonoBehaviour
         roundsSli.value = GM.totalRounds;
 
         // 
+        for (int i = 0; i < 2; i++)
+        {
+            sliShowoff[i].value = GM.explSetter[i];
+            scro_Learning[i].value = GM.nnIsLearning[i] ? 0 : 1;
+        }
+
+        // 
         dd_Haxbot[0].onValueChanged.AddListener(delegate { LoadNSetHaxbot(0); });
         dd_Haxbot[1].onValueChanged.AddListener(delegate { LoadNSetHaxbot(1); });
 
@@ -145,10 +155,28 @@ public class menuCTRL : MonoBehaviour
         CheckIfCanCreateAI();
     }
 
+    public void ToggleLearningSlider(int i)
+    {
+        GM.nnIsLearning[i] = scro_Learning[i].value == 0 ? true : false;
+
+        Color[] set = new Color[2];
+
+        ColorUtility.TryParseHtmlString("#A1FF7E", out set[0]);
+        ColorUtility.TryParseHtmlString("#FF6843", out set[1]);
+
+        scro_Learning[i].GetComponent<Image>().color = GM.nnIsLearning[i] ? set[0] : set[1];
+    }
+
     public void SliderValChanged()
     {
         GM.totalRounds = (int)roundsSli.value * multiplier;
-        roundsTxt.text = $"Rounds {(multiplier > 1 ? $"x{multiplier}" : "")}: {GM.totalRounds * multiplier}";
+        roundsTxt.text = $"Rounds {(multiplier > 1 ? $"x{multiplier}" : "")}: {GM.totalRounds}";
+    }
+
+    public void SliderShowoffChanged(int which)
+    {
+        GM.explSetter[which] = sliShowoff[which].value;
+        txtShowoff[which].text = $"Showoff: {Mathf.Round(GM.explSetter[which] * 100)}%";
     }
 
     public void UpdatePercentage(int who)
@@ -195,7 +223,7 @@ public class menuCTRL : MonoBehaviour
             //
             for (int i = 0; i < weightCount[j]; i++)
             {
-                strat[j] += $"{(ch == "-1" ? Random.Range(-1f,1f).ToString() : ch)}{(i != weightCount[j] - 1 ? "," : "")}";
+                strat[j] += $"{(ch == "-1" ? Random.Range(-1f, 1f).ToString() : ch)}{(i != weightCount[j] - 1 ? "," : "")}";
             }
 
             // 

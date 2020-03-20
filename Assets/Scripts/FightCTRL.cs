@@ -27,7 +27,7 @@ public class FightCTRL : MonoBehaviour
     public bool areInBattle;
     public Button start;
     public GameObject[] graphObj, tGraphObj;
-    public TextMeshProUGUI[] rounds;
+    public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax;
 
     int _turn;
     public int turn => _turn % 2;
@@ -57,7 +57,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < graph.Length; i++)
         {
             graph[i] = new Graph(graphObj[i], accumulative: true);
-            totalGraph[i] = new Graph(tGraphObj[i], accumulative: true);
+            totalGraph[i] = new Graph(tGraphObj[i], accumulative: false);
         }
 
         string o = "";
@@ -83,12 +83,19 @@ public class FightCTRL : MonoBehaviour
         {
             for (int i = 0; i < totalGraph.Length; i++)
             {
-                totalGraph[i] = new Graph(tGraphObj[i], accumulative: true);
+                totalGraph[i] = new Graph(tGraphObj[i], accumulative: false);
             }
 
             GM.FullReset();
 
             map.SetCamTo(Map.CamMode.Field);
+        }
+
+        // 
+        for (int i = 0; i < 2; i++)
+        {
+            GM.intelli[i].SetShowoff(GM.explSetter[i]);
+            txtAiName[i].text = $"{GM.intelli[i].aiName}";
         }
 
         // 
@@ -266,6 +273,8 @@ public class FightCTRL : MonoBehaviour
     {
         graph[who].AddValueToGraph(r);
         graph[who].UpdateGraph();
+
+        txtGraphMax[who].text = $"{graph[who].performance}";
     }
 
     public void PlaySFX(string c)
@@ -513,7 +522,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < fighter.Length; i++)
         {
             rounds[i].text = $"{GM.win[i]} / {GM.totalRounds} - {Mathf.Round(100 * ((float)GM.win[i] / GM.totalRounds))}%";
-            GM.battleAvg[i][GM.currentRound-1] = (int)GM.battleAvgThisMatch[i].Average();
+            GM.battleAvg[i][GM.currentRound-1] = (int)GM.battleAvgThisMatch[i].Sum();
 
             // 
             for (int j = 0; j < GM.currentRound; j++)
@@ -522,6 +531,7 @@ public class FightCTRL : MonoBehaviour
             }
 
             totalGraph[i].UpdateGraph();
+            txtTGraphMax[i].text = $"{(Mathf.Round(totalGraph[i].performance*1000))/1000}";
         }
 
         roundsUI.gameObject.SetActive(true);

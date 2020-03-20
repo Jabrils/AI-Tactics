@@ -214,7 +214,7 @@ public class Fighter
             }
             else if (y == 2)
             {
-                return -PowerUpRemap(str[1] - str[0]);
+                return str[1] < 20 ? -PowerUpRemap(str[1] - str[0]) : 0;
             }
             else
             {
@@ -230,7 +230,7 @@ public class Fighter
             }
             else if (y == 1)
             {
-                return PowerUpRemap(str[0] - str[1]);
+                return str[0] < 20 ? PowerUpRemap(str[0] - str[1]) : 0;
             }
             else if (y == 2)
             {
@@ -253,11 +253,11 @@ public class Fighter
     {
         if (str0 == 1)
         {
-            return str1 - str0;
+            return str0 - str1;
         }
         else if (str1 == 1)
         {
-            return str0 - str1;
+            return str1 - str0;
         }
         else if (str0 == str1)
         {
@@ -280,7 +280,7 @@ public class Fighter
 
     int PowerUpRemap(int inp)
     {
-        return inp < 0 ? 3 : inp + 3;
+        return inp <= 0 ? 2 : inp;
     }
 
     public void Battle(int time, OutputAttack[] oA, Map map)
@@ -418,11 +418,14 @@ public class Fighter
         //OutputAttack.ConvertFightWeights(config, stateData, out oOut, out hOut, out W_hidden, out W_out);
 
         // FIX THIS TO PROCESS BOTH NN
-        int z = 0;
+
 
         // 
         if (config.usingAttackNN)
         {
+            Debug.Log($"{name} has NN");
+
+            int z = 0;
             NNState nn = oA[z].nn;
             float[] state = stateData.fullState;
             float[] error = new float[nn.O_out.Length];
@@ -492,8 +495,97 @@ public class Fighter
                 }
             }
 
-            config.UpdateAttack(newWH, newWO);
+            // if we haven't toggled off their ablility to learn
+            if (GM.nnIsLearning[z])
+            {
+                Debug.Log($"Updating {z}");
+                config.UpdateAttack(newWH, newWO);
+            }
         }
+
+        if (opp.config.usingAttackNN)
+        {
+            Debug.Log($"{opp.name} has NN");
+
+            int z = 1;
+            NNState nn = oA[z].nn;
+            float[] state = opp.stateData.fullState;
+            float[] error = new float[nn.O_out.Length];
+            float[] fin = new float[nn.O_out.Length]; // assign this 
+
+            float[] derivF = new float[nn.O_out.Length];
+            float[] derivO = new float[nn.O_out.Length];
+            float[] derivH = new float[nn.H_out.Length];
+
+            float[][] D_out = new float[nn.O_out.Length][];
+            float[][] D_hidden = new float[nn.H_out.Length][];
+
+            //Debug.Log($"oOut: {nn.O_out.Length}, hOut: {nn.H_out.Length}, wOut: [{nn.W_out.Length}][{nn.W_out[0].Length}], wHidden: [{nn.W_hidden.Length}][{nn.W_hidden[0].Length}]");
+
+            // 
+            for (int i = 0; i < nn.W_hidden.Length; i++)
+            {
+                D_hidden[i] = new float[state.Length];
+            }
+
+            // 
+            for (int i = 0; i < fin.Length; i++)
+            {
+                // 
+                fin[i] = AI.Sigmoid(nn.O_out[i]);
+                // 
+                D_out[i] = new float[nn.H_out.Length];
+            }
+
+            float[][] newWH = new float[0][];
+            float[][] newWO = new float[0][];
+
+            // BackProp
+            for (int i = 0; i < r[z].Length; i++) //3
+            {
+                // back prop
+                error[i] = GM.lR * Mathf.Pow(r[z][i] * fin[i], 2);
+                //Debug.Log($"{error[i]} = {GM.lR} * { Mathf.Pow(r[z][i] * fin[i], 2)}");
+
+                derivF[i] = 2 * (GM.lR * Mathf.Pow(r[z][i], 2)) * fin[i];
+
+                // 
+                derivO[i] = AI.Sigmoid(nn.O_out[i], true) * derivF[i];
+                //Debug.Log($"{derivO[i]} = {AI.Sigmoid(nn.O_out[i], true)} * {derivF[i]}");
+                //
+                for (int j = 0; j < D_out[i].Length; j++) //12
+                {
+                    D_out[i][j] = nn.H_out[j] * derivO[i];
+                    //Debug.Log($"{D_out[i][j]} = {nn.H_out[j]} * {derivO[i]}");
+
+                    derivH[j] = nn.W_out[i][j] * derivO[i];
+
+                    // 
+                    for (int k = 0; k < D_hidden[j].Length; k++) //20
+                    {
+                        D_hidden[j][k] = state[k] * derivH[j];
+                        //Debug.Log($"{k}/{D_hidden[j].Length} - {D_out[i].Length}");
+                        newWH = nn.W_hidden;
+                        newWH[j][k] += D_hidden[j][k] * Mathf.Sign(r[z][i]);
+                    }
+
+                    newWO = nn.W_out;
+                    newWO[i][j] += D_out[i][j] * Mathf.Sign(r[z][i]);
+
+                    //Debug.Log($"{a == nn.W_out[i][j]} -> {a-nn.W_out[i][j]}");
+                    //Debug.Log($"{D_out[i][j]} * {Mathf.Sign(reward[i])}");
+                }
+            }
+
+            // if we haven't toggled off their ablility to learn
+            if (GM.nnIsLearning[z])
+            {
+                Debug.Log($"Updating {z}");
+                opp.config.UpdateAttack(newWH, newWO);
+            }
+        }
+
+        //Debug.Log($"{r[0][0]},{r[0][1]},{r[0][2]}");
 
         //
         using (StreamWriter sW = File.AppendText("masterLog.tsv"))
@@ -579,10 +671,11 @@ public class Fighter
     public void PowerUp()
     {
         _powerUp.Play();
+        int tS = _str;
         _str++;
         _str = Mathf.Clamp(_str, 1, GM.maxStr);
         _strTxt.text = $"{_str}";
-        SetText(true, Color.yellow, dmg: 1);
+        SetText(true, Color.yellow, dmg: _str - tS);
     }
 
     public void PowerDown()

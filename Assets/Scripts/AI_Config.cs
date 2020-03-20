@@ -21,8 +21,10 @@ public class AI_Config
     public string[] movementNN => _movement.Split(',');
     public string[] battleNN => _battle.Split(',');
     public string[] attackNN => _attack.Split(',');
-    float _exploit = 1f;
-    public float exploit => _exploit;
+    float _showoff;
+    public float showoff => _showoff;
+
+    public string aiName => _aiName;
 
     public AI_Config(string fname, string data)
     {
@@ -96,8 +98,8 @@ public class AI_Config
         }
     }
 
-    public void SetExploit(float e)
+    public void SetShowoff(float e)
     {
-        _exploit = e;
+        _showoff = e;
     }
 }
