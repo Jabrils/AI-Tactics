@@ -24,6 +24,8 @@ public class menuCTRL : MonoBehaviour
     public Scrollbar[] scro_Learning;
     public RectTransform msgBox;
     public Slider roundsSli;
+    public GameObject flames;
+
     int multiplier = 1;
 
     HaxbotData[] hbD;
@@ -33,8 +35,8 @@ public class menuCTRL : MonoBehaviour
     bool[] nn_strat => new bool[] { Mathf.RoundToInt(scroll[0].value) == 1, Mathf.RoundToInt(scroll[1].value) == 1, Mathf.RoundToInt(scroll[2].value) == 1, Mathf.RoundToInt(scroll[3].value) == 1, };
     List<string> newAI_Config = new List<string>();
     int menuState;
-    bool[] isNN = new bool[2];
-    bool matchHasNN => isNN[0] || isNN[1];
+    bool[] _isNN => new bool[] { GM.intelli[0] == null ? false : GM.intelli[0].usingAttackNN, GM.intelli[1] == null ? false : GM.intelli[1].usingAttackNN };
+    bool matchHasNN => _isNN[0] || _isNN[1];
 
     // Start is called before the first frame update
     void Start()
@@ -274,6 +276,9 @@ public class menuCTRL : MonoBehaviour
     {
         //print($"{dd_Intelli[i].value} -> {aI_Config[dd_Intelli[i].value]}");
         GM.intelli[i] = AI.LoadIntelligence(newAI_Config[dd_Intelli[i].value]);
+
+        sliShowoff[i].gameObject.SetActive(_isNN[i]);
+        scro_Learning[i].gameObject.SetActive(_isNN[i]);
     }
 
     // Update is called once per frame
@@ -328,10 +333,12 @@ public class menuCTRL : MonoBehaviour
             LoadBattleData();
         }
 
-        LoadBattleData();
-        Color32[] col = new Color32[] { new Color32(63, 63, 63, 255), new Color32(255, 200, 200, 255), new Color32(81, 183, 255, 255) };
+        flames.gameObject.SetActive(w == 1); // ? new Vector3(0.19f, -1.81f, 1.47f) : Vector3.up * -10000;
 
-        mainBG.color = col[w];
+        LoadBattleData();
+        Color32[] col = new Color32[] { new Color32(213, 202, 255, 255), new Color32(63, 63, 63, 255), new Color32(81, 183, 255, 255) };
+
+        Camera.main.backgroundColor = col[w]; 
 
         // 
         for (int i = 0; i < menu.Length; i++)

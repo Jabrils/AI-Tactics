@@ -544,8 +544,8 @@ public class Map
                     fC.PlaySFX("draw");
 
                     // change the animation to reveal battle results
-                    fighter[0].ChangeAnimation(battleDecLookUp[did[0]], true);
-                    fighter[1].ChangeAnimation(battleDecLookUp[did[1]], true);
+                    fighter[0].ChangeAnimation(battleDecLookUp[did[0]], oA[0].decideType, display: true);
+                    fighter[1].ChangeAnimation(battleDecLookUp[did[1]], oA[1].decideType, display: true);
 
                     // add in some cinematic waiting
                     yield return new WaitForSeconds(2);
@@ -654,6 +654,7 @@ public class Map
                     Debug.Log($"GAME OVER! TIE GMAE!");
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Defeat");
+                    GM.win[2]++;
                 }
 
                 fC.EnableRoundsUI();

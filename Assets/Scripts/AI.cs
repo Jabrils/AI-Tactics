@@ -303,19 +303,24 @@ public struct OutputAttack
     public float attack => _attack;
     public float defend => _defend;
     public float taunt => _taunt;
+
     NNState _nn;
     public NNState nn => _nn;
+
+    string _decideType;
+    public string decideType => _decideType;
 
     float[] votes => new float[] { attack, defend, taunt };
     public int decision => Decision();
     public string choice => decision == 0 ? "Attack" : decision == 1 ? "Defend" : "Taunt";
 
-    OutputAttack(float a, float d, float t, NNState nn)
+    OutputAttack(float a, float d, float t, NNState nn, string dType)
     {
         _attack = a;
         _defend = d;
         _taunt = t;
         _nn = nn;
+        _decideType = dType;
     }
 
     public void DEBUGSetVals(float a, float d, float t)
@@ -339,6 +344,8 @@ public struct OutputAttack
         float greedy = UnityEngine.Random.value;
 
         NNState nn = new NNState();
+
+        string dType = null;
         
         // 
         if (conf.usingAttackNN)
@@ -360,8 +367,12 @@ public struct OutputAttack
             // ship this.
             nn = new NNState(o, hL, wO, wHL);
 
+            bool useNN = greedy < conf.showoff;
+
+            dType = useNN ? "nn" : "r";
+
             // 
-            if (greedy < conf.showoff)
+            if (useNN)
             {
                 // squash & set the the final values for returning
                 a = AI.Sigmoid(o[0]);
@@ -401,11 +412,11 @@ public struct OutputAttack
                 t = 1;
             }
 
-            return new OutputAttack(a, d, t, nn);
+            return new OutputAttack(a, d, t, nn, dType);
         }
 
         // 
-        return new OutputAttack(a, d, t, nn);
+        return new OutputAttack(a, d, t, nn, dType);
     }
 
     public static void ConvertFightWeights(AI_Config conf, StateData state, out float[] o, out float[] hL, out float[][] wHL, out float[][] wO)
@@ -464,7 +475,7 @@ public struct OutputAttack
 
         ret[w] = 1;
 
-        return new OutputAttack(ret[0], ret[1], ret[2], new NNState());
+        return new OutputAttack(ret[0], ret[1], ret[2], new NNState(), null);
     }
 
     int Decision()

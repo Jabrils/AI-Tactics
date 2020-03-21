@@ -28,6 +28,7 @@ public class FightCTRL : MonoBehaviour
     public Button start;
     public GameObject[] graphObj, tGraphObj;
     public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax;
+    public TextMeshProUGUI theRound;
 
     int _turn;
     public int turn => _turn % 2;
@@ -48,7 +49,8 @@ public class FightCTRL : MonoBehaviour
     bool canSpawnWaffle => map.waffleCount < 3;
     Graph[] graph = new Graph[2], totalGraph = new Graph[2];
 
-    public static Material[] txts;
+    public static Material[] txtBattle;
+    public static Material[] txtDecide;
 
     void Start()
     {
@@ -60,6 +62,8 @@ public class FightCTRL : MonoBehaviour
             totalGraph[i] = new Graph(tGraphObj[i], accumulative: false);
         }
 
+        theRound.text = $"{GM.currentRound+1}/{GM.totalRounds}";
+
         string o = "";
 
         HXB.LoadHaxbot(one, GM.hbName[0]);
@@ -69,7 +73,10 @@ public class FightCTRL : MonoBehaviour
         AddToNextWaffleSpawn();
 
         // 
-        txts = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
+        txtBattle = new Material[] { Resources.Load<Material>("Mats/attack"), Resources.Load<Material>("Mats/defend"), Resources.Load<Material>("Mats/taunt") };
+
+        // 
+        txtDecide = new Material[] { Resources.Load<Material>("Mats/random"), Resources.Load<Material>("Mats/nn") };
 
         // 
         map = new Map(this, levelName);
@@ -95,7 +102,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < 2; i++)
         {
             GM.intelli[i].SetShowoff(GM.explSetter[i]);
-            txtAiName[i].text = $"{GM.intelli[i].aiName}";
+            txtAiName[i].text = $"{GM.intelli[i].aiName} - {GM.explSetter[i]*100}%";
         }
 
         // 
@@ -350,6 +357,7 @@ public class FightCTRL : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Period))
         {
             fighter[0].DMGTEMP(25);
+            fighter[1].DMGTEMP(25);
         }
 
         // 
@@ -543,7 +551,7 @@ public class FightCTRL : MonoBehaviour
     {
         yield return new WaitForSeconds(5);
 
-        bool stillBattling = (GM.win[0] + GM.win[1]) < GM.totalRounds;
+        bool stillBattling = (GM.currentRound) < GM.totalRounds;
 
         // 
         if (stillBattling)

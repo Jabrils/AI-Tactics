@@ -25,11 +25,11 @@ static class GM
     public static int nodePerConstant = 4;
     public static float attendence = .88f;
     public static float lR = .01f;
-    public static int[] win = new int[2];
+    public static int[] win = new int[3];
     public static int totalRounds = 3;
     public static List<int>[] battleAvgThisMatch = new List<int>[] { new List<int>(), new List<int>()};
     public static int[][] battleAvg = new int[2][];
-    public static int currentRound => win[0] + win[1];
+    public static int currentRound => win[0] + win[1] + win[2];
     public static float[] explSetter = new float[2];
     public static bool[] nnIsLearning = new bool[] { true, true };
 
@@ -41,7 +41,7 @@ static class GM
 
     public static void FullReset()
     {
-        win = new int[2];
+        win = new int[3];
 
         for (int i = 0; i < battleAvg.Length; i++)
         {

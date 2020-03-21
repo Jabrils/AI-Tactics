@@ -1,4 +1,4 @@
-## v0.0.42
+## v0.0.43
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -10,22 +10,40 @@
 - if training doesn't work out, I can try beefing up the NN architecture, or adding memory to the reward (use the 3 outputs to try & predict the future & obtain a totalReward[i] vector for a few timesteps ahead.)
 - For graphing, graph the acculative reward over time ( r=0; r+=2; r+= -3; r+=2 ...)
 - try an AI that cycles, att, def, taunt
+- Training strats:
+- - Berserk Slayer -> Berserk (Locked); BS_Pupil -> Berserk_Slayer(Locked); Pupil -> BS_Pupil(Locked)
+- - Some new NN vs itself
+- - Thing 1 vs Thing 2
+- - Ground a neural network by training it vs random output, then train it against something with more strategy
+- - Beserk_Slayer vs New NN, both learn to get better
+
+## Credits
+- freepik - flaticon.com
+- becris - flaticon.com
+- NAN - Stadium
+- NAN - brick texure
+- NAN - dirt texure
+- NAN - pillar model
+- Grant Sanderson - Calculus Help
+- Dan Walsh - Calculus Help
 
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added exploitation sliders
-|||Added a "Do you want NN to learn?" Scrollbar
-|||Added random vs nn icons to battle decisions
+|||Removed the pointless level.map file loadin
+|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element
+|||Fixed waffle collision bug
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
 |||Fixed NN code to be able to work for both player 1 & 2
-|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
-|Added a reset & exit button to battle
+|||Now saving AI choice that persists even after battles
+|||Added hp & decisions to taskbar
+|||Added a rounds dispay in battle, as well at the rounds graphs
+|||Added a reset & exit button to battle
 |||Added helmets
 |||Removed the weird thing on the Haxbots
 
@@ -49,6 +67,10 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.43|03.20.020|Added fire to the background of battle menu
+|v0.0.43|03.20.020|Added exploitation sliders
+|v0.0.43|03.20.020|Added a "Do you want NN to learn?" Scrollbar
+|v0.0.42|03.19.020|Added random vs nn icons to battle decisions
 |v0.0.42|03.19.020|Added a number on the graphs to display highest anything / max
 |v0.0.42|03.19.020|Added the AI Name under the fighter's graph
 |v0.0.41|03.18.020|Added graphs

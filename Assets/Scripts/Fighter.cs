@@ -423,8 +423,6 @@ public class Fighter
         // 
         if (config.usingAttackNN)
         {
-            Debug.Log($"{name} has NN");
-
             int z = 0;
             NNState nn = oA[z].nn;
             float[] state = stateData.fullState;
@@ -498,15 +496,12 @@ public class Fighter
             // if we haven't toggled off their ablility to learn
             if (GM.nnIsLearning[z])
             {
-                Debug.Log($"Updating {z}");
                 config.UpdateAttack(newWH, newWO);
             }
         }
 
         if (opp.config.usingAttackNN)
         {
-            Debug.Log($"{opp.name} has NN");
-
             int z = 1;
             NNState nn = oA[z].nn;
             float[] state = opp.stateData.fullState;
@@ -580,12 +575,11 @@ public class Fighter
             // if we haven't toggled off their ablility to learn
             if (GM.nnIsLearning[z])
             {
-                Debug.Log($"Updating {z}");
                 opp.config.UpdateAttack(newWH, newWO);
             }
         }
 
-        //Debug.Log($"{r[0][0]},{r[0][1]},{r[0][2]}");
+        //Debug.Log($"{r[0][0]},{r[0][1]},{r[0][2]} - {r[1][0]},{r[1][1]},{r[1][2]}");
 
         //
         using (StreamWriter sW = File.AppendText("masterLog.tsv"))
@@ -626,15 +620,18 @@ public class Fighter
         }
     }
 
-    public void ChangeAnimation(string a, bool display = false)
+    public void ChangeAnimation(string decide, string isNN = "", bool display = false)
     {
-        _anim.SetTrigger(a);
+        _anim.SetTrigger(decide);
 
         // 
         if (display)
         {
             _display.enabled = true;
-            _display.material = a[0] == 'A' ? FightCTRL.txts[0] : a[0] == 'D' ? FightCTRL.txts[1] : FightCTRL.txts[2];
+            Material main = decide[0] == 'A' ? FightCTRL.txtBattle[0] : decide[0] == 'D' ? FightCTRL.txtBattle[1] : FightCTRL.txtBattle[2];
+            Material side = isNN == "nn" ? FightCTRL.txtDecide[1] : isNN == "r" ? FightCTRL.txtDecide[0] : null;
+
+            _display.materials = new Material[] { main, side };
         }
     }
 
