@@ -643,15 +643,15 @@ public struct StateData
     public string PrintState()
     {
         return $"distX: {distX}, distY: {distY}" +
-            $"\nmyTurn: {myTurn}, myX: {myX}, myY: {myY}, myHp: {myHP}, myStr: {myStr}, isStunned: {iStunned}, myRuns: {myRuns}, myCandyX: {myCandyX}, myCandyY: {myCandyY}" +
-        $"\nopTurn: {oppTurn}, opX: {oppX}, opY: {oppY}, opHp: {oppHP}, opStr: {oppStr}, opStunned: {oppStunned}, oppRuns: {oppRuns}, oppCandyX: {oppCandyX}, oppCandyY: {oppCandyY}";
+            $"\nmyTurn: {myTurn}, myX: {myX}, myY: {myY}, myHp: {myHP}, myStr: {myStr}, isStunned: {iStunned}, myRuns: {myRuns}, myCandyX: {myWaffleX}, myCandyY: {myWaffleY}" +
+        $"\nopTurn: {oppTurn}, opX: {oppX}, opY: {oppY}, opHp: {oppHP}, opStr: {oppStr}, opStunned: {oppStunned}, oppRuns: {oppRuns}, oppCandyX: {oppWaffleX}, oppCandyY: {oppWaffleY}";
     }
 
     public Fighter me;
     public Fighter opp;
     int theTurn;
-    public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myCandyX, myCandyY, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppCandyX, oppCandyY };
-    public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myCandyX}, {myCandyY}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppCandyX}, {oppCandyY}";
+    public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myWaffleX, myWaffleY, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppWaffleX, oppWaffleY };
+    public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myWaffleX}, {myWaffleY}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppWaffleX}, {oppWaffleY}";
     // 
     // // SHARED
     // 
@@ -680,9 +680,9 @@ public struct StateData
     // 9 - myRuns
     public float myRuns => (float)me.ranAway / (float)GM.maxRunAway;
     // 10 - myCandyX
-    public float myCandyX => (float)me.candyX / (float)GM.mapSize;
+    public float myWaffleX => (float)me.waffleX / (float)GM.mapSize;
     // 11 - myCandyY
-    public float myCandyY => (float)me.candyY / (float)GM.mapSize;
+    public float myWaffleY => (float)me.waffleY / (float)GM.mapSize;
 
     // 
     // // OPPONENT
@@ -703,7 +703,7 @@ public struct StateData
     // 18 - oppRuns
     public float oppRuns => (float)opp.ranAway / (float)GM.maxRunAway;
     // 19 - oppCandyX
-    public float oppCandyX => (float)opp.candyX / (float)GM.mapSize;
+    public float oppWaffleX => (float)opp.waffleX / (float)GM.mapSize;
     // 20 - oppCandyY
-    public float oppCandyY => (float)opp.candyY / (float)GM.mapSize;
+    public float oppWaffleY => (float)opp.waffleY / (float)GM.mapSize;
 }

@@ -46,7 +46,7 @@ public class Map
 
         MapInit();
 
-        LoadLeveData(path);
+        LoadLeveData();
     }
 
     void MapInit()
@@ -249,6 +249,77 @@ public class Map
         }
     }
 
+    public void LoadLeveData()
+    {
+        string levelDat = "oooooooxx2xxxooooooo\nooowoooopxxpoooooooo\nooowoooopxxpoooooooo\noooooopppxxpppoooooo\nooowoooooxxooowwwooo\nooowoooooxoooooowooo\noooooooooxoooooooooo\nooowoooooxoooooowooo\nooowooooxxxxoooowooo\nooooooooxwwxoooooooo\nooooooooxwwxoooooooo\nooowooooxxxxoooowooo\nooowooooooxooooowooo\nooooooooooxooooooooo\nooowooooooxooooowooo\nooowwwoooxxooooowooo\noooooopppxxpppoooooo\noooooooopxxpoooowooo\noooooooopxxpoooowooo\noooooooxxx1xxooooooo";
+
+        // make an algo that will convert text data of x = block o = free into a list of Vector2Ints
+        string[] raw = levelDat.Split('\n');
+
+        // 
+        int mapSize = raw.Length;
+
+        // 
+        _loc = new Tile[mapSize, mapSize];
+
+        // 
+        InitLocations();
+
+        // make a reference to the data mapped as chars
+        char[,] mapped = new char[mapSize, mapSize];
+
+        // 
+        List<Vector2Int> block = new List<Vector2Int>();
+
+        // 
+        freeTiles = new List<Tile>();
+
+        // loop through the mapped chars
+        for (int i = 0; i < raw.Length; i++)
+        {
+            for (int j = 0; j < raw.Length; j++)
+            {
+                char tileData = raw[i][j];
+
+                // fill in the mapped chars
+                mapped[j, i] = tileData;
+
+                // 
+                if (tileData == 'o')
+                {
+                    // 
+                    float dice = Random.value;
+
+                    // 
+                    if (dice < GM.randomProbability)
+                    {
+                        mapped[j, i] = 'p';
+                    }
+                    else
+                    {
+                        // add that free tile to the free tiles list. (will be used for spawing food)
+                        freeTiles.Add(loc[j, i]);
+                    }
+
+                    // 
+                    tileData = mapped[j, i];
+                }
+
+                // assign type
+                loc[j, i].AssignType(tileData);
+
+                // ADD ALL THINGS, w, p etc
+                if (tileData == 'p' || tileData == 'w')
+                {
+                    block.Add(new Vector2Int(j, i));
+                }
+            }
+        }
+
+        // pass that to map.Block()
+        BlockTiles(block);
+    }
+
     public void LoadLeveData(string levelName)
     {
         using (StreamReader sR = new StreamReader($"{Path.Combine(Application.dataPath, $"lvl_{levelName}{GM.lvlExt}")}"))
@@ -405,6 +476,14 @@ public class Map
 
         ResetAllTiles();
 
+        yield return new WaitForSeconds(.5f);
+
+        // 
+        map.fC.StartABattle(who);
+    }
+
+    void CheckFighterForWaffleCollision(int who)
+    {
         // if there are actual waffles on the field
         if (waffleCount > 0)
         {
@@ -428,11 +507,6 @@ public class Map
                 }
             }
         }
-
-        yield return new WaitForSeconds(.5f);
-
-        // 
-        map.fC.StartABattle(who);
     }
 
     public IEnumerator FIGHT(int time, Map map, int who)
@@ -676,6 +750,9 @@ public class Map
 
         // incriment the global turn
         GM.turnSyncer++;
+
+        CheckFighterForWaffleCollision(0);
+        CheckFighterForWaffleCollision(1);
 
         // 
         fighter[who].CheckIfRanTooMuch();

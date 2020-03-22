@@ -1,4 +1,4 @@
-## v0.0.43
+## v0.0.44
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -30,9 +30,9 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Removed the pointless level.map file loadin
-|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element
-|||Fixed waffle collision bug
+|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
+|||Converted all keyboard buttons into pressable buttons
+|||Add splash & splash notes for "Not tested on device"
 |||Added Human control to the Menu UI
 |||Made the human control be fully controllable with a keyboard
 |||Fixed NN code to be able to work for both player 1 & 2
@@ -67,6 +67,12 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.44|03.21.020|Fixed waffle collision bug|Im sure i just need to move the waffle checker to be at the end of the turn, & not after moving
+|v0.0.44|03.21.020|Removed the pointless level.map file loadin
+|v0.0.44|03.21.020|Finished the Total Max Graph Mini feature
+|v0.0.44|03.21.020|Fixed the uninitilize deal with the battle profile images | copy settings for menu
+|v0.0.44|03.21.020|Confirmed all aspect ratios
+|v0.0.44|03.21.020|fix standalone crashing
 |v0.0.43|03.20.020|Added fire to the background of battle menu
 |v0.0.43|03.20.020|Added exploitation sliders
 |v0.0.43|03.20.020|Added a "Do you want NN to learn?" Scrollbar

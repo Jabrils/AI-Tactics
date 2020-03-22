@@ -26,8 +26,8 @@ public class FightCTRL : MonoBehaviour
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
     public Button start;
-    public GameObject[] graphObj, tGraphObj;
-    public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax;
+    public GameObject[] graphObj, tGraphObj, tGraphObjM;
+    public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax, txtTGraphMaxMini;
     public TextMeshProUGUI theRound;
 
     int _turn;
@@ -47,7 +47,8 @@ public class FightCTRL : MonoBehaviour
     int nextWaffleSpawn;
     int randNextFood => Random.Range(20, 40);
     bool canSpawnWaffle => map.waffleCount < 3;
-    Graph[] graph = new Graph[2], totalGraph = new Graph[2];
+    Graph[] graph = new Graph[2], totalGraph = new Graph[2], totalGraphMini = new Graph[2];
+    HaxbotData[] hbD = new HaxbotData[2];
 
     public static Material[] txtBattle;
     public static Material[] txtDecide;
@@ -60,14 +61,10 @@ public class FightCTRL : MonoBehaviour
         {
             graph[i] = new Graph(graphObj[i], accumulative: true);
             totalGraph[i] = new Graph(tGraphObj[i], accumulative: false);
+            totalGraphMini[i] = new Graph(tGraphObjM[i], accumulative: false);
         }
 
-        theRound.text = $"{GM.currentRound+1}/{GM.totalRounds}";
-
-        string o = "";
-
-        HXB.LoadHaxbot(one, GM.hbName[0]);
-        HXB.LoadHaxbot(two, GM.hbName[1]);
+        theRound.text = $"{GM.currentRound + 1}/{GM.totalRounds}";
 
         // 
         AddToNextWaffleSpawn();
@@ -88,26 +85,51 @@ public class FightCTRL : MonoBehaviour
         }
         else
         {
-            for (int i = 0; i < totalGraph.Length; i++)
-            {
-                totalGraph[i] = new Graph(tGraphObj[i], accumulative: false);
-            }
-
             GM.FullReset();
 
             map.SetCamTo(Map.CamMode.Field);
         }
 
         // 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < fighter.Length; i++)
         {
             GM.intelli[i].SetShowoff(GM.explSetter[i]);
-            txtAiName[i].text = $"{GM.intelli[i].aiName} - {GM.explSetter[i]*100}%";
+            txtAiName[i].text = $"{GM.intelli[i].aiName} - {GM.explSetter[i] * 100}%";
+
+            // 
+            if (GM.currentRound > 0)
+            {
+                // 
+                for (int j = 0; j < GM.currentRound; j++)
+                {
+                    totalGraphMini[i].AddValueToGraph(GM.battleAvg[i][j]);
+                }
+
+                totalGraphMini[i].UpdateGraph();
+                txtTGraphMaxMini[i].text = $"{(Mathf.Round(totalGraphMini[i].performance * 1000)) / 1000}";
+            }
         }
+
+
+        hbD[0] = HXB.LoadHaxbot(one, GM.hbName[0]);
+        hbD[1] = HXB.LoadHaxbot(two, GM.hbName[1]);
 
         // 
         fighter[0] = new Fighter(one, 0, map.mapSize, GM.intelli[0]);
         fighter[1] = new Fighter(two, 1, map.mapSize, GM.intelli[1]);
+
+        // to prevent memory leaks, lets take care of our garbage collector
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
+
+        // 
+        for (int i = 0; i < 2; i++)
+        {
+            foreach (Renderer r in fighter[i].obj.GetComponentsInChildren<Renderer>())
+            {
+                r.material.SetTexture(GM.mainTexture, hbD[i].txt2d);
+            }
+        }
 
         // 
         for (int i = 0; i < fighter.Length; i++)
@@ -350,6 +372,7 @@ public class FightCTRL : MonoBehaviour
         {
             mode = Mode.Start;
             GM.FullReset();
+            Restart();
             SceneManager.LoadScene("mainMenu");
         }
 
@@ -358,6 +381,12 @@ public class FightCTRL : MonoBehaviour
         {
             fighter[0].DMGTEMP(25);
             fighter[1].DMGTEMP(25);
+        }
+
+        // 
+        if (Input.GetKeyDown(KeyCode.Slash))
+        {
+            SpawnWaffle();
         }
 
         // 
@@ -406,6 +435,12 @@ public class FightCTRL : MonoBehaviour
     {
         mode = Mode.Start;
         GM.Init();
+
+        //for (int i = 0; i < 2; i++)
+        //{
+        //    GameObject.Destroy(hbD[i].txt2d);
+        //}
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -530,7 +565,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < fighter.Length; i++)
         {
             rounds[i].text = $"{GM.win[i]} / {GM.totalRounds} - {Mathf.Round(100 * ((float)GM.win[i] / GM.totalRounds))}%";
-            GM.battleAvg[i][GM.currentRound-1] = (int)GM.battleAvgThisMatch[i].Sum();
+            GM.battleAvg[i][GM.currentRound - 1] = (int)GM.battleAvgThisMatch[i].Sum();
 
             // 
             for (int j = 0; j < GM.currentRound; j++)
@@ -539,7 +574,7 @@ public class FightCTRL : MonoBehaviour
             }
 
             totalGraph[i].UpdateGraph();
-            txtTGraphMax[i].text = $"{(Mathf.Round(totalGraph[i].performance*1000))/1000}";
+            txtTGraphMax[i].text = $"{(Mathf.Round(totalGraph[i].performance * 1000)) / 1000}";
         }
 
         roundsUI.gameObject.SetActive(true);

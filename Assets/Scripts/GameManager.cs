@@ -32,6 +32,7 @@ static class GM
     public static int currentRound => win[0] + win[1] + win[2];
     public static float[] explSetter = new float[2];
     public static bool[] nnIsLearning = new bool[] { true, true };
+    public static string mainTexture = "_BaseMap";
 
     public static void Init()
     {

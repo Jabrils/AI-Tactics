@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class HXB
 {
-    public static HaxbotData LoadHaxbot(GameObject bot, string who, string mainTexture="_BaseMap")
+    public static HaxbotData LoadHaxbot(GameObject bot, string who, string mainTexture = "_BaseMap")
     {
         string o;
         string[] grab = new string[2];
@@ -17,13 +17,9 @@ public static class HXB
             o = grab[1];
         }
 
-        // 
-        foreach (Renderer r in bot.GetComponentsInChildren<Renderer>())
-        {
-            r.material.SetTexture(mainTexture, Base64ToTexture2D(o));
-        }
+        Texture2D t2d = Base64ToTexture2D(o);
 
-        return new HaxbotData(grab[0], grab[1]);
+        return new HaxbotData(grab[0], grab[1], t2d);
     }
 
     public static void SaveHXB(string loc, string filename, Texture2D txt)
@@ -97,9 +93,13 @@ public struct HaxbotData
     string _base64;
     public string base64 => _base64;
 
-    public HaxbotData(string n, string b64)
+    Texture2D _txt2d;
+    public Texture2D txt2d => _txt2d;
+
+    public HaxbotData(string n, string b64, Texture2D txt2d)
     {
         _name = n;
         _base64 = b64;
+        _txt2d = txt2d;
     }
 }

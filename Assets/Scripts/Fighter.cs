@@ -50,8 +50,8 @@ public class Fighter
     int _waffleX;
     int _waffleY;
 
-    public int candyX => _waffleX;
-    public int candyY => _waffleY;
+    public int waffleX => _waffleX;
+    public int waffleY => _waffleY;
 
     int _myTurn;
     public int myTurn => _myTurn;

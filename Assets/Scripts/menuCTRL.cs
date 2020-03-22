@@ -270,6 +270,15 @@ public class menuCTRL : MonoBehaviour
         hbD[i] = HXB.LoadHaxbot(bot[i], dd[dd_Haxbot[i].value].text);
         name[i].text = hbD[i].name;
         GM.hbName[i] = hbD[i].name;
+
+        for (int j = 0; j < 2; j++)
+        {
+            foreach (Renderer r in bot[j].GetComponentsInChildren<Renderer>())
+            {
+                r.material.SetTexture(GM.mainTexture, hbD[j].txt2d);
+            }
+        }
+
     }
 
     void SetIntelli(int i)

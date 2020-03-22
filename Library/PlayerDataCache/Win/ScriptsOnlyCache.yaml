@@ -3,7 +3,6 @@ ScriptsOnlyBuild:
     Assembly-CSharp.dll:
     - CameraShake
     - FightCTRL
-    - Readme
     - menuCTRL
     - rotate
     - takeScreencap
@@ -63,6 +62,7 @@ ScriptsOnlyBuild:
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
+    - UnityEditor.TestTools.TestRunner.TestListCacheData
     - UnityEditor.TestTools.TestRunner.TestRun.TestJobDataHolder
     UnityEngine.UI.dll:
     - UnityEngine.EventSystems.EventSystem
@@ -939,7 +939,7 @@ ScriptsOnlyBuild:
     className: Physics2DRaycaster
   - hash:
       serializedVersion: 2
-      Hash: a8c8ae5eca75489ef790f70823a96b95
+      Hash: 4139af12d67cad4191fa6b54a981b1ef
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: FightCTRL
@@ -1331,4 +1331,5 @@ ScriptsOnlyBuild:
   scenePathNames:
   - Assets/Scenes/mainMenu.unity
   - Assets/Scenes/battle.unity
-  playerPath: C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Builds/AI Tactics.exe
+  playerPath: C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Builds/quick/Haxbot
+    AI Strategy.exe
