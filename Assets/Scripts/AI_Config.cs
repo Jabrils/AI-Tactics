@@ -8,6 +8,7 @@ public class AI_Config
     public bool[] neuralNetwork => new bool[] { stayNN.Length > 10, movementNN.Length > 10, battleNN.Length > 10, attackNN.Length > 10 };
 
     public bool usingAttackNN => neuralNetwork[3];
+    public bool isHuman => _raw == "x";
 
     string _raw, _stay, _movement, _battle, _attack, _defend, _taunt, _filename, _aiName;
     public float stayTrad => float.Parse(_stay);
@@ -32,26 +33,30 @@ public class AI_Config
         _aiName = split[0];
         _raw = split[1];
 
-        _filename = fname;
-
-        split = _raw.Split(';');
-
-        _stay = split[0];
-        _movement = split[1];
-        _battle = split[2];
-
-        string[] last = split[3].Split(',');
-
         // 
-        if (last.Length == 3)
+        if (!isHuman)
         {
-            _attack = last[0];
-            _defend = last[1];
-            _taunt = last[2];
-        }
-        else
-        {
-            _attack = split[3];
+            _filename = fname;
+
+            split = _raw.Split(';');
+
+            _stay = split[0];
+            _movement = split[1];
+            _battle = split[2];
+
+            string[] last = split[3].Split(',');
+
+            // 
+            if (last.Length == 3)
+            {
+                _attack = last[0];
+                _defend = last[1];
+                _taunt = last[2];
+            }
+            else
+            {
+                _attack = split[3];
+            }
         }
     }
 
@@ -75,7 +80,7 @@ public class AI_Config
             }
         }
 
-        add = add.Remove(add.Length-1);
+        add = add.Remove(add.Length - 1);
 
         _attack = add;
 
@@ -94,7 +99,7 @@ public class AI_Config
         // 
         using (StreamWriter sR = new StreamWriter(_filename))
         {
-            sR.Write(concat0+concat1);
+            sR.Write(concat0 + concat1);
         }
     }
 

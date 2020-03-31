@@ -1,4 +1,4 @@
-## v0.0.44
+## v0.0.45
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -30,17 +30,16 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded
 |||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
-|||Converted all keyboard buttons into pressable buttons
+|||You can now press esc in battle, menu pops up & you can select restart or main menu
 |||Add splash & splash notes for "Not tested on device"
-|||Added Human control to the Menu UI
-|||Made the human control be fully controllable with a keyboard
-|||Fixed NN code to be able to work for both player 1 & 2
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Now saving AI choice that persists even after battles
+|||Added a little circle that shows up when youre selecting where to move
+|||Now saving AI choice in menu select that persists even after battles
 |||Added hp & decisions to taskbar
 |||Added a rounds dispay in battle, as well at the rounds graphs
 |||Added a reset & exit button to battle
@@ -67,6 +66,9 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.45|03.30.020|Made the human control be fully controllable with a keyboard
+|v0.0.45|03.30.020|Added Human control to the Menu UI
+|v0.0.44|03.21.020|Fixed NN code to be able to work for both player 1 & 2
 |v0.0.44|03.21.020|Fixed waffle collision bug|Im sure i just need to move the waffle checker to be at the end of the turn, & not after moving
 |v0.0.44|03.21.020|Removed the pointless level.map file loadin
 |v0.0.44|03.21.020|Finished the Total Max Graph Mini feature

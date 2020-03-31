@@ -134,7 +134,7 @@ public class FightCTRL : MonoBehaviour
         // 
         for (int i = 0; i < fighter.Length; i++)
         {
-            if (fighter[i].config == null)
+            if (fighter[i].config.isHuman)
             {
                 humansInvolved[i] = true;
             }
@@ -362,10 +362,10 @@ public class FightCTRL : MonoBehaviour
     void ListenForControls()
     {
         // 
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            Restart();
-        }
+        //if (Input.GetKeyDown(KeyCode.LeftControl))
+        //{
+        //    Restart();
+        //}
 
         // 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -395,35 +395,50 @@ public class FightCTRL : MonoBehaviour
             mode = Mode.Battle;
         }
 
-        // 
-        if (Input.GetKeyDown(KeyCode.F))
+        for (int i = 0; i < fighter.Length; i++)
         {
-            map.SetCamTo(Map.CamMode.Field);
+            if (humansInvolved[i] && gmTurn == turn)
+            {
+                // 
+                dist += Input.GetAxis("Vertical1") * .1f;
+                angleX += Input.GetAxis("Horizontal2") * .1f;
+                angleY += Input.GetAxis("Vertical2") * .1f;
+
+                dist = Mathf.Clamp(dist, -1, 1);
+                angleX = Mathf.Clamp(angleX, -1, 1);
+                angleY = Mathf.Clamp(angleY, -1, 1);
+            }
         }
 
-        // 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            map.SetCamTo(Map.CamMode.Topdown);
-        }
+        //    // 
+        //    if (Input.GetKeyDown(KeyCode.F))
+        //{
+        //    map.SetCamTo(Map.CamMode.Field);
+        //}
 
-        // 
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            map.SetCamTo(Map.CamMode.Isometric);
-        }
+        //// 
+        //if (Input.GetKeyDown(KeyCode.T))
+        //{
+        //    map.SetCamTo(Map.CamMode.Topdown);
+        //}
 
-        // 
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            map.SetCamTo(Map.CamMode.Action);
-        }
+        //// 
+        //if (Input.GetKeyDown(KeyCode.I))
+        //{
+        //    map.SetCamTo(Map.CamMode.Isometric);
+        //}
 
-        // 
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            map.SetCamTo(Map.CamMode.IsoAction);
-        }
+        //// 
+        //if (Input.GetKeyDown(KeyCode.A))
+        //{
+        //    map.SetCamTo(Map.CamMode.Action);
+        //}
+
+        //// 
+        //if (Input.GetKeyDown(KeyCode.H))
+        //{
+        //    map.SetCamTo(Map.CamMode.IsoAction);
+        //}
     }
 
     public void SetCam(int c)
@@ -461,8 +476,12 @@ public class FightCTRL : MonoBehaviour
         // 
         if (humansInvolved[turn])
         {
+            // HERE CHECK IF THE LOCATION HAS CHANGED BEFORE WE CALCULATE EVERYTHING
+
+            // check if the 3 variables have changed since the last frame
             if (p_D != dist || p_aX != angleX || p_aY != angleY)
             {
+
                 // Get the movement data
                 outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY);
                 p_D = dist;

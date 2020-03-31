@@ -87,8 +87,14 @@
     <Reference Include="Unity.RenderPipelines.Core.Runtime">
       <HintPath>C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Library/ScriptAssemblies/Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Recorder.Editor">
+      <HintPath>C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Library/ScriptAssemblies/Unity.Recorder.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Recorder">
+      <HintPath>C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Library/ScriptAssemblies/Unity.Recorder.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Runtime">
       <HintPath>C:/Users/brilj/Documents/UNITY Local/AI-Tactics/Library/ScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.dll</HintPath>

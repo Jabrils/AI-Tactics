@@ -421,7 +421,7 @@ public class Fighter
 
 
         // 
-        if (config.usingAttackNN)
+        if (!config.isHuman && config.usingAttackNN)
         {
             int z = 0;
             NNState nn = oA[z].nn;

@@ -35,7 +35,7 @@ public class menuCTRL : MonoBehaviour
     bool[] nn_strat => new bool[] { Mathf.RoundToInt(scroll[0].value) == 1, Mathf.RoundToInt(scroll[1].value) == 1, Mathf.RoundToInt(scroll[2].value) == 1, Mathf.RoundToInt(scroll[3].value) == 1, };
     List<string> newAI_Config = new List<string>();
     int menuState;
-    bool[] _isNN => new bool[] { GM.intelli[0] == null ? false : GM.intelli[0].usingAttackNN, GM.intelli[1] == null ? false : GM.intelli[1].usingAttackNN };
+    bool[] _isNN => new bool[] { GM.intelli[0] == null || GM.intelli[0].isHuman ? false : GM.intelli[0].usingAttackNN, GM.intelli[1] == null || GM.intelli[1].isHuman ? false : GM.intelli[1].usingAttackNN };
     bool matchHasNN => _isNN[0] || _isNN[1];
 
     // Start is called before the first frame update
@@ -67,6 +67,10 @@ public class menuCTRL : MonoBehaviour
 
             dd = new List<TMP_Dropdown.OptionData>();
             List<TMP_Dropdown.OptionData> dd2 = new List<TMP_Dropdown.OptionData>();
+
+            // 
+            dd2.Add(new TMP_Dropdown.OptionData("Human"));
+
             // 
             if (brainsExist)
             {
@@ -271,6 +275,7 @@ public class menuCTRL : MonoBehaviour
         name[i].text = hbD[i].name;
         GM.hbName[i] = hbD[i].name;
 
+        // 
         for (int j = 0; j < 2; j++)
         {
             foreach (Renderer r in bot[j].GetComponentsInChildren<Renderer>())
@@ -283,8 +288,11 @@ public class menuCTRL : MonoBehaviour
 
     void SetIntelli(int i)
     {
-        //print($"{dd_Intelli[i].value} -> {aI_Config[dd_Intelli[i].value]}");
-        GM.intelli[i] = AI.LoadIntelligence(newAI_Config[dd_Intelli[i].value]);
+        int chosen = dd_Intelli[i].value;
+
+        print(chosen);
+
+        GM.intelli[i] = chosen == 0 ? new AI_Config("Human", "Human\nx") : AI.LoadIntelligence(newAI_Config[chosen - 1]);
 
         sliShowoff[i].gameObject.SetActive(_isNN[i]);
         scro_Learning[i].gameObject.SetActive(_isNN[i]);
@@ -347,7 +355,7 @@ public class menuCTRL : MonoBehaviour
         LoadBattleData();
         Color32[] col = new Color32[] { new Color32(213, 202, 255, 255), new Color32(63, 63, 63, 255), new Color32(81, 183, 255, 255) };
 
-        Camera.main.backgroundColor = col[w]; 
+        Camera.main.backgroundColor = col[w];
 
         // 
         for (int i = 0; i < menu.Length; i++)
