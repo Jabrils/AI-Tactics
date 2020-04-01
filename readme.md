@@ -1,4 +1,4 @@
-## v0.0.45
+## v0.0.46
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -30,7 +30,6 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded
 |||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
 |||You can now press esc in battle, menu pops up & you can select restart or main menu
 |||Add splash & splash notes for "Not tested on device"
@@ -66,6 +65,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.46|03.31.020|Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded
 |v0.0.45|03.30.020|Made the human control be fully controllable with a keyboard
 |v0.0.45|03.30.020|Added Human control to the Menu UI
 |v0.0.44|03.21.020|Fixed NN code to be able to work for both player 1 & 2

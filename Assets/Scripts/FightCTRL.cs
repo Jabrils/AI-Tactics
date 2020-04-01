@@ -19,7 +19,7 @@ public class FightCTRL : MonoBehaviour
     public int mMoves = 5;
     public float btSpd;
     [Range(0, 1)]
-    public float dist = 1;
+    float dist = .5f;
     [Range(-1, 1)]
     public float angleX = 0, angleY = 0;
     public GameObject one, two, roundsUI;
@@ -404,41 +404,11 @@ public class FightCTRL : MonoBehaviour
                 angleX += Input.GetAxis("Horizontal2") * .1f;
                 angleY += Input.GetAxis("Vertical2") * .1f;
 
-                dist = Mathf.Clamp(dist, -1, 1);
+                dist = Mathf.Clamp01(dist);
                 angleX = Mathf.Clamp(angleX, -1, 1);
                 angleY = Mathf.Clamp(angleY, -1, 1);
             }
         }
-
-        //    // 
-        //    if (Input.GetKeyDown(KeyCode.F))
-        //{
-        //    map.SetCamTo(Map.CamMode.Field);
-        //}
-
-        //// 
-        //if (Input.GetKeyDown(KeyCode.T))
-        //{
-        //    map.SetCamTo(Map.CamMode.Topdown);
-        //}
-
-        //// 
-        //if (Input.GetKeyDown(KeyCode.I))
-        //{
-        //    map.SetCamTo(Map.CamMode.Isometric);
-        //}
-
-        //// 
-        //if (Input.GetKeyDown(KeyCode.A))
-        //{
-        //    map.SetCamTo(Map.CamMode.Action);
-        //}
-
-        //// 
-        //if (Input.GetKeyDown(KeyCode.H))
-        //{
-        //    map.SetCamTo(Map.CamMode.IsoAction);
-        //}
     }
 
     public void SetCam(int c)
@@ -450,11 +420,6 @@ public class FightCTRL : MonoBehaviour
     {
         mode = Mode.Start;
         GM.Init();
-
-        //for (int i = 0; i < 2; i++)
-        //{
-        //    GameObject.Destroy(hbD[i].txt2d);
-        //}
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
@@ -481,12 +446,16 @@ public class FightCTRL : MonoBehaviour
             // check if the 3 variables have changed since the last frame
             if (p_D != dist || p_aX != angleX || p_aY != angleY)
             {
-
                 // Get the movement data
-                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY);
-                p_D = dist;
-                p_aX = angleX;
-                p_aY = angleY;
+                outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY, humanUsing: true);
+
+                // 
+                if (outp[turn] != null)
+                {
+                    p_D = dist;
+                    p_aX = angleX;
+                    p_aY = angleY;
+                }
             }
 
             // Set camera to turnee
@@ -619,6 +588,9 @@ public class FightCTRL : MonoBehaviour
     {
         mode = Mode.Battle;
         start.gameObject.SetActive(false);
+
+        // this registers a change for the system, yeah, I have lost my code to laziness at this point
+        dist -= .5f;
     }
 
     public void StartABattle(int who)

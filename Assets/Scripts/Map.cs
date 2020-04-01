@@ -19,9 +19,11 @@ public class Map
     public float zoom = 1f;
     public FightCTRL fC;
     CameraShake camShake;
+    static Loc storePLoc;
 
     public enum CamMode { Field, Isometric, Topdown, IsoAction, Action, Free };
     public static CamMode camMode;
+    public static int pCalc = -100;
 
     Tile current;
     Tile[,] _loc;
@@ -392,7 +394,7 @@ public class Map
         }
     }
 
-    public static Loc OutputLocation(Map map, Vector2Int self, Vector2Int opponent, float dist, float angleX, float angleY)
+    public static Loc OutputLocation(Map map, Vector2Int self, Vector2Int opponent, float dist, float angleX, float angleY, bool humanUsing = false)
     {
         // reset our selPos list every frame, this allows us to make changes to it
         List<Tile> selLoc = new List<Tile>();
@@ -403,50 +405,77 @@ public class Map
         // now we calculate the selected range of tiles based on distance from the opponent
         int calc = Mathf.RoundToInt((dist * intervals) + (Map.ManhattanDistance(self, opponent) - GM.maxMoves));
 
-        // we need a reference to a temp all selected positions list
-        List<Vector2Int> tempAllSelPos = new List<Vector2Int>();
+        // 
+        bool tabIn = (calc != pCalc) || !humanUsing;
 
         // 
-        List<Tile> loc = map.CalcAvailbleMoves(self);
-
-        // 
-        int angleSelect = 0;
-        TilePath p = new TilePath(new List<Tile>());
-
-        // 
-        if (loc.Count > 0)
+        if (tabIn)
         {
-            // we need a reference to the furthest distance in the availible spaces
-            int closest = 10000;
-            int furthest = 0;
+            pCalc = calc;
+
+            // we need a reference to a temp all selected positions list
+            List<Vector2Int> tempAllSelPos = new List<Vector2Int>();
 
             // 
-            for (int i = 0; i < loc.Count; i++)
-            {
-                int temp = Map.ManhattanDistance(loc[i].v2Int, opponent);
+            List<Tile> loc = map.CalcAvailbleMoves(self);
 
-                closest = temp < closest ? temp : closest;
-                furthest = temp > furthest ? temp : furthest;
-            }
+            // 
+            int angleSelect = 0;
+            TilePath p = new TilePath(new List<Tile>());
 
-            // next we loop through all of the positions & see who is viable
-            for (int i = 0; i < loc.Count; i++)
+            // 
+            if (loc.Count > 0)
             {
-                // 
-                if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, closest, furthest))
+                // we need a reference to the furthest distance in the availible spaces
+                int closest = 10000;
+                int furthest = 0;
+
+                // loop through the locations to find the closest
+                for (int i = 0; i < loc.Count; i++)
                 {
-                    selLoc.Add(loc[i]);
+                    int temp = Map.ManhattanDistance(loc[i].v2Int, opponent);
+
+                    closest = temp < closest ? temp : closest;
+                    furthest = temp > furthest ? temp : furthest;
                 }
+
+                // next we loop through all of the positions & see who is viable
+                for (int i = 0; i < loc.Count; i++)
+                {
+                    // if within walkable range
+                    if (Map.ManhattanDistance(loc[i].v2Int, opponent) == Mathf.Clamp(calc, closest, furthest))
+                    {
+                        selLoc.Add(loc[i]);
+                    }
+                }
+
+                // calculate the angle select
+                angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
+
+                // calculate the paths
+                p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
             }
 
             // 
-            angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
+            storePLoc = new Loc(loc, selLoc, p, angleSelect);
+        }
+        else
+        {
+            // grab a ref to the previously calulated path
+            List<Tile> sL = storePLoc.selLoc;
 
-            // 
-            p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
+            // re-calculate the angle select
+            int aS = Map.SelectAnAngle(sL, angleX, angleY, opponent);
+            // update the stored location angle
+            storePLoc.angleSelect = aS;
+
+            // re-calculate the paths
+            TilePath paths = map.FindLimitedPath(self.x, self.y, sL[aS].x, sL[aS].y);
+            // update the stored location path
+            storePLoc.path = paths;
         }
 
-        return new Loc(loc, selLoc, p, angleSelect);
+        return storePLoc;
     }
 
     public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, float speed, TilePath tp)

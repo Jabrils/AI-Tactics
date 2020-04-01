@@ -290,8 +290,6 @@ public class menuCTRL : MonoBehaviour
     {
         int chosen = dd_Intelli[i].value;
 
-        print(chosen);
-
         GM.intelli[i] = chosen == 0 ? new AI_Config("Human", "Human\nx") : AI.LoadIntelligence(newAI_Config[chosen - 1]);
 
         sliShowoff[i].gameObject.SetActive(_isNN[i]);
