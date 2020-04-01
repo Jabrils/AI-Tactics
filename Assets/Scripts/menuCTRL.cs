@@ -192,17 +192,23 @@ public class menuCTRL : MonoBehaviour
 
     public void CreateAIBrain()
     {
-        // NN = (# of outputs)4 x # of input
+        // just a random hyperparam that I just chose at whim, 4 nodes per 1 output node for the HL
+        int hlNodesPer1 = 4;
+        // inputs are 26 different values
+        int inpCount = 26;
+        // attack constant output nodes
+        int attOutNodeCount = 3;
+        // attack HL node count
+        int attHLNodeCount = hlNodesPer1 * attOutNodeCount;
 
-        // Stay = (1)4 x 20 = 80
-        // Movement = (3)4 x 20 = 240
-        // Battle = (1)4 x 20 = 80
-        // Attack = (3)4 x 20 = 240
-        // In Total = 640
+        // calulate how many weights we got for attack weight
+        int attWeightCount = (inpCount * attHLNodeCount) + (attHLNodeCount * attOutNodeCount);
 
+        // 
         string[] strat = new string[4];
 
-        int[] weightCount = new int[] { 84, 276, 84, 276 };
+        // 
+        int[] weightCount = new int[] { 84, 276, 84, attWeightCount };
 
         // 
         string ret = "";

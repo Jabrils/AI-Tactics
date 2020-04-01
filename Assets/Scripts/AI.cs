@@ -384,6 +384,9 @@ public struct OutputAttack
             else
             {
                 //Debug.Log($"{fighter.name}: Combat Explore");
+                a = UnityEngine.Random.Range(0f, 1f);
+                d = UnityEngine.Random.Range(0f, 1f);
+                t = UnityEngine.Random.Range(0f, 1f);
             }
         }
         else
@@ -643,15 +646,15 @@ public struct StateData
     public string PrintState()
     {
         return $"distX: {distX}, distY: {distY}" +
-            $"\nmyTurn: {myTurn}, myX: {myX}, myY: {myY}, myHp: {myHP}, myStr: {myStr}, isStunned: {iStunned}, myRuns: {myRuns}, myCandyX: {myWaffleX}, myCandyY: {myWaffleY}" +
-        $"\nopTurn: {oppTurn}, opX: {oppX}, opY: {oppY}, opHp: {oppHP}, opStr: {oppStr}, opStunned: {oppStunned}, oppRuns: {oppRuns}, oppCandyX: {oppWaffleX}, oppCandyY: {oppWaffleY}";
+            $"\nmyTurn: {myTurn}, myX: {myX}, myY: {myY}, myHp: {myHP}, myStr: {myStr}, isStunned: {iStunned}, myRuns: {myRuns}, myCandyX: {myWaffleX}, myCandyY: {myWaffleY}, myLast10Att: {myLast10Att}, myLast10Def: {myLast10Def}, myLast10Tnt: {myLast10Tnt}" +
+        $"\nopTurn: {oppTurn}, opX: {oppX}, opY: {oppY}, opHp: {oppHP}, opStr: {oppStr}, opStunned: {oppStunned}, oppRuns: {oppRuns}, oppCandyX: {oppWaffleX}, oppCandyY: {oppWaffleY}, oppLast10Att: {oppLast10Att}, oppLast10Def: {oppLast10Def}, oppLast10Tnt: {opLast10Tnt}";
     }
 
     public Fighter me;
     public Fighter opp;
     int theTurn;
-    public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myWaffleX, myWaffleY, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppWaffleX, oppWaffleY };
-    public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myWaffleX}, {myWaffleY}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppWaffleX}, {oppWaffleY}";
+    public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myWaffleX, myWaffleY, myLast10Att, myLast10Def, myLast10Tnt, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppWaffleX, oppWaffleY, oppLast10Att, oppLast10Def, opLast10Tnt };
+    public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myWaffleX}, {myWaffleY}, {myLast10Att}, {myLast10Def}, {myLast10Tnt}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppWaffleX}, {oppWaffleY}, {oppLast10Att}, {oppLast10Def}, {opLast10Tnt}";
     // 
     // // SHARED
     // 
@@ -683,27 +686,39 @@ public struct StateData
     public float myWaffleX => (float)me.waffleX / (float)GM.mapSize;
     // 11 - myCandyY
     public float myWaffleY => (float)me.waffleY / (float)GM.mapSize;
+    // 12 - myLast10Att
+    public float myLast10Att => (float)me.last10Att / 10f;
+    // 13 - myLast10Def
+    public float myLast10Def => (float)me.last10Def / 10f;
+    // 14 - myLast10Tnt
+    public float myLast10Tnt => (float)me.last10Tnt / 10f;
 
     // 
     // // OPPONENT
     // 
 
-    // 12 - oppTurn
+    // 15 - oppTurn
     public int oppTurn => myTurn == 0 ? 1 : 0;
-    // 13- oppX
+    // 16- oppX
     public float oppX => (float)opp.eX / (float)GM.mapSize;
-    // 14- oppY
+    // 17- oppY
     public float oppY => (float)opp.eY / (float)GM.mapSize;
-    // 15- oppHp
+    // 18- oppHp
     public float oppHP => (float)opp.hp / (float)GM.maxHP;
-    // 16- oppStr
+    // 19- oppStr
     public float oppStr => (float)opp.str / (float)GM.maxStr;
-    // 17- oppStunned
+    // 20- oppStunned
     public int oppStunned => opp.isStunned ? 1 : 0;
-    // 18 - oppRuns
+    // 21 - oppRuns
     public float oppRuns => (float)opp.ranAway / (float)GM.maxRunAway;
-    // 19 - oppCandyX
+    // 22 - oppCandyX
     public float oppWaffleX => (float)opp.waffleX / (float)GM.mapSize;
-    // 20 - oppCandyY
+    // 23 - oppCandyY
     public float oppWaffleY => (float)opp.waffleY / (float)GM.mapSize;
+    // 24 - myLast10Att
+    public float oppLast10Att => (float)opp.last10Att / 10f;
+    // 25 - myLast10Def
+    public float oppLast10Def => (float)opp.last10Def / 10f;
+    // 26 - myLast10Tnt
+    public float opLast10Tnt => (float)opp.last10Tnt / 10f;
 }

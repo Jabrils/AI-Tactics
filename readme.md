@@ -30,13 +30,14 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
 |||You can now press esc in battle, menu pops up & you can select restart or main menu
 |||Add splash & splash notes for "Not tested on device"
+|||You can now train a NN via a human player
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added a NN input visualizers | steal the visualizer used in ML Hoops 21
 |||Added a little circle that shows up when youre selecting where to move
 |||Now saving AI choice in menu select that persists even after battles
 |||Added hp & decisions to taskbar
@@ -65,6 +66,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.47|03.31.020|Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
 |v0.0.46|03.31.020|Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded
 |v0.0.45|03.30.020|Made the human control be fully controllable with a keyboard
 |v0.0.45|03.30.020|Added Human control to the Menu UI

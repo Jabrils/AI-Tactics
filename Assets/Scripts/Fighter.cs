@@ -75,6 +75,13 @@ public class Fighter
     public bool inAttackRange => distToOpp == 1;
     public bool strIsMin => _str == 1;
 
+    List<int> _last10Actions = new List<int>();
+    int[] _actionDistr = new int[3];
+
+    public int last10Att => _actionDistr[0];
+    public int last10Def => _actionDistr[1];
+    public int last10Tnt => _actionDistr[2];
+
     int mapSize;
 
     public Fighter(GameObject gO, int myTurn, int mapSize, AI_Config aI)
@@ -283,6 +290,25 @@ public class Fighter
         return inp <= 0 ? 2 : inp;
     }
 
+    public void UpdateActions(int a)
+    {
+        _last10Actions.Add(a);
+
+        // 
+        if (_last10Actions.Count == 10)
+        {
+            _last10Actions.RemoveAt(0);
+        }
+
+        _actionDistr = new int[3];
+
+        // 
+        for (int i = 0; i < _last10Actions.Count; i++)
+        {
+            _actionDistr[_last10Actions[i]]++;
+        }
+    }
+
     public void Battle(int time, OutputAttack[] oA, Map map)
     {
 
@@ -295,6 +321,9 @@ public class Fighter
         _ranAway = 0;
 
         int[][] r = Rewarder(map, oA[0].decision, oA[1].decision);
+
+        UpdateActions(oA[0].decision);
+        opp.UpdateActions(oA[1].decision);
 
         //Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
 
@@ -413,13 +442,6 @@ public class Fighter
 
         string[] sD = new string[] { stateData.rawState, opp.stateData.rawState };
 
-        //float[] oOut, hOut;
-        //float[][] W_hidden, W_out;
-        //OutputAttack.ConvertFightWeights(config, stateData, out oOut, out hOut, out W_hidden, out W_out);
-
-        // FIX THIS TO PROCESS BOTH NN
-
-
         // 
         if (!config.isHuman && config.usingAttackNN)
         {
@@ -435,8 +457,6 @@ public class Fighter
 
             float[][] D_out = new float[nn.O_out.Length][];
             float[][] D_hidden = new float[nn.H_out.Length][];
-
-            //Debug.Log($"oOut: {nn.O_out.Length}, hOut: {nn.H_out.Length}, wOut: [{nn.W_out.Length}][{nn.W_out[0].Length}], wHidden: [{nn.W_hidden.Length}][{nn.W_hidden[0].Length}]");
 
             // 
             for (int i = 0; i < nn.W_hidden.Length; i++)
@@ -461,18 +481,15 @@ public class Fighter
             {
                 // back prop
                 error[i] = GM.lR * Mathf.Pow(r[z][i] * fin[i], 2);
-                //Debug.Log($"{error[i]} = {GM.lR} * { Mathf.Pow(r[z][i] * fin[i], 2)}");
 
                 derivF[i] = 2 * (GM.lR * Mathf.Pow(r[z][i], 2)) * fin[i];
 
                 // 
                 derivO[i] = AI.Sigmoid(nn.O_out[i], true) * derivF[i];
-                //Debug.Log($"{derivO[i]} = {AI.Sigmoid(nn.O_out[i], true)} * {derivF[i]}");
                 //
                 for (int j = 0; j < D_out[i].Length; j++) //12
                 {
                     D_out[i][j] = nn.H_out[j] * derivO[i];
-                    //Debug.Log($"{D_out[i][j]} = {nn.H_out[j]} * {derivO[i]}");
 
                     derivH[j] = nn.W_out[i][j] * derivO[i];
 
@@ -480,16 +497,12 @@ public class Fighter
                     for (int k = 0; k < D_hidden[j].Length; k++) //20
                     {
                         D_hidden[j][k] = state[k] * derivH[j];
-                        //Debug.Log($"{k}/{D_hidden[j].Length} - {D_out[i].Length}");
                         newWH = nn.W_hidden;
                         newWH[j][k] += D_hidden[j][k] * Mathf.Sign(r[z][i]);
                     }
 
                     newWO = nn.W_out;
                     newWO[i][j] += D_out[i][j] * Mathf.Sign(r[z][i]);
-
-                    //Debug.Log($"{a == nn.W_out[i][j]} -> {a-nn.W_out[i][j]}");
-                    //Debug.Log($"{D_out[i][j]} * {Mathf.Sign(reward[i])}");
                 }
             }
 
@@ -500,7 +513,7 @@ public class Fighter
             }
         }
 
-        if (opp.config.usingAttackNN)
+        if (!opp.config.isHuman && opp.config.usingAttackNN)
         {
             int z = 1;
             NNState nn = oA[z].nn;
@@ -540,18 +553,15 @@ public class Fighter
             {
                 // back prop
                 error[i] = GM.lR * Mathf.Pow(r[z][i] * fin[i], 2);
-                //Debug.Log($"{error[i]} = {GM.lR} * { Mathf.Pow(r[z][i] * fin[i], 2)}");
 
                 derivF[i] = 2 * (GM.lR * Mathf.Pow(r[z][i], 2)) * fin[i];
 
                 // 
                 derivO[i] = AI.Sigmoid(nn.O_out[i], true) * derivF[i];
-                //Debug.Log($"{derivO[i]} = {AI.Sigmoid(nn.O_out[i], true)} * {derivF[i]}");
                 //
                 for (int j = 0; j < D_out[i].Length; j++) //12
                 {
                     D_out[i][j] = nn.H_out[j] * derivO[i];
-                    //Debug.Log($"{D_out[i][j]} = {nn.H_out[j]} * {derivO[i]}");
 
                     derivH[j] = nn.W_out[i][j] * derivO[i];
 
@@ -559,16 +569,12 @@ public class Fighter
                     for (int k = 0; k < D_hidden[j].Length; k++) //20
                     {
                         D_hidden[j][k] = state[k] * derivH[j];
-                        //Debug.Log($"{k}/{D_hidden[j].Length} - {D_out[i].Length}");
                         newWH = nn.W_hidden;
                         newWH[j][k] += D_hidden[j][k] * Mathf.Sign(r[z][i]);
                     }
 
                     newWO = nn.W_out;
                     newWO[i][j] += D_out[i][j] * Mathf.Sign(r[z][i]);
-
-                    //Debug.Log($"{a == nn.W_out[i][j]} -> {a-nn.W_out[i][j]}");
-                    //Debug.Log($"{D_out[i][j]} * {Mathf.Sign(reward[i])}");
                 }
             }
 
@@ -578,8 +584,6 @@ public class Fighter
                 opp.config.UpdateAttack(newWH, newWO);
             }
         }
-
-        //Debug.Log($"{r[0][0]},{r[0][1]},{r[0][2]} - {r[1][0]},{r[1][1]},{r[1][2]}");
 
         //
         using (StreamWriter sW = File.AppendText("masterLog.tsv"))
