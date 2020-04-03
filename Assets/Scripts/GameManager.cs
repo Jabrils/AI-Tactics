@@ -10,7 +10,7 @@ static class GM
     public static int maxMoves = 5;
     public static int maxHP = 25;
     public static string lvlExt = ".map";
-    public static float battleSpd = 4;
+    public static float battleSpd = 5;
     public static Transform tilesParent;
     public static float randomProbability = .0f;
     public static int turnSyncer;
@@ -33,6 +33,8 @@ static class GM
     public static float[] explSetter = new float[2];
     public static bool[] nnIsLearning = new bool[] { true, true };
     public static string mainTexture = "_BaseMap";
+    public static int[] haxBotChoice = new int[2];
+    public static int[] intelliChoice = new int[2];
 
     public static void Init()
     {

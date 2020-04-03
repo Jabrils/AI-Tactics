@@ -1,4 +1,4 @@
-## v0.0.46
+## v0.0.48
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -16,6 +16,10 @@
 - - Thing 1 vs Thing 2
 - - Ground a neural network by training it vs random output, then train it against something with more strategy
 - - Beserk_Slayer vs New NN, both learn to get better
+- NN Problem solutions
+- - Investigate if NN is wired right
+- - Try a smaller learning rate
+- - Train for long
 
 ## Credits
 - freepik - flaticon.com
@@ -66,6 +70,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.48|04.03.020|Added a speedup time feature
 |v0.0.47|03.31.020|Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
 |v0.0.46|03.31.020|Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded
 |v0.0.45|03.30.020|Made the human control be fully controllable with a keyboard

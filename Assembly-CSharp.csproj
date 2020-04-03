@@ -82,6 +82,10 @@
     <Compile Include="Assets\Scripts\takeScreencap.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\graphTestCTRL.cs" />
+    <Compile Include="Assets\living birds\demo\livingBirdsDemoScript.cs" />
+    <Compile Include="Assets\living birds\scripts\lb_Bird.cs" />
+    <Compile Include="Assets\living birds\scripts\lb_BirdController.cs" />
+    <Compile Include="Assets\living birds\scripts\lb_CrowProximity.cs" />
     <Compile Include="Assets\rotateForVideo.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />

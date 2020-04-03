@@ -478,7 +478,7 @@ public class Map
         return storePLoc;
     }
 
-    public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, float speed, TilePath tp)
+    public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, TilePath tp)
     {
         // 
         if (canMove)
@@ -487,7 +487,7 @@ public class Map
             int pathSpots = tp.path.Count;
 
             // 
-            yield return new WaitForSeconds(1 / speed * 2);
+            yield return new WaitForSeconds(1 / GM.battleSpd);
 
             fighter[who].ChangeAnimation("Walk");
 
@@ -495,7 +495,7 @@ public class Map
             for (int i = 0; i < pathSpots; i++)
             {
                 fighter[who].MoveTo(time, map, tp.path[i].expression);
-                yield return new WaitForSeconds(1 / speed);
+                yield return new WaitForSeconds(1 / GM.battleSpd);
             }
 
             fighter[who].ChangeAnimation("Idle");
@@ -505,7 +505,7 @@ public class Map
 
         ResetAllTiles();
 
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(2.5f / GM.battleSpd);
 
         // 
         map.fC.StartABattle(who);
@@ -641,7 +641,7 @@ public class Map
                 if (did[0] != -1)
                 {
                     // add in some cinematic waiting
-                    yield return new WaitForSeconds(1);
+                    yield return new WaitForSeconds(5 / GM.battleSpd);
 
                     // play draw sfx
                     fC.PlaySFX("draw");
@@ -651,7 +651,7 @@ public class Map
                     fighter[1].ChangeAnimation(battleDecLookUp[did[1]], oA[1].decideType, display: true);
 
                     // add in some cinematic waiting
-                    yield return new WaitForSeconds(2);
+                    yield return new WaitForSeconds(10 / GM.battleSpd);
 
                     // idle animation the bots
                     fighter[0].ChangeAnimation("Idle");
@@ -701,7 +701,7 @@ public class Map
                 fC.PlaySFX(sfx);
 
                 // add in some cinematic waiting
-                yield return new WaitForSeconds(2);
+                yield return new WaitForSeconds(10 / GM.battleSpd);
 
                 // remove the damage from showing over the heads
                 fighter[0].SetText(false, Color.clear);
@@ -736,7 +736,7 @@ public class Map
                 // check a few different conditions for loses & tie games
                 if (lost[0] && !lost[1])
                 {
-                    Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
+                    //Debug.Log($"GAME OVER! {fighter[0].obj.name} LOST!");
 
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Win");
@@ -745,7 +745,7 @@ public class Map
                 }
                 else if (!lost[0] && lost[1])
                 {
-                    Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
+                    //Debug.Log($"GAME OVER! {fighter[1].obj.name} LOST!");
 
                     fighter[0].ChangeAnimation("Win");
                     fighter[1].ChangeAnimation("Defeat");
@@ -754,7 +754,7 @@ public class Map
                 }
                 else if (lost[0] && lost[1])
                 {
-                    Debug.Log($"GAME OVER! TIE GMAE!");
+                    //Debug.Log($"GAME OVER! TIE GMAE!");
                     fighter[0].ChangeAnimation("Defeat");
                     fighter[1].ChangeAnimation("Defeat");
                     GM.win[2]++;

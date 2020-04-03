@@ -12,7 +12,7 @@ public class menuCTRL : MonoBehaviour
     public GameObject[] bot;
     public RectTransform[] menu;
     public TextMeshProUGUI[] name, percentage, txtShowoff;
-    public TextMeshProUGUI toolTipTxt, vText, roundsTxt;
+    public TextMeshProUGUI toolTipTxt, vText, roundsTxt, bSpeedTxt;
     public TMP_Dropdown[] dd_Haxbot, dd_Intelli, dd_aiType;
     public Image bCol;
     public RectTransform title;
@@ -23,7 +23,7 @@ public class menuCTRL : MonoBehaviour
     public Slider[] percSlider, sliShowoff;
     public Scrollbar[] scro_Learning;
     public RectTransform msgBox;
-    public Slider roundsSli;
+    public Slider roundsSli, bSpeedSli;
     public GameObject flames;
 
     int multiplier = 1;
@@ -42,6 +42,8 @@ public class menuCTRL : MonoBehaviour
     void Start()
     {
         hbD = new HaxbotData[2];
+
+        LoadDropDownData();
 
         LoadBattleData();
 
@@ -135,6 +137,9 @@ public class menuCTRL : MonoBehaviour
         // 
         roundsSli.value = GM.totalRounds;
 
+        bSpeedSli.value = GM.battleSpd;
+        bSpeedTxt.text = $"Battle Speed: {GM.battleSpd}";
+
         // 
         for (int i = 0; i < 2; i++)
         {
@@ -143,12 +148,12 @@ public class menuCTRL : MonoBehaviour
         }
 
         // 
-        dd_Haxbot[0].onValueChanged.AddListener(delegate { LoadNSetHaxbot(0); });
-        dd_Haxbot[1].onValueChanged.AddListener(delegate { LoadNSetHaxbot(1); });
+        dd_Haxbot[0].onValueChanged.AddListener(delegate { GM.haxBotChoice[0] = dd_Haxbot[0].value; LoadNSetHaxbot(0); });
+        dd_Haxbot[1].onValueChanged.AddListener(delegate { GM.haxBotChoice[1] = dd_Haxbot[1].value; LoadNSetHaxbot(1); });
 
         // 
-        dd_Intelli[0].onValueChanged.AddListener(delegate { SetIntelli(0); });
-        dd_Intelli[1].onValueChanged.AddListener(delegate { SetIntelli(1); });
+        dd_Intelli[0].onValueChanged.AddListener(delegate { GM.intelliChoice[0] = dd_Intelli[0].value; SetIntelli(0); });
+        dd_Intelli[1].onValueChanged.AddListener(delegate { GM.intelliChoice[1] = dd_Intelli[1].value; SetIntelli(1); });
 
         // 
         UpdatePanel(0);
@@ -173,10 +178,16 @@ public class menuCTRL : MonoBehaviour
         scro_Learning[i].GetComponent<Image>().color = GM.nnIsLearning[i] ? set[0] : set[1];
     }
 
-    public void SliderValChanged()
+    public void SliderRoundsValChanged()
     {
         GM.totalRounds = (int)roundsSli.value * multiplier;
         roundsTxt.text = $"Rounds {(multiplier > 1 ? $"x{multiplier}" : "")}: {GM.totalRounds}";
+    }
+
+    public void SliderSpeedValChanged()
+    {
+        GM.battleSpd = bSpeedSli.value;
+        bSpeedTxt.text = $"Battle Speed: {GM.battleSpd}";
     }
 
     public void SliderShowoffChanged(int which)
@@ -277,7 +288,9 @@ public class menuCTRL : MonoBehaviour
 
     void LoadNSetHaxbot(int i)
     {
-        hbD[i] = HXB.LoadHaxbot(bot[i], dd[dd_Haxbot[i].value].text);
+        int chosen = GM.haxBotChoice[i];
+
+        hbD[i] = HXB.LoadHaxbot(bot[i], dd[chosen].text);
         name[i].text = hbD[i].name;
         GM.hbName[i] = hbD[i].name;
 
@@ -294,7 +307,7 @@ public class menuCTRL : MonoBehaviour
 
     void SetIntelli(int i)
     {
-        int chosen = dd_Intelli[i].value;
+        int chosen = GM.intelliChoice[i];
 
         GM.intelli[i] = chosen == 0 ? new AI_Config("Human", "Human\nx") : AI.LoadIntelligence(newAI_Config[chosen - 1]);
 
@@ -330,7 +343,26 @@ public class menuCTRL : MonoBehaviour
                 multiplier = Mathf.Clamp(multiplier, 1, multiplier);
             }
 
-            SliderValChanged();
+            SliderRoundsValChanged();
+        }
+
+        // 
+        LoadDropDownData();
+    }
+
+    void LoadDropDownData()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (dd_Intelli[i].value != GM.intelliChoice[i])
+            {
+                dd_Intelli[i].value = GM.intelliChoice[i];
+            }
+
+            if (dd_Haxbot[i].value != GM.haxBotChoice[i])
+            {
+                dd_Haxbot[i].value = GM.haxBotChoice[i];
+            }
         }
     }
 

@@ -17,7 +17,6 @@ public class FightCTRL : MonoBehaviour
 
     public string levelName;
     public int mMoves = 5;
-    public float btSpd;
     [Range(0, 1)]
     float dist = .5f;
     [Range(-1, 1)]
@@ -200,8 +199,6 @@ public class FightCTRL : MonoBehaviour
 
     void Update()
     {
-        GM.battleSpd = btSpd;
-
         GM.maxMoves = mMoves;
 
         GM.time = time;
@@ -478,7 +475,7 @@ public class FightCTRL : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     // start our Coroutine of moving our fighter
-                    StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
+                    StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, outp[turn].path));
 
                     // incriment the turn
                     _turn++;
@@ -540,7 +537,7 @@ public class FightCTRL : MonoBehaviour
                 outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, m.distance, m.angleX, m.angleY);
 
                 // start our Coroutine of moving our fighter
-                StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, GM.battleSpd, outp[turn].path));
+                StartCoroutine(map.MoveFighter(time, outp[turn].loc.Count > 0, map, turn, outp[turn].path));
 
                 // incriment the turn
                 _turn++;
@@ -572,7 +569,7 @@ public class FightCTRL : MonoBehaviour
 
     IEnumerator NextRound()
     {
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(2.5f / GM.battleSpd);
 
         bool stillBattling = (GM.currentRound) < GM.totalRounds;
 
