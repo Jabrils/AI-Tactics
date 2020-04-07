@@ -1,4 +1,4 @@
-## v0.0.49
+## v0.0.50
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -26,6 +26,7 @@
 ## Perfect World
 - Trainable by user input
 - Complex local minimum algorithm
+- AI learns their own reward outcome
 
 ## Credits
 - freepik - Running Icon

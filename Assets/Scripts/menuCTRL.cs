@@ -139,11 +139,12 @@ public class menuCTRL : MonoBehaviour
 
         bSpeedSli.value = GM.battleSpd;
 
-        bSpeedTxt.text = $"Battle Speed: {(GM.battleSpd == 51 ? "MAX" : ""+GM.battleSpd)}";
+        bSpeedTxt.text = $"Battle Speed: {(GM.battleSpd == 51 ? "MAX" : "" + GM.battleSpd)}";
 
         // 
         for (int i = 0; i < 2; i++)
         {
+            GM.isForrest[i] = false;
             sliShowoff[i].value = GM.explSetter[i];
             scro_Learning[i].value = GM.nnIsLearning[i] ? 0 : 1;
         }
@@ -371,12 +372,18 @@ public class menuCTRL : MonoBehaviour
 
             if (Input.GetKey(KeyCode.RightShift))
             {
-                if (Input.GetKeyDown(KeyCode.Alpha2))
+                KeyCode[] keyPress = new KeyCode[] { KeyCode.Alpha1, KeyCode.Alpha2 };
+
+                for (int i = 0; i < 2; i++)
                 {
-                    bot[1].SetActive(false);
-                    forrest[1].SetActive(true);
-                    name[1].text = "Forrest";
-                    dd_Haxbot[1].gameObject.SetActive(false);
+                    if (Input.GetKeyDown(keyPress[i]))
+                    {
+                        bot[i].SetActive(false);
+                        forrest[i].SetActive(true);
+                        name[i].text = "Gladiator Forrest";
+                        GM.isForrest[i] = true;
+                        dd_Haxbot[i].gameObject.SetActive(false);
+                    }
                 }
             }
         }

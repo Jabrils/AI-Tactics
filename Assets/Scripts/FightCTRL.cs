@@ -96,7 +96,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < fighter.Length; i++)
         {
             GM.intelli[i].SetShowoff(GM.explSetter[i]);
-            txtAiName[i].text = $"{GM.intelli[i].aiName} - {GM.explSetter[i] * 100}%";
+            txtAiName[i].text = $"{(GM.isForrest[i] ? "Forrest" : GM.intelli[i].aiName)} - {GM.explSetter[i] * 100}%";
 
             // 
             if (GM.currentRound > 0)
@@ -127,9 +127,16 @@ public class FightCTRL : MonoBehaviour
         // 
         for (int i = 0; i < 2; i++)
         {
-            foreach (Renderer r in fighter[i].obj.GetComponentsInChildren<Renderer>())
+            if (GM.isForrest[i])
             {
-                r.material.SetTexture(GM.mainTexture, hbD[i].txt2d);
+                fighter[i].ForrestOverride();
+            }
+            else
+            {
+                foreach (Renderer r in fighter[i].obj.GetComponentsInChildren<Renderer>())
+                {
+                    r.material.SetTexture(GM.mainTexture, hbD[i].txt2d);
+                }
             }
         }
 

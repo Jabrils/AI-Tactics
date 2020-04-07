@@ -134,6 +134,30 @@ public class Fighter
 
     }
 
+    public void ForrestOverride()
+    {
+        //
+        obj.GetComponentsInChildren<Transform>()[1].gameObject.SetActive(false);
+
+        GameObject forr = GameObject.Instantiate(Resources.Load<GameObject>("Forrest/Gladiator Forrest"));
+        forr.transform.SetParent(obj.transform);
+        forr.transform.localPosition = Vector3.zero;
+
+        forr.transform.localEulerAngles = myTurn == 0 ? Vector3.zero : forr.transform.localEulerAngles;
+
+        // 
+        TextMeshPro[] grabTMP = obj.GetComponentsInChildren<TextMeshPro>();
+
+        // 
+        grabTMP[1].text = "Gladiator Forrest";
+
+        //_obj = forr;
+
+        _anim = forr.GetComponent<Animator>();
+
+        _anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Forrest/Forrest Anim");
+    }
+
     public void UpdateClosestCandy(List<Tile> waffle)
     {
         // 
