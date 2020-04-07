@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using briljasanLib;
 
 public class Fighter
 {
@@ -29,6 +30,8 @@ public class Fighter
     ParticleSystem _powerUp, _powerDown;
 
     MeshRenderer _display;
+
+    SpriteRenderer[] _runIcons;
 
     int _ranAway;
     public int ranAway => _ranAway;
@@ -94,8 +97,17 @@ public class Fighter
         // 
         _anim = _obj.GetComponentInChildren<Animator>();
 
+        // get a ref to all Sprite Renderers (WARNING: THIS BIT IS A BIT OF A MESS)
+        SpriteRenderer[] allSR = gO.GetComponentsInChildren<SpriteRenderer>();
+
         // 
-        _hpHolder = gO.GetComponentsInChildren<SpriteRenderer>()[2].transform.parent;
+        _hpHolder = allSR[2].transform.parent;
+
+        // 
+        _runIcons = new SpriteRenderer[] { allSR[5], allSR[7], allSR[9], allSR[11], allSR[13], };
+
+        // 
+        DisableAllRunIcons();
 
         // 
         _stunSpr = gO.GetComponentsInChildren<SpriteRenderer>()[4];
@@ -182,76 +194,105 @@ public class Fighter
 
     int[][] Rewarder(Map map, int x, int y)
     {
-        return new int[][] { new int[] { Reward(map, 0, y), Reward(map, 1, y), Reward(map, 2, y) }, new int[] { -Reward(map, x, 0), -Reward(map, x, 1), -Reward(map, x, 2) } };
+        return new int[][] { new int[] { Reward(0, map, 0, y), Reward(0, map, 1, y), Reward(0, map, 2, y) }, new int[] { Reward(1, map, 0, x), Reward(1, map, 1, x), Reward(1, map, 2, x) } };
     }
 
-    int Reward(Map map, int x, int y)
+    int Reward(int which, Map map, int me, int opp)
     {
-        int[] str = new int[] { map.fighter[0].str, map.fighter[1].str };
+        int[] t_str = new int[] { map.fighter[0].str, map.fighter[1].str };
+        int[] t_hp = new int[] { map.fighter[0].hp, map.fighter[1].hp };
 
-        if (x == 0)
+        int tMe = which == 0 ? 0 : 1;
+        int tOpp = tMe == 0 ? 1 : 0;
+
+        // 
+        if (me == 0)
         {
-            if (y == 0)
+            if (opp == 0)
             {
-                return str[0] - str[1];
+                return t_str[tMe] - t_str[tOpp];
             }
-            else if (y == 1)
+            else if (opp == 1)
             {
-                return Mathf.FloorToInt(str[0] / 3) - 2;
+                return Mathf.FloorToInt(t_str[tMe] / 3) - 1;
             }
-            else if (y == 2)
+            else if (opp == 2)
             {
-                return str[0] * 2;
+                return t_str[tMe] * 2;
             }
             else
             {
-                Debug.Log($"ERROR: [{x},{y}]");
+                Debug.Log($"ERROR: [{me},{opp}]");
                 return 0;
             }
         }
-        else if (x == 1)
+        else if (me == 1)
         {
-            if (y == 0)
+            if (opp == 0)
             {
-                return 2 - Mathf.FloorToInt(str[1] / 3);
+                return 1 - Mathf.FloorToInt(t_str[tOpp] / 3);
             }
-            else if (y == 1)
+            else if (opp == 1)
             {
-                return 0;
+                int hP = 0;
+                int sP = 0;
+
+                // 
+                if (t_hp[tMe] < t_hp[tOpp])
+                {
+                    hP++;
+                }
+                else if (t_hp[tMe] > t_hp[tOpp])
+                {
+                    hP--;
+                }
+
+                ////
+                //if (t_str[tMe] < t_str[tOpp])
+                //{
+                //    sP++;
+                //}
+                //else if (t_str[tMe] > t_str[tOpp])
+                //{
+                //    sP--;
+                //}
+
+                return hP;
             }
-            else if (y == 2)
+            else if (opp == 2)
             {
-                return str[1] < 20 ? -PowerUpRemap(str[1] - str[0]) : 0;
+                //return str[to] < 20 ? -PowerUpRemap(opp.hpPercent, (str[to] - str[tm])) : 0;
+                return t_str[tOpp] < 20 ? Mathf.Clamp(t_str[tMe] - t_str[tOpp], -20, -2) : 0;
             }
             else
             {
-                Debug.Log($"ERROR: [{x},{y}]");
+                Debug.Log($"ERROR: [{me},{opp}]");
                 return 0;
             }
         }
-        else if (x == 2)
+        else if (me == 2)
         {
-            if (y == 0)
+            if (opp == 0)
             {
-                return -str[1] * 2;
+                return (-t_str[tOpp] * 2) + (PowerUpRemap(hpPercent, (t_str[tMe] - t_str[tOpp])));
             }
-            else if (y == 1)
+            else if (opp == 1)
             {
-                return str[0] < 20 ? PowerUpRemap(str[0] - str[1]) : 0;
+                return PowerUpRemap(hpPercent, (t_str[tMe] - t_str[tOpp]));
             }
-            else if (y == 2)
+            else if (opp == 2)
             {
-                return TauntOff(str[0], str[1]);
+                return TauntOff(t_str[tMe], t_str[tOpp]);
             }
             else
             {
-                Debug.Log($"ERROR: [{x},{y}]");
+                Debug.Log($"ERROR: [{me},{opp}]");
                 return 0;
             }
         }
         else
         {
-            Debug.Log($"ERROR: [{x},{y}]");
+            Debug.Log($"ERROR: [{me},{opp}]");
             return 0;
         }
     }
@@ -285,9 +326,11 @@ public class Fighter
         }
     }
 
-    int PowerUpRemap(int inp)
+    int PowerUpRemap(float x, int diff)
     {
-        return inp <= 0 ? 2 : inp;
+        diff = diff > 0 ? diff : 0;
+
+        return Mathf.RoundToInt(GM.basePowerReward * x) - diff;
     }
 
     public void UpdateActions(int a)
@@ -319,13 +362,17 @@ public class Fighter
 
         // reset ran away after every battle
         _ranAway = 0;
+        opp._ranAway = 0;
+
+        DisableAllRunIcons();
+        opp.DisableAllRunIcons();
 
         int[][] r = Rewarder(map, oA[0].decision, oA[1].decision);
 
         UpdateActions(oA[0].decision);
         opp.UpdateActions(oA[1].decision);
 
-        //Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
+        Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
 
         // compare & calculate
         if (oA[0].decision == 0)
@@ -440,14 +487,12 @@ public class Fighter
             }
         }
 
-        string[] sD = new string[] { stateData.rawState, opp.stateData.rawState };
-
         // 
         if (!config.isHuman && config.usingAttackNN)
         {
             int z = 0;
             NNState nn = oA[z].nn;
-            float[] state = stateData.fullState;
+            float[] state = stateData.attState;
             float[] error = new float[nn.O_out.Length];
             float[] fin = new float[nn.O_out.Length]; // assign this 
 
@@ -475,6 +520,10 @@ public class Fighter
 
             float[][] newWH = new float[0][];
             float[][] newWO = new float[0][];
+
+            //Debug.Log($"BACK: {nn.W_hidden.Length}*{nn.W_hidden[0].Length} = {nn.W_hidden.Length * nn.W_hidden[0].Length}");
+            //Debug.Log($"BACK: {nn.W_out.Length}*{nn.W_out[0].Length} = {nn.W_out.Length * nn.W_out[0].Length}");
+            //Debug.Log($"\t\tBACK: {nn.W_hidden.Length * nn.W_hidden[0].Length} + {nn.W_out.Length * nn.W_out[0].Length} = {(nn.W_hidden.Length * nn.W_hidden[0].Length) + (nn.W_out.Length * nn.W_out[0].Length)}");
 
             // BackProp
             for (int i = 0; i < r[z].Length; i++) //3
@@ -506,7 +555,13 @@ public class Fighter
                 }
             }
 
-            // if we haven't toggled off their ablility to learn
+            // 
+            //for (int i = 0; i < derivF.Length; i++)
+            //{
+            //    Debug.Log(derivF[i]);
+            //}
+
+            // if we have toggled off their ablility to learn
             if (GM.nnIsLearning[z])
             {
                 config.UpdateAttack(newWH, newWO);
@@ -517,7 +572,7 @@ public class Fighter
         {
             int z = 1;
             NNState nn = oA[z].nn;
-            float[] state = opp.stateData.fullState;
+            float[] state = opp.stateData.attState;
             float[] error = new float[nn.O_out.Length];
             float[] fin = new float[nn.O_out.Length]; // assign this 
 
@@ -585,22 +640,43 @@ public class Fighter
             }
         }
 
-        //
-        using (StreamWriter sW = File.AppendText("masterLog.tsv"))
+        for (int i = 0; i < 2; i++)
         {
-            for (int i = 0; i < 2; i++)
-            {
-                sW.WriteLine($"{sD[i]}\t{oA[i].decision}\t{r[i][0]},{r[i][1]},{r[i][2]}");
-                int currentReward = r[i][oA[i].decision];
-                map.fC.UpdateGraph(i, currentReward);
-                GM.battleAvgThisMatch[i].Add(currentReward);
-            }
+            int currentReward = r[i][oA[i].decision];
+            map.fC.UpdateGraph(i, currentReward);
+            GM.battleAvgThisMatch[i].Add(currentReward);
         }
+
+        //
+        //using (StreamWriter sW = File.AppendText("masterLog.tsv"))
+        //{
+        //    for (int i = 0; i < 2; i++)
+        //    {
+        //        sW.WriteLine($"{sD[i]}\t{oA[i].decision}\t{r[i][0]},{r[i][1]},{r[i][2]}");
+        //    }
+        //}
     }
 
     public void RanAway()
     {
         _ranAway++;
+
+        // Disable all of the run icons
+        DisableAllRunIcons();
+
+        // 
+        for (int i = 0; i < _ranAway; i++)
+        {
+            _runIcons[i].gameObject.SetActive(true);
+        }
+    }
+
+    public void DisableAllRunIcons()
+    {
+        foreach (SpriteRenderer sR in _runIcons)
+        {
+            sR.gameObject.SetActive(false);
+        }
     }
 
     public void CheckIfRanTooMuch()
@@ -609,6 +685,7 @@ public class Fighter
         {
             Stun(1);
             _ranAway = 0;
+            DisableAllRunIcons();
         }
     }
 

@@ -10,7 +10,7 @@ public class AI_Config
     public bool usingAttackNN => neuralNetwork[3];
     public bool isHuman => _raw == "x";
 
-    string _raw, _stay, _movement, _battle, _attack, _defend, _taunt, _filename, _aiName;
+    string _raw, _stay, _movement, _battle, _attack, _defend, _taunt, _filename, _aiName, _info;
     public float stayTrad => float.Parse(_stay);
     public float movementTrad => float.Parse(_movement);
     public float battleTrad => float.Parse(_battle);
@@ -24,6 +24,7 @@ public class AI_Config
     public string[] attackNN => _attack.Split(',');
     float _showoff;
     public float showoff => _showoff;
+    public int attNodePer1 => int.Parse(_info);
 
     public string aiName => _aiName;
 
@@ -31,7 +32,8 @@ public class AI_Config
     {
         string[] split = data.Split('\n');
         _aiName = split[0];
-        _raw = split[1];
+        _info = split[1];
+        _raw = split[2];
 
         // 
         if (!isHuman)
@@ -57,6 +59,8 @@ public class AI_Config
             {
                 _attack = split[3];
             }
+
+            //Debug.Log($"LOADED ATT COUNT: {attNodePer1}");
         }
     }
 
@@ -94,12 +98,13 @@ public class AI_Config
         save[3] = _attack;
 
         string concat0 = $"{_aiName}\n";
-        string concat1 = string.Join(";", save);
+        string concat1 = $"{attNodePer1}\n";
+        string concat2 = string.Join(";", save);
 
         // 
         using (StreamWriter sR = new StreamWriter(_filename))
         {
-            sR.Write(concat0 + concat1);
+            sR.Write(concat0 + concat1+ concat2);
         }
     }
 

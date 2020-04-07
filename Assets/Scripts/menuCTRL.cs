@@ -5,13 +5,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System;
 
 public class menuCTRL : MonoBehaviour
 {
     public Image mainBG;
     public GameObject[] bot;
+    public GameObject[] forrest;
     public RectTransform[] menu;
-    public TextMeshProUGUI[] name, percentage, txtShowoff;
+    public TextMeshProUGUI[] name, percentage, txtShowoff, txt_BrainSize;
     public TextMeshProUGUI toolTipTxt, vText, roundsTxt, bSpeedTxt;
     public TMP_Dropdown[] dd_Haxbot, dd_Intelli, dd_aiType;
     public Image bCol;
@@ -20,13 +22,11 @@ public class menuCTRL : MonoBehaviour
     public Transform[] panelSwitch;
     public Button createAI;
     public TMP_InputField brainInp;
-    public Slider[] percSlider, sliShowoff;
+    public Slider[] percSlider, sliShowoff, sli_BrainSize;
     public Scrollbar[] scro_Learning;
     public RectTransform msgBox;
     public Slider roundsSli, bSpeedSli;
     public GameObject flames;
-
-    int multiplier = 1;
 
     HaxbotData[] hbD;
     List<TMP_Dropdown.OptionData> dd = new List<TMP_Dropdown.OptionData>();
@@ -138,7 +138,8 @@ public class menuCTRL : MonoBehaviour
         roundsSli.value = GM.totalRounds;
 
         bSpeedSli.value = GM.battleSpd;
-        bSpeedTxt.text = $"Battle Speed: {GM.battleSpd}";
+
+        bSpeedTxt.text = $"Battle Speed: {(GM.battleSpd == 51 ? "MAX" : ""+GM.battleSpd)}";
 
         // 
         for (int i = 0; i < 2; i++)
@@ -164,6 +165,11 @@ public class menuCTRL : MonoBehaviour
         // set the proper menu
         ChangeMenu(0);
         CheckIfCanCreateAI();
+
+        for (int i = 0; i < percentage.Length; i++)
+        {
+            UpdatePercentage(i);
+        }
     }
 
     public void ToggleLearningSlider(int i)
@@ -180,14 +186,14 @@ public class menuCTRL : MonoBehaviour
 
     public void SliderRoundsValChanged()
     {
-        GM.totalRounds = (int)roundsSli.value * multiplier;
-        roundsTxt.text = $"Rounds {(multiplier > 1 ? $"x{multiplier}" : "")}: {GM.totalRounds}";
+        GM.totalRounds = (int)roundsSli.value * GM.roundsMultiplier;
+        roundsTxt.text = $"Rounds {(GM.roundsMultiplier > 1 ? $"x{GM.roundsMultiplier}" : "")}: {GM.totalRounds}";
     }
 
     public void SliderSpeedValChanged()
     {
         GM.battleSpd = bSpeedSli.value;
-        bSpeedTxt.text = $"Battle Speed: {GM.battleSpd}";
+        bSpeedTxt.text = $"Battle Speed: {(GM.battleSpd == 51 ? "MAX" : "" + GM.battleSpd)}";
     }
 
     public void SliderShowoffChanged(int which)
@@ -201,19 +207,26 @@ public class menuCTRL : MonoBehaviour
         percentage[who].text = $"{Mathf.Round(percSlider[who].value * 100)}%";
     }
 
+    public void SliderBrainSizeChanged(int which)
+    {
+        txt_BrainSize[which].text = $"Brain Size: {sli_BrainSize[which].value}";
+    }
+
     public void CreateAIBrain()
     {
         // just a random hyperparam that I just chose at whim, 4 nodes per 1 output node for the HL
-        int hlNodesPer1 = 4;
+        int attHLNodesPer1 = (int)sli_BrainSize[3].value;
         // inputs are 26 different values
-        int inpCount = 26;
+        int inpCount = 16;
         // attack constant output nodes
         int attOutNodeCount = 3;
         // attack HL node count
-        int attHLNodeCount = hlNodesPer1 * attOutNodeCount;
+        int attHLNodeCount = attHLNodesPer1 * attOutNodeCount;
 
         // calulate how many weights we got for attack weight
         int attWeightCount = (inpCount * attHLNodeCount) + (attHLNodeCount * attOutNodeCount);
+
+        print($"SET: {attWeightCount}");
 
         // 
         string[] strat = new string[4];
@@ -223,6 +236,8 @@ public class menuCTRL : MonoBehaviour
 
         // 
         string ret = "";
+
+        print($"Check: {weightCount[3]}");
 
         // 
         for (int j = 0; j < weightCount.Length; j++)
@@ -246,7 +261,7 @@ public class menuCTRL : MonoBehaviour
             //
             for (int i = 0; i < weightCount[j]; i++)
             {
-                strat[j] += $"{(ch == "-1" ? Random.Range(-1f, 1f).ToString() : ch)}{(i != weightCount[j] - 1 ? "," : "")}";
+                strat[j] += $"{(ch == "-1" ? UnityEngine.Random.Range(-1f, 1f).ToString() : ch)}{(i != weightCount[j] - 1 ? "," : "")}";
             }
 
             // 
@@ -265,10 +280,10 @@ public class menuCTRL : MonoBehaviour
         // 
         using (StreamWriter sW = new StreamWriter(Path.Combine(bPath, $"{brainInp.text}.sbr")))
         {
-            sW.Write($"{brainInp.text}\n{ret}");
+            sW.Write($"{brainInp.text}\n{attHLNodesPer1}\n{ret}");
         }
 
-        StartCoroutine(ShowMessage("Your AI Brain has been Saved in the data file/Brains!"));
+        StartCoroutine(ShowMessage($"Your AI Brain {brainInp.text} has been Saved in the data file/Brains!"));
     }
 
     public void CheckIfCanCreateAI()
@@ -309,7 +324,7 @@ public class menuCTRL : MonoBehaviour
     {
         int chosen = GM.intelliChoice[i];
 
-        GM.intelli[i] = chosen == 0 ? new AI_Config("Human", "Human\nx") : AI.LoadIntelligence(newAI_Config[chosen - 1]);
+        GM.intelli[i] = chosen == 0 ? new AI_Config("Human", "Human\n0\nx") : AI.LoadIntelligence(newAI_Config[chosen - 1]);
 
         sliShowoff[i].gameObject.SetActive(_isNN[i]);
         scro_Learning[i].gameObject.SetActive(_isNN[i]);
@@ -324,26 +339,46 @@ public class menuCTRL : MonoBehaviour
         // 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Application.Quit();
+            if (menuState == 0)
+            {
+                Application.Quit();
+            }
+            else
+            {
+                ChangeMenu(0);
+            }
         }
 
         if (menuState == 1)
         {
+            // 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                multiplier++;
+                GM.roundsMultiplier++;
 
-                multiplier = Mathf.Clamp(multiplier, 1, multiplier);
+                GM.roundsMultiplier = Mathf.Clamp(GM.roundsMultiplier, 1, GM.roundsMultiplier);
             }
 
+            // 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                multiplier--;
+                GM.roundsMultiplier--;
 
-                multiplier = Mathf.Clamp(multiplier, 1, multiplier);
+                GM.roundsMultiplier = Mathf.Clamp(GM.roundsMultiplier, 1, GM.roundsMultiplier);
             }
 
             SliderRoundsValChanged();
+
+            if (Input.GetKey(KeyCode.RightShift))
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    bot[1].SetActive(false);
+                    forrest[1].SetActive(true);
+                    name[1].text = "Forrest";
+                    dd_Haxbot[1].gameObject.SetActive(false);
+                }
+            }
         }
 
         // 
@@ -402,6 +437,19 @@ public class menuCTRL : MonoBehaviour
 
     public void GoTo(string where)
     {
+        string dt = DateTime.Now.ToString().Replace(" ", "_").Replace(":", "-").Replace("/", "-");
+        GM.battleName = $"BattleOf_{GM.intelli[0].aiName}VS{GM.intelli[1].aiName}_{dt}";
+
+        // 
+        if (where == "battle" && GM.battleSpd == 51)
+        {
+            GM.maxSimSpeed = true;
+        }
+        else
+        {
+            GM.maxSimSpeed = false;
+        }
+
         SceneManager.LoadScene(where);
     }
 

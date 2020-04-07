@@ -1,4 +1,4 @@
-## v0.0.48
+## v0.0.49
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -20,10 +20,17 @@
 - - Investigate if NN is wired right
 - - Try a smaller learning rate
 - - Train for long
+- If letting the AI train all night vs Beserk Slayer doesn't work, look into [ rewards / adjustable LR / NN connections / making NN bigger ]
+- Att -> Def: Currently 
+
+## Perfect World
+- Trainable by user input
+- Complex local minimum algorithm
 
 ## Credits
-- freepik - flaticon.com
-- becris - flaticon.com
+- freepik - Running Icon
+- freepik - ???
+- becris - ???
 - NAN - Stadium
 - NAN - brick texure
 - NAN - dirt texure
@@ -34,7 +41,10 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
+|||You can now set individual learning rates
 |||You can now press esc in battle, menu pops up & you can select restart or main menu
+|||Added the ability to adjust the learning rate in the battle menu
+|||Now saves stats about the AI to the data file, like how many battles it's been in
 |||Add splash & splash notes for "Not tested on device"
 |||You can now train a NN via a human player
 

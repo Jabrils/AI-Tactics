@@ -102,6 +102,8 @@ public struct OutputMove
         AI_Config conf = fighter.config;
         StateData state = fighter.stateData;
 
+        int nodePer1 = conf.attNodePer1;
+
         // 
         if (conf.neuralNetwork[1])
         {
@@ -113,13 +115,13 @@ public struct OutputMove
             // ref to output nodes
             float[] o = new float[numOutputNodes];
             // ref to hidden layer nodes
-            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            float[] hL = new float[numOutputNodes * nodePer1];
             // ref to hidden layer node weights
-            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            float[][] wHL = new float[numOutputNodes * nodePer1][];
             // ref to output layer weights
             float[][] wO = new float[numOutputNodes][];
             // ref to the when the hidden layer weights end
-            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+            int lastHLW = numOutputNodes * nodePer1 * inpCount;
 
             // init our hidden layer nodes wieghts
             for (int i = 0; i < wHL.Length; i++)
@@ -154,7 +156,7 @@ public struct OutputMove
             // calculate the hidden layer nodes output
             for (int i = 0; i < hL.Length; i++)
             {
-                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+                hL[i] = AI.ReLu(AI.Σ(state.attState, wHL[i]) + 0);
             }
 
             // calculate the output nodes output
@@ -206,16 +208,18 @@ public struct OutputToBattle
             // ref to number of output nodes for To Battle network
             int numOutputNodes = 1;
 
+            int nodePer1 = conf.attNodePer1;
+
             // ref to output nodes
             float[] o = new float[numOutputNodes];
             // ref to hidden layer nodes
-            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            float[] hL = new float[numOutputNodes * nodePer1];
             // ref to hidden layer node weights
-            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            float[][] wHL = new float[numOutputNodes * nodePer1][];
             // ref to output layer weights
             float[][] wO = new float[numOutputNodes][];
             // ref to the when the hidden layer weights end
-            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+            int lastHLW = numOutputNodes * nodePer1 * inpCount;
 
             // init our hidden layer nodes wieghts
             for (int i = 0; i < wHL.Length; i++)
@@ -251,7 +255,7 @@ public struct OutputToBattle
             // calculate the hidden layer nodes output
             for (int i = 0; i < hL.Length; i++)
             {
-                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+                hL[i] = AI.ReLu(AI.Σ(state.attState, wHL[i]) + 0);
             }
 
             // calculate the output nodes output
@@ -352,10 +356,14 @@ public struct OutputAttack
         {
             ConvertFightWeights(conf, state, out o, out hL, out wHL, out wO);
 
+            //Debug.Log($"FORW: {wHL.Length} * {wHL[0].Length} = {(wHL.Length * wHL[0].Length)}");
+            //Debug.Log($"FORW: {wO.Length} * {wO[0].Length} = {(wO.Length * wO[0].Length)}");
+            //Debug.Log($"\t\tFORW: {(wHL.Length * wHL[0].Length)} + {(wO.Length * wO[0].Length)} = {(wHL.Length * wHL[0].Length) + (wO.Length * wO[0].Length)}");
+
             // calculate the hidden layer nodes output
             for (int i = 0; i < hL.Length; i++)
             {
-                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+                hL[i] = AI.ReLu(AI.Σ(state.attState, wHL[i]) + 0);
             }
 
             // calculate the output nodes output
@@ -425,20 +433,22 @@ public struct OutputAttack
     public static void ConvertFightWeights(AI_Config conf, StateData state, out float[] o, out float[] hL, out float[][] wHL, out float[][] wO)
     {
         // get a ref to how many inputs will we be using for the attack output network
-        int inpCount = state.fullState.Length;
+        int inpCount = state.attState.Length;
         // ref to number of output nodes for attack network
         int numOutputNodes = 3;
+
+        int nodePer1 = conf.attNodePer1;
 
         // ref to output nodes
         o = new float[numOutputNodes];
         // ref to hidden layer nodes
-        hL = new float[numOutputNodes * GM.nodePerConstant];
+        hL = new float[numOutputNodes * nodePer1];
         // ref to hidden layer node weights
-        wHL = new float[numOutputNodes * GM.nodePerConstant][];
+        wHL = new float[numOutputNodes * nodePer1][];
         // ref to output layer weights
         wO = new float[numOutputNodes][];
         // ref to the when the hidden layer weights end
-        int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+        int lastHLW = numOutputNodes * nodePer1 * inpCount;
 
         // init our hidden layer nodes wieghts
         for (int i = 0; i < wHL.Length; i++)
@@ -530,16 +540,18 @@ public struct OutputMakeMove
             // ref to number of output nodes for stay network
             int numOutputNodes = 1;
 
+            int nodePer1 = conf.attNodePer1;
+
             // ref to output nodes
             float[] o = new float[numOutputNodes];
             // ref to hidden layer nodes
-            float[] hL = new float[numOutputNodes * GM.nodePerConstant];
+            float[] hL = new float[numOutputNodes * nodePer1];
             // ref to hidden layer node weights
-            float[][] wHL = new float[numOutputNodes * GM.nodePerConstant][];
+            float[][] wHL = new float[numOutputNodes * nodePer1][];
             // ref to output layer weights
             float[][] wO = new float[numOutputNodes][];
             // ref to the when the hidden layer weights end
-            int lastHLW = numOutputNodes * GM.nodePerConstant * inpCount;
+            int lastHLW = numOutputNodes * nodePer1 * inpCount;
 
             // init our hidden layer nodes wieghts
             for (int i = 0; i < wHL.Length; i++)
@@ -576,7 +588,7 @@ public struct OutputMakeMove
             // calculate the hidden layer nodes output
             for (int i = 0; i < hL.Length; i++)
             {
-                hL[i] = AI.ReLu(AI.Σ(state.fullState, wHL[i]) + 0);
+                hL[i] = AI.ReLu(AI.Σ(state.attState, wHL[i]) + 0);
             }
 
             // calculate the output nodes output
@@ -654,6 +666,7 @@ public struct StateData
     public Fighter opp;
     int theTurn;
     public float[] fullState => new float[] { distX, distY, myTurn, myX, myY, myHP, myStr, iStunned, myRuns, myWaffleX, myWaffleY, myLast10Att, myLast10Def, myLast10Tnt, oppTurn, oppX, oppY, oppHP, oppStr, oppStunned, oppRuns, oppWaffleX, oppWaffleY, oppLast10Att, oppLast10Def, opLast10Tnt };
+    public float[] attState => new float[] { myTurn, myHP, myStr, iStunned, myRuns, myLast10Att, myLast10Def, myLast10Tnt, oppTurn, oppHP, oppStr, oppStunned, oppRuns, oppLast10Att, oppLast10Def, opLast10Tnt };
     public string rawState => $"{distX}, {distY}, {myTurn}, {myX}, {myY}, {myHP}, {myStr}, {iStunned}, {myRuns}, {myWaffleX}, {myWaffleY}, {myLast10Att}, {myLast10Def}, {myLast10Tnt}, {oppTurn}, {oppX}, {oppY}, {oppHP}, {oppStr}, {oppStunned}, {oppRuns}, {oppWaffleX}, {oppWaffleY}, {oppLast10Att}, {oppLast10Def}, {opLast10Tnt}";
     // 
     // // SHARED

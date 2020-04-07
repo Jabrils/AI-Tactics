@@ -20,6 +20,7 @@ public class Map
     public FightCTRL fC;
     CameraShake camShake;
     static Loc storePLoc;
+    string dt;
 
     public enum CamMode { Field, Isometric, Topdown, IsoAction, Action, Free };
     public static CamMode camMode;
@@ -230,7 +231,7 @@ public class Map
         if (ManhattanDistance(new Vector2Int(_fX, _fY), new Vector2Int(_tX, _tY)) > GM.maxMoves)
         {
             // appologize. right now.
-            Debug.Log($"Sorry out of range!");
+            //Debug.Log($"Sorry out of range!");
 
             return null;
         }
@@ -450,10 +451,12 @@ public class Map
                 }
 
                 // calculate the angle select
-                angleSelect = Map.SelectAnAngle(selLoc, angleX, angleY, opponent);
+                angleSelect = SelectAnAngle(selLoc, angleX, angleY, opponent);
 
                 // calculate the paths
                 p = map.FindLimitedPath(self.x, self.y, selLoc[angleSelect].x, selLoc[angleSelect].y);
+
+                //Debug.Log($"Change: ({self.x}, {self.y}), ({selLoc[angleSelect].x}, {selLoc[angleSelect].y}) = {p.dist} & {p.path.Count}");
             }
 
             // 
@@ -461,18 +464,31 @@ public class Map
         }
         else
         {
+            // 
+            List<Tile> l = storePLoc.loc;
+
             // grab a ref to the previously calulated path
             List<Tile> sL = storePLoc.selLoc;
 
             // re-calculate the angle select
-            int aS = Map.SelectAnAngle(sL, angleX, angleY, opponent);
+            int aS = SelectAnAngle(sL, angleX, angleY, opponent);
             // update the stored location angle
-            storePLoc.angleSelect = aS;
+            //storePLoc.angleSelect = aS;
 
             // re-calculate the paths
             TilePath paths = map.FindLimitedPath(self.x, self.y, sL[aS].x, sL[aS].y);
             // update the stored location path
-            storePLoc.path = paths;
+            //storePLoc.path = paths;
+
+            //Debug.Log($"Not: ({self.x-1}, {self.y}), ({sL[aS].x}, {sL[aS].y})");
+
+            storePLoc = new Loc(l, sL, paths, aS);
+        }
+
+        // 
+        if (storePLoc.path == null)
+        {
+            Debug.Log("THIS SHIT NULL");
         }
 
         return storePLoc;
@@ -481,13 +497,21 @@ public class Map
     public IEnumerator MoveFighter(int time, bool canMove, Map map, int who, TilePath tp)
     {
         // 
-        if (canMove)
+        if (canMove && tp != null)
         {
             // 
             int pathSpots = tp.path.Count;
 
             // 
-            yield return new WaitForSeconds(1 / GM.battleSpd);
+
+            if (GM.maxSimSpeed)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+            else
+            {
+                yield return new WaitForSeconds(1 / GM.battleSpd);
+            }
 
             fighter[who].ChangeAnimation("Walk");
 
@@ -495,7 +519,15 @@ public class Map
             for (int i = 0; i < pathSpots; i++)
             {
                 fighter[who].MoveTo(time, map, tp.path[i].expression);
-                yield return new WaitForSeconds(1 / GM.battleSpd);
+
+                if (GM.maxSimSpeed)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
+                else
+                {
+                    yield return new WaitForSeconds(1 / GM.battleSpd);
+                }
             }
 
             fighter[who].ChangeAnimation("Idle");
@@ -505,7 +537,15 @@ public class Map
 
         ResetAllTiles();
 
-        yield return new WaitForSeconds(2.5f / GM.battleSpd);
+
+        if (GM.maxSimSpeed)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        else
+        {
+            yield return new WaitForSeconds(2.5f / GM.battleSpd);
+        }
 
         // 
         map.fC.StartABattle(who);
@@ -641,7 +681,15 @@ public class Map
                 if (did[0] != -1)
                 {
                     // add in some cinematic waiting
-                    yield return new WaitForSeconds(5 / GM.battleSpd);
+
+                    if (GM.maxSimSpeed)
+                    {
+                        yield return new WaitForEndOfFrame();
+                    }
+                    else
+                    {
+                        yield return new WaitForSeconds(5 / GM.battleSpd);
+                    }
 
                     // play draw sfx
                     fC.PlaySFX("draw");
@@ -651,7 +699,15 @@ public class Map
                     fighter[1].ChangeAnimation(battleDecLookUp[did[1]], oA[1].decideType, display: true);
 
                     // add in some cinematic waiting
-                    yield return new WaitForSeconds(10 / GM.battleSpd);
+
+                    if (GM.maxSimSpeed)
+                    {
+                        yield return new WaitForEndOfFrame();
+                    }
+                    else
+                    {
+                        yield return new WaitForSeconds(10 / GM.battleSpd);
+                    }
 
                     // idle animation the bots
                     fighter[0].ChangeAnimation("Idle");
@@ -701,7 +757,15 @@ public class Map
                 fC.PlaySFX(sfx);
 
                 // add in some cinematic waiting
-                yield return new WaitForSeconds(10 / GM.battleSpd);
+
+                if (GM.maxSimSpeed)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
+                else
+                {
+                    yield return new WaitForSeconds(10 / GM.battleSpd);
+                }
 
                 // remove the damage from showing over the heads
                 fighter[0].SetText(false, Color.clear);
@@ -716,11 +780,28 @@ public class Map
             for (int i = 0; i < fighter.Length; i++)
             {
 
-                // if a fighter has <= 0 hp,
-                if (fighter[i].hp <= 0)
+                // 
+                if (GM.timer <= 0)
                 {
-                    // toggle that it has lost
-                    lost[i] = true;
+                    Debug.Log("ENTER");
+
+                    if (fighter[i].hp < fighter[i].opp.hp)
+                    {
+                        lost[i] = true;
+                    }
+                    else if (fighter[i].hp == fighter[i].opp.hp)
+                    {
+                        lost[i] = true;
+                    }
+                }
+                else
+                {
+                    // if a fighter has <= 0 hp,
+                    if (fighter[i].hp <= 0)
+                    {
+                        // toggle that it has lost
+                        lost[i] = true;
+                    }
                 }
             }
 

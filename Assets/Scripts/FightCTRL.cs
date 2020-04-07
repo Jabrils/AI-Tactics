@@ -27,7 +27,7 @@ public class FightCTRL : MonoBehaviour
     public Button start;
     public GameObject[] graphObj, tGraphObj, tGraphObjM;
     public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax, txtTGraphMaxMini;
-    public TextMeshProUGUI theRound;
+    public TextMeshProUGUI theRound, turnTxt;
 
     int _turn;
     public int turn => _turn % 2;
@@ -55,6 +55,9 @@ public class FightCTRL : MonoBehaviour
     void Start()
     {
         GenerateAudience(GM.attendence);
+        dist = .5f;
+        angleX = 0;
+        angleY = 0;
 
         for (int i = 0; i < graph.Length; i++)
         {
@@ -206,7 +209,7 @@ public class FightCTRL : MonoBehaviour
         // 
         if (_turn == nextWaffleSpawn)
         {
-            SpawnWaffle();
+            //SpawnWaffle();
         }
 
         // 
@@ -292,6 +295,12 @@ public class FightCTRL : MonoBehaviour
             {
                 map.ResetAllTiles();
             }
+        }
+        else
+        {
+            // HOLY SHIT THIS IS SLOPPY CODE WILL THIS PROJECT PPLEASE END!
+            // this will bring back the tile UI
+            dist += dist < .5f ? .03f : -.03f;
         }
     }
 
@@ -423,8 +432,6 @@ public class FightCTRL : MonoBehaviour
 
     void TakeTurn()
     {
-        //print(fighter[turn].stateData.PrintState());
-
         // At the start of the turn, do a checkup on the fighters
         for (int i = 0; i < fighter.Length; i++)
         {
@@ -438,13 +445,17 @@ public class FightCTRL : MonoBehaviour
         // 
         if (humansInvolved[turn])
         {
-            // HERE CHECK IF THE LOCATION HAS CHANGED BEFORE WE CALCULATE EVERYTHING
-
             // check if the 3 variables have changed since the last frame
             if (p_D != dist || p_aX != angleX || p_aY != angleY)
             {
                 // Get the movement data
                 outp[turn] = Map.OutputLocation(map, fighter[turn].expression, fighter[turn == 0 ? 1 : 0].expression, dist, angleX, angleY, humanUsing: true);
+
+                // 
+                if (dist >= .5f)
+                {
+                    fighter[turn].RanAway();
+                }
 
                 // 
                 if (outp[turn] != null)
@@ -543,6 +554,9 @@ public class FightCTRL : MonoBehaviour
                 _turn++;
             }
         }
+
+        // 
+        turnTxt.text = $"{GM.timer}";
     }
 
     public void EnableRoundsUI()
@@ -557,19 +571,60 @@ public class FightCTRL : MonoBehaviour
             {
                 totalGraph[i].AddValueToGraph(GM.battleAvg[i][j]);
             }
-
             totalGraph[i].UpdateGraph();
             txtTGraphMax[i].text = $"{(Mathf.Round(totalGraph[i].performance * 1000)) / 1000}";
         }
 
         roundsUI.gameObject.SetActive(true);
 
+        // 
+        WriteRoundRewardToFile();
+
         StartCoroutine(NextRound());
+    }
+
+    void WriteRoundRewardToFile()
+    {
+        string[] read = new string[2];
+
+        string fileLoc = $"{ Application.dataPath}/BattleRecords";
+
+        // 
+        if (!Directory.Exists(fileLoc))
+        {
+            Directory.CreateDirectory(fileLoc);
+        }
+
+        // 
+        if (File.Exists($"{fileLoc}/{GM.battleName}.tsv"))
+        {
+            using (StreamReader sR = new StreamReader($"{fileLoc}/{GM.battleName}.tsv"))
+            {
+                read = sR.ReadToEnd().Split('\n');
+            }
+        }
+
+        // 
+        read[0] += $"{totalGraph[0].objs[totalGraph[0].objs.Count - 1].value}\t";
+        read[1] += $"{totalGraph[1].objs[totalGraph[1].objs.Count - 1].value}\t";
+
+        // 
+        using (StreamWriter sW = new StreamWriter($"{fileLoc}/{GM.battleName}.tsv"))
+        {
+            sW.Write($"{read[0]}\n{read[1]}");
+        }
     }
 
     IEnumerator NextRound()
     {
-        yield return new WaitForSeconds(2.5f / GM.battleSpd);
+        if (GM.maxSimSpeed)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        else
+        {
+            yield return new WaitForSeconds(2.5f / GM.battleSpd);
+        }
 
         bool stillBattling = (GM.currentRound) < GM.totalRounds;
 
