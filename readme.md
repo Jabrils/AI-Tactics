@@ -1,4 +1,4 @@
-## v0.0.50
+## v0.0.51
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -23,15 +23,11 @@
 - If letting the AI train all night vs Beserk Slayer doesn't work, look into [ rewards / adjustable LR / NN connections / making NN bigger ]
 - Att -> Def: Currently 
 
-## Perfect World
-- Trainable by user input
-- Complex local minimum algorithm
-- AI learns their own reward outcome
-
 ## Credits
 - freepik - Running Icon
 - freepik - ???
 - becris - ???
+- umeicon - AI Brain Icon
 - NAN - Stadium
 - NAN - brick texure
 - NAN - dirt texure
@@ -42,16 +38,21 @@
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||You can now set individual learning rates
+|||Gives in-game message if there is not bots folder
+|||Added a author's note button & made it functional
+|||Added a credits button & made it functional
+|||Made Support Developer button functional
 |||You can now press esc in battle, menu pops up & you can select restart or main menu
 |||Added the ability to adjust the learning rate in the battle menu
 |||Now saves stats about the AI to the data file, like how many battles it's been in
 |||Add splash & splash notes for "Not tested on device"
-|||You can now train a NN via a human player
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Automatically generates Bots list if it doesnt exist
+|||Added 2 random Haxbots from the Bots directory to the main menu
+|||Added menu music
 |||Added a NN input visualizers | steal the visualizer used in ML Hoops 21
 |||Added a little circle that shows up when youre selecting where to move
 |||Now saving AI choice in menu select that persists even after battles
@@ -61,9 +62,13 @@
 |||Added helmets
 |||Removed the weird thing on the Haxbots
 
-### Feature Creep
+### Perfect World
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Learning is split into 2|Learn: Changes weights in real time, & saves everything the network learns, Adapt: Also changes weights in real time, but does not save everything the network learns. Acts as like a baseline knowledge, then fit it to the current opponent.
+|||Now added a complex local minimum algorithm that attempts to prevent AIs from getting stuck in a local minima
+|||AI now learns their own reward outcome instead of being set by developer
+|||You can now train a NN via a human player
 |||Added a ML AI for Movement
 |||Added a battle replay feature
 |||The crowd now reacts to the battle with cheers
@@ -81,6 +86,7 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|v0.0.51|04.08.020|Added menu button click sfx
 |v0.0.48|04.03.020|Added a speedup time feature
 |v0.0.47|03.31.020|Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?
 |v0.0.46|03.31.020|Map.OutputLocation is no longer called IF nothing has changed with the path / end selected tile|i think i can check it upon where ever its getting rounded

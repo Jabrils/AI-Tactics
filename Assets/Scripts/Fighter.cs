@@ -145,6 +145,11 @@ public class Fighter
 
         forr.transform.localEulerAngles = myTurn == 0 ? Vector3.zero : forr.transform.localEulerAngles;
 
+        foreach (Transform t in forr.GetComponentsInChildren<Transform>())
+        {
+            t.gameObject.layer = myTurn == 0 ? 8 : 9;
+        }
+
         // 
         TextMeshPro[] grabTMP = obj.GetComponentsInChildren<TextMeshPro>();
 
@@ -396,7 +401,7 @@ public class Fighter
         UpdateActions(oA[0].decision);
         opp.UpdateActions(oA[1].decision);
 
-        Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
+        //Debug.Log($"0: [{oA[0].decision}->{r[0][oA[0].decision]}][{r[0][0]},{r[0][1]},{r[0][2]}]\n1: [{oA[1].decision}->{r[1][oA[1].decision]}][{r[1][0]},{r[1][1]},{r[1][2]}]");
 
         // compare & calculate
         if (oA[0].decision == 0)

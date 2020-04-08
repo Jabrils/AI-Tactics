@@ -25,7 +25,7 @@ public class FightCTRL : MonoBehaviour
     public AudioClip sfx_Walk, sfx_Draw, sfx_StepBack, sfx_Hit, sfx_Crit, sfx_Def, sfx_PowerUp, sfx_PowerDown, sfx_End, sfx_Wrong, sfx_Eat;
     public bool areInBattle;
     public Button start;
-    public GameObject[] graphObj, tGraphObj, tGraphObjM;
+    public GameObject[] graphObj, tGraphObj, tGraphObjM, gIsLearningBrain;
     public TextMeshProUGUI[] rounds, txtAiName, txtGraphMax, txtTGraphMax, txtTGraphMaxMini;
     public TextMeshProUGUI theRound, turnTxt;
 
@@ -54,6 +54,8 @@ public class FightCTRL : MonoBehaviour
 
     void Start()
     {
+        GameObject.Find("vText").GetComponent<TextMeshProUGUI>().text = $"v{Application.version}";
+
         GenerateAudience(GM.attendence);
         dist = .5f;
         angleX = 0;
@@ -167,6 +169,7 @@ public class FightCTRL : MonoBehaviour
         for (int i = 0; i < 2; i++)
         {
             outp[i] = Map.OutputLocation(map, fighter[i].expression, fighter[i == 0 ? 1 : 0].expression, dist, angleX, angleY);
+            gIsLearningBrain[i].SetActive(GM.nnIsLearning[i]);
         }
 
         // 
@@ -178,6 +181,7 @@ public class FightCTRL : MonoBehaviour
                 GameObject g = null;
             }
         }
+
     }
 
     void GenerateAudience(float attendence)
@@ -633,7 +637,9 @@ public class FightCTRL : MonoBehaviour
             yield return new WaitForSeconds(2.5f / GM.battleSpd);
         }
 
-        bool stillBattling = (GM.currentRound) < GM.totalRounds;
+        bool bestOfWin = GM.bestOf ? (GM.win[0] / (float)GM.totalRounds >= .5f) || (GM.win[1] / (float)GM.totalRounds >= .5f) : false;
+
+        bool stillBattling = ((GM.currentRound) < GM.totalRounds) && !bestOfWin;
 
         // 
         if (stillBattling)

@@ -14,9 +14,9 @@ public class menuCTRL : MonoBehaviour
     public GameObject[] forrest;
     public RectTransform[] menu;
     public TextMeshProUGUI[] name, percentage, txtShowoff, txt_BrainSize;
-    public TextMeshProUGUI toolTipTxt, vText, roundsTxt, bSpeedTxt;
+    public TextMeshProUGUI toolTipTxt, vText, roundsTxt, bSpeedTxt, txt_BestOf;
     public TMP_Dropdown[] dd_Haxbot, dd_Intelli, dd_aiType;
-    public Image bCol;
+    public Image bCol, img_BestOf;
     public RectTransform title;
     public Scrollbar[] scroll;
     public Transform[] panelSwitch;
@@ -27,7 +27,9 @@ public class menuCTRL : MonoBehaviour
     public RectTransform msgBox;
     public Slider roundsSli, bSpeedSli;
     public GameObject flames;
+    public AudioClip menuSFX;
 
+    AudioSource menuAud;
     HaxbotData[] hbD;
     List<TMP_Dropdown.OptionData> dd = new List<TMP_Dropdown.OptionData>();
     bool botsExist, brainsExist;
@@ -43,12 +45,12 @@ public class menuCTRL : MonoBehaviour
     {
         hbD = new HaxbotData[2];
 
+        // 
+        MenuInit();
+
         LoadDropDownData();
 
         LoadBattleData();
-
-        // 
-        MenuInit();
 
         vText.text = $"v{Application.version}";
     }
@@ -135,6 +137,15 @@ public class menuCTRL : MonoBehaviour
     void MenuInit()
     {
         // 
+        menuAud = gameObject.AddComponent<AudioSource>();
+        menuAud.clip = menuSFX;
+
+        // 
+        ColorUtility.TryParseHtmlString("#A1FF7E", out GM.color[0]);
+        ColorUtility.TryParseHtmlString("#FF6843", out GM.color[1]);
+        ColorUtility.TryParseHtmlString("#44CAFF", out GM.color[2]);
+
+        // 
         roundsSli.value = GM.totalRounds;
 
         bSpeedSli.value = GM.battleSpd;
@@ -147,15 +158,16 @@ public class menuCTRL : MonoBehaviour
             GM.isForrest[i] = false;
             sliShowoff[i].value = GM.explSetter[i];
             scro_Learning[i].value = GM.nnIsLearning[i] ? 0 : 1;
+            GM.nnIsLearning[i] = scro_Learning[i].value == 0 && _isNN[i] ? true : false;
         }
 
         // 
-        dd_Haxbot[0].onValueChanged.AddListener(delegate { GM.haxBotChoice[0] = dd_Haxbot[0].value; LoadNSetHaxbot(0); });
-        dd_Haxbot[1].onValueChanged.AddListener(delegate { GM.haxBotChoice[1] = dd_Haxbot[1].value; LoadNSetHaxbot(1); });
+        dd_Haxbot[0].onValueChanged.AddListener(delegate { GM.haxBotChoice[0] = dd_Haxbot[0].value; LoadNSetHaxbot(0); menuAud.Play(); });
+        dd_Haxbot[1].onValueChanged.AddListener(delegate { GM.haxBotChoice[1] = dd_Haxbot[1].value; LoadNSetHaxbot(1); menuAud.Play(); });
 
         // 
-        dd_Intelli[0].onValueChanged.AddListener(delegate { GM.intelliChoice[0] = dd_Intelli[0].value; SetIntelli(0); });
-        dd_Intelli[1].onValueChanged.AddListener(delegate { GM.intelliChoice[1] = dd_Intelli[1].value; SetIntelli(1); });
+        dd_Intelli[0].onValueChanged.AddListener(delegate { GM.intelliChoice[0] = dd_Intelli[0].value; SetIntelli(0); menuAud.Play(); });
+        dd_Intelli[1].onValueChanged.AddListener(delegate { GM.intelliChoice[1] = dd_Intelli[1].value; SetIntelli(1); menuAud.Play(); });
 
         // 
         UpdatePanel(0);
@@ -171,24 +183,29 @@ public class menuCTRL : MonoBehaviour
         {
             UpdatePercentage(i);
         }
+
+        UpdateBestOfUI();
+    }
+
+    void UpdateBestOfUI()
+    {
+        img_BestOf.color = GM.bestOf ? GM.green : GM.blue;
+        txt_BestOf.text = GM.bestOf ? $"Match Type: Play best of {GM.totalRounds} rounds" : $"Match Type: Play all {GM.totalRounds} rounds";
     }
 
     public void ToggleLearningSlider(int i)
     {
-        GM.nnIsLearning[i] = scro_Learning[i].value == 0 ? true : false;
+        GM.nnIsLearning[i] = scro_Learning[i].value == 0 && _isNN[i] ? true : false;
 
-        Color[] set = new Color[2];
-
-        ColorUtility.TryParseHtmlString("#A1FF7E", out set[0]);
-        ColorUtility.TryParseHtmlString("#FF6843", out set[1]);
-
-        scro_Learning[i].GetComponent<Image>().color = GM.nnIsLearning[i] ? set[0] : set[1];
+        scro_Learning[i].GetComponent<Image>().color = GM.nnIsLearning[i] ? GM.green : GM.red;
     }
 
     public void SliderRoundsValChanged()
     {
         GM.totalRounds = (int)roundsSli.value * GM.roundsMultiplier;
         roundsTxt.text = $"Rounds {(GM.roundsMultiplier > 1 ? $"x{GM.roundsMultiplier}" : "")}: {GM.totalRounds}";
+
+        UpdateBestOfUI();
     }
 
     public void SliderSpeedValChanged()
@@ -329,6 +346,7 @@ public class menuCTRL : MonoBehaviour
 
         sliShowoff[i].gameObject.SetActive(_isNN[i]);
         scro_Learning[i].gameObject.SetActive(_isNN[i]);
+        GM.nnIsLearning[i] = scro_Learning[i].value == 0 && _isNN[i] ? true : false;
     }
 
     // Update is called once per frame
@@ -418,6 +436,8 @@ public class menuCTRL : MonoBehaviour
 
     public void ChangeMenu(int w)
     {
+        menuAud.Play();
+
         menuState = w;
 
         if (w == 1)
@@ -444,6 +464,8 @@ public class menuCTRL : MonoBehaviour
 
     public void GoTo(string where)
     {
+        menuAud.Play();
+
         string dt = DateTime.Now.ToString().Replace(" ", "_").Replace(":", "-").Replace("/", "-");
         GM.battleName = $"BattleOf_{GM.intelli[0].aiName}VS{GM.intelli[1].aiName}_{dt}";
 
@@ -458,6 +480,22 @@ public class menuCTRL : MonoBehaviour
         }
 
         SceneManager.LoadScene(where);
+    }
+
+    public void ToggleBestOf()
+    {
+        menuAud.Play();
+
+        if (GM.bestOf)
+        {
+            GM.bestOf = false;
+        }
+        else
+        {
+            GM.bestOf = true;
+        }
+
+        UpdateBestOfUI();
     }
 
     public void SetToolTip(string tt)

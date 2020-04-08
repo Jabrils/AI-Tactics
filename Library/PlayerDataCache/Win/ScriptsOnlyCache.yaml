@@ -62,11 +62,8 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.StateEditor
-    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
@@ -581,7 +578,7 @@ ScriptsOnlyBuild:
     className: ScreenSpaceReflections
   - hash:
       serializedVersion: 2
-      Hash: 8b7b7af3529fab44a3d8b3c77e5a3bde
+      Hash: e524e3e038b77f618b37ed8e3812aef6
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: menuCTRL
@@ -989,7 +986,7 @@ ScriptsOnlyBuild:
     className: Physics2DRaycaster
   - hash:
       serializedVersion: 2
-      Hash: 53b92bbf9ec707f9c31be8410a242d67
+      Hash: 760f7ee506c533ebf6522d51fce03755
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: FightCTRL
