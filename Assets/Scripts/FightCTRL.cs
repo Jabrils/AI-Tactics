@@ -115,8 +115,8 @@ public class FightCTRL : MonoBehaviour
         }
 
 
-        hbD[0] = HXB.LoadHaxbot(one, GM.hbName[0]);
-        hbD[1] = HXB.LoadHaxbot(two, GM.hbName[1]);
+        hbD[0] = HXB.LoadHaxbot(one, GM.botsExist ? GM.hbName[0] : "");
+        hbD[1] = HXB.LoadHaxbot(two, GM.botsExist ? GM.hbName[1] : "");
 
         // 
         fighter[0] = new Fighter(one, 0, map.mapSize, GM.intelli[0]);
@@ -634,7 +634,7 @@ public class FightCTRL : MonoBehaviour
         }
         else
         {
-            yield return new WaitForSeconds(2.5f / GM.battleSpd);
+            yield return new WaitForSeconds(15f / GM.battleSpd);
         }
 
         bool bestOfWin = GM.bestOf ? (GM.win[0] / (float)GM.totalRounds >= .5f) || (GM.win[1] / (float)GM.totalRounds >= .5f) : false;

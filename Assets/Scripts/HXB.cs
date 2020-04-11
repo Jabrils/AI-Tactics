@@ -9,15 +9,25 @@ public static class HXB
         string o;
         string[] grab = new string[2];
 
-        // 
-        using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
-        {
-            grab = sR.ReadToEnd().Split('\n');
-            bot.name = grab[0];
-            o = grab[1];
-        }
+        Texture2D t2d = new Texture2D(1,1);
 
-        Texture2D t2d = Base64ToTexture2D(o);
+        if (who != "")
+        {
+            // 
+            using (StreamReader sR = new StreamReader(Path.Combine(Application.dataPath, "Bots", $"{who}", $"{who}.hxb")))
+            {
+                grab = sR.ReadToEnd().Split('\n');
+                bot.name = grab[0];
+                o = grab[1];
+            }
+
+            t2d = Base64ToTexture2D(o);
+        }
+        else
+        {
+            t2d = Resources.Load<Texture2D>("Textures/Haxbot_Template_Texture");
+            bot.name = "Haxbot Template";
+        }
 
         return new HaxbotData(grab[0], grab[1], t2d);
     }

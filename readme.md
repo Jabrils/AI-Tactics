@@ -1,4 +1,4 @@
-## v0.0.51
+## v1.0.0
 
 ## Notes
 - There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
@@ -23,33 +23,40 @@
 - If letting the AI train all night vs Beserk Slayer doesn't work, look into [ rewards / adjustable LR / NN connections / making NN bigger ]
 - Att -> Def: Currently 
 
+## Authors Note
+- I initially was meaning to create a very complex AI system comprised of 4 parts, but after about 6 weeks of development, I realized how much time the grand vision would of taken to complete
+- I suspect the closer you get to a brain size of 128, the more useless nodes you'll end up having, but again this is a suspiscion, not tested
+- I really wanted to add the ability for an AI to learn from user input, but I just ended up getting to lazy to hack this in, more bothered by having to figure out how to work it into the UI than anything
+- when I made the video, I did 90% of my training with a learning rate of .01
+- I would love to see someone discover some really cool edge cases with this project
+- I really wanted to make a tournament mode feature
+- I absolutely hate the battle win chime, I made it quickly in 10m, meaning to go back & improve / finish it, but at this point in time, its been way too much time sunk into this project
+- I have not experimented enough with this project, but I have learned a lot, & want to take all of my failures & sucesses, learn from them, & make the next AI-In-Games project even better!
+
 ## Credits
 - freepik - Running Icon
-- freepik - ???
-- becris - ???
 - umeicon - AI Brain Icon
-- NAN - Stadium
-- NAN - brick texure
-- NAN - dirt texure
-- NAN - pillar model
+- rumcaizs - Stadium
+- Giggle Star - pillar model
 - Grant Sanderson - Calculus Help
 - Dan Walsh - Calculus Help
+- Game-Ready Studios - brick texure
+- NAN - dirt texure
+- freepik - ???
+- becris - ???
 
 ### To-Do
 |Version|Date|Thing|Note
 |-|-|-|-
-|||Gives in-game message if there is not bots folder
-|||Added a author's note button & made it functional
-|||Added a credits button & made it functional
-|||Made Support Developer button functional
-|||You can now press esc in battle, menu pops up & you can select restart or main menu
-|||Added the ability to adjust the learning rate in the battle menu
-|||Now saves stats about the AI to the data file, like how many battles it's been in
-|||Add splash & splash notes for "Not tested on device"
+|||Fixed the ran away feature for Humans
+|||Fixed the Neural Network confusion for player 2
 
 ## Polish
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added the ability to adjust the learning rate in the battle menu
+|||Now saves stats about the AI to the data file, like how many battles it's been in | x/y battles, y total battles, x of which it has learned from
+|||You can now press esc in battle, menu pops up & you can select restart or main menu
 |||Automatically generates Bots list if it doesnt exist
 |||Added 2 random Haxbots from the Bots directory to the main menu
 |||Added menu music
@@ -65,6 +72,7 @@
 ### Perfect World
 |Version|Date|Thing|Note
 |-|-|-|-
+|||Added the functionality to increase a previously made brain size|Pad the endout with zeros? <- This will def work for new inputs im sure of it
 |||Learning is split into 2|Learn: Changes weights in real time, & saves everything the network learns, Adapt: Also changes weights in real time, but does not save everything the network learns. Acts as like a baseline knowledge, then fit it to the current opponent.
 |||Now added a complex local minimum algorithm that attempts to prevent AIs from getting stuck in a local minima
 |||AI now learns their own reward outcome instead of being set by developer
@@ -73,9 +81,6 @@
 |||Added a battle replay feature
 |||The crowd now reacts to the battle with cheers
 |||Added crowd SFX
-|||Added last 10 battle actions to state data | going to have to build a memory NN to be able to properly feed this as input
-|||optimize
-|||model a few skins
 |||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
 |||model new coleseum
 |||units no longer get stuck in corners
@@ -86,6 +91,12 @@
 ### Changelog
 |Version|Date|Thing|Note
 |-|-|-|-
+|1.0.0|04.10.020|Added a author's note button & made it functional
+|1.0.0|04.10.020|Added a credits button & made it functional
+|1.0.0|04.10.020|Made Support Developer button functional
+|1.0.0|04.10.020|Add splash & splash notes for "Not tested on device"
+|1.0.0|04.10.020|End of match data preview is now a bit longer to view
+|1.0.0|04.10.020|Gives in-game message if there is not bots folder
 |v0.0.51|04.08.020|Added menu button click sfx
 |v0.0.48|04.03.020|Added a speedup time feature
 |v0.0.47|03.31.020|Added 6 more inputs to state data | sum of last 10 choices / 10, myAtt, myDef, myTaunt, oppAtt, oppDef, oppTaunt. Tech: this is a list of Actions, that sums all of the 3 actions & / list count, & if list count > 10 then remove the first element. This will essentially ask: based on the past 10 or less battle actions, what is the distribution?

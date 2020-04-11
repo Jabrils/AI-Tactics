@@ -9,7 +9,7 @@ using System;
 
 public class menuCTRL : MonoBehaviour
 {
-    public Image mainBG;
+    public Image mainBG, authorsNote;
     public GameObject[] bot;
     public GameObject[] forrest;
     public RectTransform[] menu;
@@ -27,30 +27,28 @@ public class menuCTRL : MonoBehaviour
     public RectTransform msgBox;
     public Slider roundsSli, bSpeedSli;
     public GameObject flames;
-    public AudioClip menuSFX;
+    public AudioClip menuSFX, aNote;
 
     AudioSource menuAud;
     HaxbotData[] hbD;
     List<TMP_Dropdown.OptionData> dd = new List<TMP_Dropdown.OptionData>();
-    bool botsExist, brainsExist;
+    bool brainsExist;
     string botsPath, brainsPath;
     bool[] nn_strat => new bool[] { Mathf.RoundToInt(scroll[0].value) == 1, Mathf.RoundToInt(scroll[1].value) == 1, Mathf.RoundToInt(scroll[2].value) == 1, Mathf.RoundToInt(scroll[3].value) == 1, };
     List<string> newAI_Config = new List<string>();
     int menuState;
     bool[] _isNN => new bool[] { GM.intelli[0] == null || GM.intelli[0].isHuman ? false : GM.intelli[0].usingAttackNN, GM.intelli[1] == null || GM.intelli[1].isHuman ? false : GM.intelli[1].usingAttackNN };
     bool matchHasNN => _isNN[0] || _isNN[1];
+    bool authorNoting;
 
     // Start is called before the first frame update
     void Start()
     {
         hbD = new HaxbotData[2];
+        GM.botsExist = false;
 
         // 
         MenuInit();
-
-        LoadDropDownData();
-
-        LoadBattleData();
 
         vText.text = $"v{Application.version}";
     }
@@ -60,77 +58,93 @@ public class menuCTRL : MonoBehaviour
         botsPath = Path.Combine(Application.dataPath, "Bots");
         brainsPath = Path.Combine(Application.dataPath, "Brains");
 
-        botsExist = Directory.Exists(botsPath);
+        GM.botsExist = Directory.Exists(botsPath);
         brainsExist = Directory.Exists(brainsPath);
 
         // 
-        if (botsExist)
+        if (!GM.botsExist)
+        {
+            Directory.CreateDirectory(botsPath);
+        }
+
+        // 
+        int botsCount = Directory.GetFiles(botsPath).Length;
+
+        // 
+        GM.botsExist = botsCount > 0;
+
+        dd = new List<TMP_Dropdown.OptionData>();
+        List<TMP_Dropdown.OptionData> dd2 = new List<TMP_Dropdown.OptionData>();
+
+        // 
+        dd2.Add(new TMP_Dropdown.OptionData("Human"));
+
+        // 
+        if (brainsExist)
+        {
+            // 
+            string[] aI_Config = Directory.GetFiles(brainsPath);
+
+            // reset
+            newAI_Config = new List<string>();
+
+            // 
+            for (int i = 0; i < aI_Config.Length; i++)
+            {
+                if (aI_Config[i].Contains(".sbr") && !aI_Config[i].Contains(".meta"))
+                {
+                    newAI_Config.Add(aI_Config[i]);
+                }
+            }
+
+            // 
+            for (int i = 0; i < newAI_Config.Count; i++)
+            {
+                string name = "";
+
+                // 
+                {
+                    // 
+                    using (StreamReader sR = new StreamReader(newAI_Config[i]))
+                    {
+                        name = sR.ReadToEnd().Split('\n')[0];
+                    }
+
+                    // 
+                    dd2.Add(new TMP_Dropdown.OptionData(name));
+                }
+            }
+        }
+
+        // 
+        if (GM.botsExist)
         {
             // 
             string[] allBots = Directory.GetDirectories(botsPath);
-
-            dd = new List<TMP_Dropdown.OptionData>();
-            List<TMP_Dropdown.OptionData> dd2 = new List<TMP_Dropdown.OptionData>();
-
-            // 
-            dd2.Add(new TMP_Dropdown.OptionData("Human"));
-
-            // 
-            if (brainsExist)
-            {
-                // 
-                string[] aI_Config = Directory.GetFiles(brainsPath);
-
-                // reset
-                newAI_Config = new List<string>();
-
-                // 
-                for (int i = 0; i < aI_Config.Length; i++)
-                {
-                    if (aI_Config[i].Contains(".sbr") && !aI_Config[i].Contains(".meta"))
-                    {
-                        newAI_Config.Add(aI_Config[i]);
-                    }
-                }
-
-                // 
-                for (int i = 0; i < newAI_Config.Count; i++)
-                {
-                    string name = "";
-
-                    // 
-                    {
-                        // 
-                        using (StreamReader sR = new StreamReader(newAI_Config[i]))
-                        {
-                            name = sR.ReadToEnd().Split('\n')[0];
-                        }
-
-                        // 
-                        dd2.Add(new TMP_Dropdown.OptionData(name));
-                    }
-                }
-            }
 
             // 
             for (int i = 0; i < allBots.Length; i++)
             {
                 dd.Add(new TMP_Dropdown.OptionData(allBots[i].Split('\\')[2]));
             }
+        }
+        else
+        {
+            StartCoroutine(ShowMessage("You do not have any bots installed! Please visit the gamejolt page to download some bots!"));
+        }
+
+        // 
+        for (int i = 0; i < 2; i++)
+        {
+            dd_Haxbot[i].ClearOptions();
+            dd_Intelli[i].ClearOptions();
 
             // 
-            for (int i = 0; i < 2; i++)
-            {
-                dd_Haxbot[i].ClearOptions();
-                dd_Intelli[i].ClearOptions();
-
-                // 
-                dd_Haxbot[i].AddOptions(dd);
-                //
-                dd_Intelli[i].AddOptions(dd2);
-                // 
-                LoadNSetHaxbot(i);
-            }
+            dd_Haxbot[i].AddOptions(dd);
+            //
+            dd_Intelli[i].AddOptions(dd2);
+            // 
+            LoadNSetHaxbot(i);
         }
     }
 
@@ -218,6 +232,11 @@ public class menuCTRL : MonoBehaviour
     {
         GM.explSetter[which] = sliShowoff[which].value;
         txtShowoff[which].text = $"Showoff: {Mathf.Round(GM.explSetter[which] * 100)}%";
+    }
+
+    public void SupportDev()
+    {
+        Application.OpenURL("https://paypal.me/SEFDStuff");
     }
 
     public void UpdatePercentage(int who)
@@ -321,21 +340,28 @@ public class menuCTRL : MonoBehaviour
 
     void LoadNSetHaxbot(int i)
     {
-        int chosen = GM.haxBotChoice[i];
-
-        hbD[i] = HXB.LoadHaxbot(bot[i], dd[chosen].text);
-        name[i].text = hbD[i].name;
-        GM.hbName[i] = hbD[i].name;
-
-        // 
-        for (int j = 0; j < 2; j++)
+        if (GM.botsExist)
         {
-            foreach (Renderer r in bot[j].GetComponentsInChildren<Renderer>())
+            dd_Haxbot[i].gameObject.SetActive(true);
+            int chosen = GM.haxBotChoice[i];
+
+            hbD[i] = HXB.LoadHaxbot(bot[i], dd[chosen].text);
+            name[i].text = hbD[i].name;
+            GM.hbName[i] = hbD[i].name;
+
+            // 
+            for (int j = 0; j < 2; j++)
             {
-                r.material.SetTexture(GM.mainTexture, hbD[j].txt2d);
+                foreach (Renderer r in bot[j].GetComponentsInChildren<Renderer>())
+                {
+                    r.material.SetTexture(GM.mainTexture, hbD[j].txt2d);
+                }
             }
         }
-
+        else
+        {
+            dd_Haxbot[i].gameObject.SetActive(false);
+        }
     }
 
     void SetIntelli(int i)
@@ -366,6 +392,13 @@ public class menuCTRL : MonoBehaviour
             {
                 ChangeMenu(0);
             }
+
+            // 
+            if (authorNoting)
+            {
+                EndAuthorsNote();
+            }
+                    
         }
 
         if (menuState == 1)
@@ -428,6 +461,7 @@ public class menuCTRL : MonoBehaviour
 
     IEnumerator ShowMessage(string msg)
     {
+        menuAud.Play();
         msgBox.gameObject.SetActive(true);
         msgBox.GetComponentInChildren<TextMeshProUGUI>().text = msg;
         yield return new WaitForSeconds(3);
@@ -439,19 +473,19 @@ public class menuCTRL : MonoBehaviour
         menuAud.Play();
 
         menuState = w;
+        toolTipTxt.text = "";
 
         if (w == 1)
         {
             // 
+            LoadBattleData();
             SetIntelli(0);
             SetIntelli(1);
-            LoadBattleData();
         }
 
         flames.gameObject.SetActive(w == 1); // ? new Vector3(0.19f, -1.81f, 1.47f) : Vector3.up * -10000;
 
-        LoadBattleData();
-        Color32[] col = new Color32[] { new Color32(213, 202, 255, 255), new Color32(63, 63, 63, 255), new Color32(81, 183, 255, 255) };
+        Color32[] col = new Color32[] { new Color32(213, 202, 255, 255), new Color32(63, 63, 63, 255), new Color32(81, 183, 255, 255), new Color32(0,0,0,255) };
 
         Camera.main.backgroundColor = col[w];
 
@@ -502,5 +536,28 @@ public class menuCTRL : MonoBehaviour
     {
         toolTipTxt.gameObject.SetActive(tt != "");
         toolTipTxt.text = tt;
+    }
+
+    public void AuthorsNote()
+    {
+        StartCoroutine(AuthorsNoteTimer());
+    }
+
+    IEnumerator AuthorsNoteTimer()
+    {
+        authorNoting = true;
+        authorsNote.gameObject.SetActive(true);
+
+        menuAud.clip = aNote;
+        menuAud.Play();
+        yield return new WaitForSeconds(1.75f * 60);
+        EndAuthorsNote();
+    }
+
+    void EndAuthorsNote()
+    {
+        authorNoting = false;
+        menuAud.clip = menuSFX;
+        authorsNote.gameObject.SetActive(false);
     }
 }

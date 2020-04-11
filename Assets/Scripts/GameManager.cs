@@ -42,6 +42,7 @@ static class GM
 
     public static bool maxSimSpeed = false;
     public static bool bestOf;
+    public static bool botsExist;
 
     public static bool[] nnIsLearning = new bool[] { true, true };
     public static bool[] isForrest = new bool[2];
