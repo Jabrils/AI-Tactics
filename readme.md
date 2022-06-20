@@ -1,14 +1,14 @@
 ## v1.0.0
 
 ## Notes
-- There is ABSOLUTLEY NO randomness in this. This is 100% determanistic. EXCEPT for the level generation (not toggled) & candy Spawning.
+- There is ABSOLUTLEY NO randomness in this. This is 100% deterministic. EXCEPT for the level generation (not toggled) & candy Spawning.
 - make sure you vs opp turn it is makes it into the state
-- I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implimentation.
-- dont forget if all else fails I can force 1 hot encoding for any network
+- I can either go off the assumption that for every 1 node taking 20 inputs, it need 5 nodes in the middle, OR can try some NEAT inspired implementation.
+- don't forget if all else fails I can force 1 hot encoding for any network
 - deriv of sigmoid is fucking bonk, it will not work for me, but I think it is close enough to use, so just add the summation of all output nodes & it should be alright.
 - THE SMALLER EPSILON IS (change in input) THE MORE ACCURATE DERV OF SIGMOID IS, THATS JUST CALCULUS BABY
 - if training doesn't work out, I can try beefing up the NN architecture, or adding memory to the reward (use the 3 outputs to try & predict the future & obtain a totalReward[i] vector for a few timesteps ahead.)
-- For graphing, graph the acculative reward over time ( r=0; r+=2; r+= -3; r+=2 ...)
+- For graphing, graph the accumulative reward over time ( r=0; r+=2; r+= -3; r+=2 ...)
 - try an AI that cycles, att, def, taunt
 - Training strats:
 - - Berserk Slayer -> Berserk (Locked); BS_Pupil -> Berserk_Slayer(Locked); Pupil -> BS_Pupil(Locked)
@@ -25,13 +25,13 @@
 
 ## Authors Note
 - I initially was meaning to create a very complex AI system comprised of 4 parts, but after about 6 weeks of development, I realized how much time the grand vision would of taken to complete
-- I suspect the closer you get to a brain size of 128, the more useless nodes you'll end up having, but again this is a suspiscion, not tested
+- I suspect the closer you get to a brain size of 128, the more useless nodes you'll end up having, but again this is a suspicion, not tested
 - I really wanted to add the ability for an AI to learn from user input, but I just ended up getting to lazy to hack this in, more bothered by having to figure out how to work it into the UI than anything
 - when I made the video, I did 90% of my training with a learning rate of .01
 - I would love to see someone discover some really cool edge cases with this project
 - I really wanted to make a tournament mode feature
 - I absolutely hate the battle win chime, I made it quickly in 10m, meaning to go back & improve / finish it, but at this point in time, its been way too much time sunk into this project
-- I have not experimented enough with this project, but I have learned a lot, & want to take all of my failures & sucesses, learn from them, & make the next AI-In-Games project even better!
+- I have not experimented enough with this project, but I have learned a lot, & want to take all of my failures & successes, learn from them, & make the next AI-In-Games project even better!
 
 ## Credits
 - freepik - Running Icon
@@ -40,8 +40,8 @@
 - Giggle Star - pillar model
 - Grant Sanderson - Calculus Help
 - Dan Walsh - Calculus Help
-- Game-Ready Studios - brick texure
-- NAN - dirt texure
+- Game-Ready Studios - brick texture
+- NAN - dirt texture
 - freepik - ???
 - becris - ???
 
@@ -57,14 +57,14 @@
 |||Added the ability to adjust the learning rate in the battle menu
 |||Now saves stats about the AI to the data file, like how many battles it's been in | x/y battles, y total battles, x of which it has learned from
 |||You can now press esc in battle, menu pops up & you can select restart or main menu
-|||Automatically generates Bots list if it doesnt exist
+|||Automatically generates Bots list if it doesn't exist
 |||Added 2 random Haxbots from the Bots directory to the main menu
 |||Added menu music
 |||Added a NN input visualizers | steal the visualizer used in ML Hoops 21
-|||Added a little circle that shows up when youre selecting where to move
+|||Added a little circle that shows up when you're selecting where to move
 |||Now saving AI choice in menu select that persists even after battles
 |||Added hp & decisions to taskbar
-|||Added a rounds dispay in battle, as well at the rounds graphs
+|||Added a rounds display in battle, as well at the rounds graphs
 |||Added a reset & exit button to battle
 |||Added helmets
 |||Removed the weird thing on the Haxbots
@@ -81,8 +81,8 @@
 |||Added a battle replay feature
 |||The crowd now reacts to the battle with cheers
 |||Added crowd SFX
-|||Added a dummy AI|can simply just create a state heiarchy based on hp in 1/4 incriments
-|||model new coleseum
+|||Added a dummy AI|can simply just create a state hierarchy based on hp in 1/4 increments
+|||model new coliseum
 |||units no longer get stuck in corners
 |||Maybe add like a special attack
 |||fixed level loader to read it properly
@@ -105,9 +105,9 @@
 |v0.0.45|03.30.020|Added Human control to the Menu UI
 |v0.0.44|03.21.020|Fixed NN code to be able to work for both player 1 & 2
 |v0.0.44|03.21.020|Fixed waffle collision bug|Im sure i just need to move the waffle checker to be at the end of the turn, & not after moving
-|v0.0.44|03.21.020|Removed the pointless level.map file loadin
+|v0.0.44|03.21.020|Removed the pointless level.map file loading
 |v0.0.44|03.21.020|Finished the Total Max Graph Mini feature
-|v0.0.44|03.21.020|Fixed the uninitilize deal with the battle profile images | copy settings for menu
+|v0.0.44|03.21.020|Fixed the uninitialize deal with the battle profile images | copy settings for menu
 |v0.0.44|03.21.020|Confirmed all aspect ratios
 |v0.0.44|03.21.020|fix standalone crashing
 |v0.0.43|03.20.020|Added fire to the background of battle menu
@@ -119,7 +119,7 @@
 |v0.0.41|03.18.020|Added graphs
 |v0.0.40|03.15.020|Added Saving & Loading of AI Brains
 |v0.0.40|03.15.020|Added a ML AI for Combat
-|v0.0.37|03.09.020|Added exporation vs exploitation|for combat, the rest doesn't really make sense
+|v0.0.37|03.09.020|Added exploration vs exploitation|for combat, the rest doesn't really make sense
 |v0.0.36|03.08.020|Added audience to stands
 |v0.0.35|03.08.020|A menu popup now displays to confirm
 |v0.0.35|03.08.020|You can now click "start battle" or can still press space
@@ -145,7 +145,7 @@
 |v0.0.19|02.23.020|Added power up sfx
 |v0.0.19|02.23.020|Added power down sfx
 |v0.0.19|02.23.020|Added hit sfx
-|v0.0.19|02.23.020|Added poweup animation
+|v0.0.19|02.23.020|Added power up animation
 |v0.0.18|02.22.020|added topdown camera mode
 |v0.0.18|02.22.020|visualized stunned
 |v0.0.18|02.22.020|visualized strength
